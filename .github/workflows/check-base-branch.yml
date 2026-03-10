@@ -1,0 +1,24 @@
+name: Check PR Base Branch
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-base:
+    name: Block direct PRs to main
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: PR should target develop, not main
+        run: |
+          echo "❌ Este Pull Request apunta directamente a la rama 'main'."
+          echo ""
+          echo "Por favor, cambia la rama base a 'develop':"
+          echo "  1. Abre el Pull Request en GitHub"
+          echo "  2. Haz clic en 'Edit' junto al título"
+          echo "  3. Cambia la rama base de 'main' a 'develop'"
+          echo ""
+          echo "La rama 'main' solo recibe cambios desde 'develop' mediante releases."
+          exit 1
