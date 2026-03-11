@@ -31,6 +31,17 @@ class Usuario extends Model{
         return $usuario ?: null;
     }
 
+    // El método buscarPorId se encarga de buscar un usuario en la base de datos utilizando su ID.
+    public function buscarPorId(int $id){
+        $sql = "SELECT * FROM usuarios WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':id' => $id]);
+        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $usuario ?: null;
+    }
+
 
 
 }
+
+?>
