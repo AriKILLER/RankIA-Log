@@ -4,6 +4,8 @@
 require_once __DIR__ . '/../app/controllers/AutenticacionController.php';
 require_once __DIR__ . '/../app/models/Usuario.php';
 require_once __DIR__ . '/../routes/api.php';
+require_once __DIR__ . '/../app/controllers/PreferenciaController.php';
+require_once __DIR__ . '/../app/models/Preferencia.php';
 header('Content-Type: application/json');
 
 ?>
