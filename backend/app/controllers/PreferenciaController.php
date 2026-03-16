@@ -8,9 +8,9 @@ class PreferenciaController{
         $this->preferenciaModel = new Preferencia();
     }
 
-    public function crearPreferenciaUsuario(int $usuario_id, int $id, string $tipo_preferido, string $duracion_preferida,
+    public function crearPreferenciaUsuario(int $usuario_id, string $tipo_preferido, string $duracion_preferida,
                                             string $max_temporadas, string $preferencia_popularidad){
-        if(empty($usuario_id) || empty($id) || empty($tipo_preferido) || empty($duracion_preferida) || empty($max_temporadas) || empty($preferencia_popularidad)){
+        if(empty($usuario_id) || empty($tipo_preferido) || empty($duracion_preferida) || empty($max_temporadas) || empty($preferencia_popularidad)){
             throw new Exception("Todos los campos son obligatorios para crear una preferencia");
         }
 
@@ -30,7 +30,7 @@ class PreferenciaController{
             throw new Exception("La preferencia de popularidad debe ser 'popular', 'indiferente' o 'menos_conocido'");
         }
 
-        return $this->preferenciaModel->crearPreferenciaUsuario($usuario_id, $id, $tipo_preferido, $duracion_preferida,
+        return $this->preferenciaModel->crearPreferenciaUsuario($usuario_id, $tipo_preferido, $duracion_preferida,
                                                                 $max_temporadas, $preferencia_popularidad);    
     }
 
