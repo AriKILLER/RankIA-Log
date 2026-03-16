@@ -4,9 +4,9 @@
   <form [formGroup]="form" (ngSubmit)="onSubmit()">
 
     <div class="field">
-      <label for="username">Usuario</label>
-      <input id="username" type="text" formControlName="username" />
-      @if (username.invalid && username.touched) {
+      <label for="nombre">Nombre</label>
+      <input id="nombre" type="text" formControlName="nombre" />
+      @if (nombre.invalid && nombre.touched) {
         <span class="error">Mínimo 3 caracteres</span>
       }
     </div>
