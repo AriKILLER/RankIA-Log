@@ -1,7 +1,11 @@
 <?php
+session_start();
 // Aqui van las rutas de la API del backend. Se define todo lo que se vaya a usar en frontend
 require_once __DIR__ . '/../app/controllers/AutenticacionController.php';
 require_once __DIR__ . '/../app/controllers/PreferenciaController.php';
+require_once __DIR__ . '/../app/middleware/Autenticacion.php';
+
+$autenticacion = new Autenticacion();
 $autenticacionController = new AutenticacionController();
 $preferenciaController = new PreferenciaController();
 header('Content-Type: application/json');
@@ -34,7 +38,19 @@ if ($method === 'POST' && $action === 'inicioSesion') {
         $password = $_POST['password'];
         $usuario = $autenticacionController->inicioSesion($email, $password);
         unset($usuario['password_hash']);
+        session_regenerate_id(true);
+        $_SESSION['usuario_id'] = $usuario['id'];
+        $_SESSION['usuario_email'] = $usuario['email'];
         echo json_encode(['success' => true, 'message' => 'Inicio de sesion exitoso', 'usuario' => $usuario]);
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+if ($method === 'POST' && $action === 'cerrarSesion') {
+    try {
+        $autenticacionController->cerrarSesion();
+        echo json_encode(['success' => true, 'message' => 'Sesion cerrada exitosamente']);
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
@@ -48,6 +64,7 @@ if($method === 'POST' && $action === 'crearPreferenciaUsuario'){
         $duracion_preferida = $_POST['duracion_preferida'];
         $max_temporadas = $_POST['max_temporadas'];
         $preferencia_popularidad = $_POST['preferencia_popularidad'];
+
         $preferencia = $preferenciaController->crearPreferenciaUsuario($usuario_id, $id, $tipo_preferido, $duracion_preferida, $max_temporadas, $preferencia_popularidad);
         echo json_encode(['success' => true, 'message' => 'Preferencia creada exitosamente al usuario con id ' . $usuario_id]);
     }catch (Exception $e){
