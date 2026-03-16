@@ -35,6 +35,11 @@ class AutenticacionController{
             }
         }
     }
+
+    public function cerrarSesion(){
+        session_unset();
+        session_destroy();
+    }
 }
 
 ?>
