@@ -58,15 +58,16 @@ if ($method === 'POST' && $action === 'cerrarSesion') {
 
 if($method === 'POST' && $action === 'crearPreferenciaUsuario'){
     try{
-        $usuario_id = $_POST['usuario_id'];
-        $id = $_POST['id'];
+        $autenticacion->verificarSesion();
+
+        $usuario_id = $_SESSION['usuario_id'];
         $tipo_preferido = $_POST['tipo_preferido'];
         $duracion_preferida = $_POST['duracion_preferida'];
         $max_temporadas = $_POST['max_temporadas'];
         $preferencia_popularidad = $_POST['preferencia_popularidad'];
 
-        $preferencia = $preferenciaController->crearPreferenciaUsuario($usuario_id, $id, $tipo_preferido, $duracion_preferida, $max_temporadas, $preferencia_popularidad);
-        echo json_encode(['success' => true, 'message' => 'Preferencia creada exitosamente al usuario con id ' . $usuario_id]);
+        $preferencia = $preferenciaController->crearPreferenciaUsuario($usuario_id, $tipo_preferido, $duracion_preferida, $max_temporadas, $preferencia_popularidad);
+        echo json_encode(['success' => true, 'message' => 'Preferencia creada exitosamente al usuario ', 'preferencia_id' => $preferencia]);
     }catch (Exception $e){
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
