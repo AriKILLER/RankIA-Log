@@ -29,12 +29,21 @@ export class Login {
     this.loading = true;
     this.error   = '';
 
-    this.auth.login(this.form.getRawValue() as any).subscribe({
-      next: () => this.router.navigate(['']),
-      error: err => {
-        this.error   = err.error?.message ?? 'Email o contraseña incorrectos';
-        this.loading = false;
+    const { email, password } = this.form.getRawValue();
+
+    this.auth.login(email!, password!).subscribe({
+      next: res => {
+        if (res.success) {
+          this.router.navigate(['']);
+        } else {
+          this.error   = res.message;
+          this.loading = false;
+        }
       },
+      error: () => {
+        this.error   = 'Error al conectar con el servidor';
+        this.loading = false;
+      }
     });
   }
 

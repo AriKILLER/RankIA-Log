@@ -2,13 +2,12 @@ import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
-import { AuthResponse, LoginRequest, RegisterRequest, User } from '../../features/auth/models/models';
+import { User } from '../../features/auth/models/models';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly API_URL = 'http://localhost/rankia-log/api';
-  private readonly TOKEN_KEY = 'rankia_token';
-  private readonly USER_KEY  = 'rankia_user';
+  private readonly API_URL = 'http://localhost/RankIA-Log/backend/public/index.php';
+  private readonly USER_KEY = 'rankia_user';
 
   private currentUserSignal = signal<User | null>(this.loadUserFromStorage());
 
@@ -17,33 +16,42 @@ export class AuthService {
 
   constructor(private http: HttpClient, private router: Router) {}
 
-  register(data: RegisterRequest): Observable<AuthResponse> {
-    return this.http
-      .post<AuthResponse>(`${this.API_URL}/auth/register`, data)
-      .pipe(tap(res => this.persistSession(res)));
+  register(nombre: string, email: string, password: string): Observable<any> {
+    const formData = new FormData();
+    formData.append('action', 'registroUsuario');
+    formData.append('nombre', nombre);
+    formData.append('email', email);
+    formData.append('password', password);
+
+    return this.http.post<any>(this.API_URL, formData);
   }
 
-  login(data: LoginRequest): Observable<AuthResponse> {
-    return this.http
-      .post<AuthResponse>(`${this.API_URL}/auth/login`, data)
-      .pipe(tap(res => this.persistSession(res)));
+  login(email: string, password: string): Observable<any> {
+    const formData = new FormData();
+    formData.append('action', 'inicioSesion');
+    formData.append('email', email);
+    formData.append('password', password);
+
+    return this.http.post<any>(this.API_URL, formData).pipe(
+      tap(res => {
+        if (res.success) this.persistSession(res.usuario);
+      })
+    );
   }
 
   logout(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
+    const formData = new FormData();
+    formData.append('action', 'cerrarSesion');
+
+    this.http.post<any>(this.API_URL, formData).subscribe();
     localStorage.removeItem(this.USER_KEY);
     this.currentUserSignal.set(null);
     this.router.navigate(['/login']);
   }
 
-  getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
-  }
-
-  private persistSession(res: AuthResponse): void {
-    localStorage.setItem(this.TOKEN_KEY, res.token);
-    localStorage.setItem(this.USER_KEY, JSON.stringify(res.user));
-    this.currentUserSignal.set(res.user);
+  private persistSession(user: User): void {
+    localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+    this.currentUserSignal.set(user);
   }
 
   private loadUserFromStorage(): User | null {

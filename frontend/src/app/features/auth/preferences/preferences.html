@@ -1,1 +1,97 @@
-<p>preferences works!</p>
+<section class="auth-container">
+  <h1>¿Qué te gusta?</h1>
+  <p>Cuéntanos tus preferencias para recomendarte mejor contenido</p>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+    <div class="field">
+      <label>¿Qué tipo de contenido prefieres?</label>
+      <div class="options">
+        <label>
+          <input type="radio" formControlName="tipo_preferido" value="pelicula" /> Películas
+        </label>
+        <label>
+          <input type="radio" formControlName="tipo_preferido" value="serie" /> Series
+        </label>
+        <label>
+          <input type="radio" formControlName="tipo_preferido" value="anime" /> Anime
+        </label>
+        <label>
+          <input type="radio" formControlName="tipo_preferido" value="manga" /> Manga
+        </label>
+        <label>
+          <input type="radio" formControlName="tipo_preferido" value="libro" /> Libros
+        </label>
+      </div>
+      @if (tipo_preferido.invalid && tipo_preferido.touched) {
+        <span class="error">Selecciona una opción</span>
+      }
+    </div>
+
+    <div class="field">
+      <label>¿Cuánto tiempo tienes para consumir contenido?</label>
+      <div class="options">
+        <label>
+          <input type="radio" formControlName="duracion_preferida" value="corta" /> Corta
+        </label>
+        <label>
+          <input type="radio" formControlName="duracion_preferida" value="media" /> Media
+        </label>
+        <label>
+          <input type="radio" formControlName="duracion_preferida" value="larga" /> Larga
+        </label>
+      </div>
+      @if (duracion_preferida.invalid && duracion_preferida.touched) {
+        <span class="error">Selecciona una opción</span>
+      }
+    </div>
+
+    <div class="field">
+      <label>¿Cuántas temporadas máximo?</label>
+      <div class="options">
+        <label>
+          <input type="radio" formControlName="max_temporadas" value="1" /> 1
+        </label>
+        <label>
+          <input type="radio" formControlName="max_temporadas" value="3" /> Hasta 3
+        </label>
+        <label>
+          <input type="radio" formControlName="max_temporadas" value="5" /> Hasta 5
+        </label>
+        <label>
+          <input type="radio" formControlName="max_temporadas" value="10+" /> Sin límite
+        </label>
+      </div>
+      @if (max_temporadas.invalid && max_temporadas.touched) {
+        <span class="error">Selecciona una opción</span>
+      }
+    </div>
+
+    <div class="field">
+      <label>¿Qué tipo de contenido prefieres?</label>
+      <div class="options">
+        <label>
+          <input type="radio" formControlName="preferencia_popularidad" value="popular" /> Popular
+        </label>
+        <label>
+          <input type="radio" formControlName="preferencia_popularidad" value="independiente" /> Independiente
+        </label>
+        <label>
+          <input type="radio" formControlName="preferencia_popularidad" value="ambas" /> Ambas
+        </label>
+      </div>
+      @if (preferencia_popularidad.invalid && preferencia_popularidad.touched) {
+        <span class="error">Selecciona una opción</span>
+      }
+    </div>
+
+    @if (error) {
+      <p class="error-global">{{ error }}</p>
+    }
+
+    <button type="submit" [disabled]="form.invalid || loading">
+      {{ loading ? 'Guardando...' : 'Empezar' }}
+    </button>
+
+  </form>
+</section>

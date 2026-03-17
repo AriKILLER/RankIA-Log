@@ -16,7 +16,7 @@ export class Register {
   private router = inject(Router);
 
   form = this.fb.group({
-    username: ['', [Validators.required, Validators.minLength(3)]],
+    nombre:   ['', [Validators.required, Validators.minLength(3)]],
     email:    ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(8)]],
   });
@@ -30,16 +30,25 @@ export class Register {
     this.loading = true;
     this.error   = '';
 
-    this.auth.register(this.form.getRawValue() as any).subscribe({
-      next: () => this.router.navigate(['/preferences']),
-      error: err => {
-        this.error   = err.error?.message ?? 'Error al registrarse';
-        this.loading = false;
+    const { nombre, email, password } = this.form.getRawValue();
+
+    this.auth.register(nombre!, email!, password!).subscribe({
+      next: res => {
+        if (res.success) {
+          this.router.navigate(['/preferences']);
+        } else {
+          this.error   = res.message;
+          this.loading = false;
+        }
       },
+      error: () => {
+        this.error   = 'Error al conectar con el servidor';
+        this.loading = false;
+      }
     });
   }
 
-  get username() { return this.form.get('username')!; }
+  get nombre()   { return this.form.get('nombre')!; }
   get email()    { return this.form.get('email')!; }
   get password() { return this.form.get('password')!; }
 }
