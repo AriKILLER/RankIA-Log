@@ -15,7 +15,7 @@ export class Preferences {
   private http   = inject(HttpClient);
   private router = inject(Router);
 
-  private readonly API_URL = 'http://localhost/RankIA-Log/backend/public/index.php';
+private readonly API_URL = '/api';
 
   form = this.fb.group({
     tipo_preferido:          ['', Validators.required],
