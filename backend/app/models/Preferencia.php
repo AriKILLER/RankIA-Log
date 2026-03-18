@@ -29,7 +29,6 @@ class Preferencia extends Model{
         return $preferencias ?: null;
     }
 
-
 }
 
 ?>
