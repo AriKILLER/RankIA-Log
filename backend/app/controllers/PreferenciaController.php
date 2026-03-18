@@ -1,11 +1,14 @@
 <?php
 require_once __DIR__ . '/../models/Preferencia.php';
+require_once __DIR__ . '/../models/Genero.php';
 class PreferenciaController{
 
     private $preferenciaModel;
+    private $generoModel;
 
     public function __construct(){
         $this->preferenciaModel = new Preferencia();
+        $this->generoModel = new Genero();
     }
 
     public function crearPreferenciaUsuario(int $usuario_id, string $tipo_preferido, string $duracion_preferida,
@@ -36,6 +39,10 @@ class PreferenciaController{
 
     public function obtenerPreferenciasPorUsuarioId(int $usuario_id){
         return $this->preferenciaModel->obtenerPreferenciasPorUsuarioId($usuario_id);
+    }
+
+    public function guardarGenerosFavoritosUsuario(int $usuario_id, array $generos_ids){
+        return $this->generoModel->guardarGenerosUsuario($usuario_id, $generos_ids);
     }
 }
 

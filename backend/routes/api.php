@@ -65,9 +65,20 @@ if($method === 'POST' && $action === 'crearPreferenciaUsuario'){
         $duracion_preferida = $_POST['duracion_preferida'];
         $max_temporadas = $_POST['max_temporadas'];
         $preferencia_popularidad = $_POST['preferencia_popularidad'];
+        $preferencia_id = $preferenciaController->crearPreferenciaUsuario(
+            $usuario_id, $tipo_preferido, $duracion_preferida, $max_temporadas,
+            $preferencia_popularidad
+        );
 
-        $preferencia = $preferenciaController->crearPreferenciaUsuario($usuario_id, $tipo_preferido, $duracion_preferida, $max_temporadas, $preferencia_popularidad);
-        echo json_encode(['success' => true, 'message' => 'Preferencia creada exitosamente al usuario ', 'preferencia_id' => $preferencia]);
+        $generos_ids = json_decode($_POST['generos_ids'] ?? '[]', true);
+
+        if(!is_array($generos_ids) || empty($generos_ids)){
+            throw new Exception("Debe haber al menos un genero favorito seleccionado para el usuario");
+        }
+
+        $preferenciaController->guardarGenerosFavoritosUsuario($usuario_id, $generos_ids);
+
+        echo json_encode(['success' => true, 'message' => 'Preferencias de usuario creadas exitosamente', 'preferencia_id' => $preferencia_id]);
     }catch (Exception $e){
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
