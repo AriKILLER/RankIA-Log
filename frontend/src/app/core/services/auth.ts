@@ -6,7 +6,7 @@ import { User } from '../../features/auth/models/models';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly API_URL = 'http://localhost/RankIA-Log/backend/public/index.php';
+private readonly API_URL = '/api';
   private readonly USER_KEY = 'rankia_user';
 
   private currentUserSignal = signal<User | null>(this.loadUserFromStorage());
