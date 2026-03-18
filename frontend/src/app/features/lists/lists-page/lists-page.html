@@ -1,2 +1,73 @@
-<h1>Mis listas</h1>
-<p>Aquí estarán las listas de contenido.</p>
+<div class="lists-container">
+
+  <header class="lists-header">
+    <div>
+      <h1>MIS <span>LISTAS</span></h1>
+      <p>Organiza lo que estás viendo, lo que quieres consumir y lo que ya has completado.</p>
+    </div>
+  </header>
+
+  <section class="tabs">
+    <p class="tabs-label">Estado</p>
+    <div class="pills">
+      @for (t of tabs; track t.key) {
+        <button
+          type="button"
+          class="pill"
+          [class.active]="activeTab === t.key"
+          (click)="setTab(t.key)"
+        >
+          {{ t.label }}
+        </button>
+      }
+    </div>
+  </section>
+
+  <section class="list-content">
+
+    <div class="list-head">
+      <h2>
+        @if (activeTab === 'viendo') { VIEND<span>O</span> }
+        @if (activeTab === 'pendientes') { PENDIENT<span>ES</span> }
+        @if (activeTab === 'completadas') { COMPLETAD<span>AS</span> }
+      </h2>
+      <span class="list-meta">{{ currentItems.length }} items</span>
+    </div>
+
+    @if (currentItems.length === 0) {
+      <div class="empty-state">
+        <span>📭</span>
+        <p>No hay contenido en esta lista todavía.</p>
+        <small>Ve a Buscar para añadir algo.</small>
+      </div>
+    } @else {
+      <div class="grid">
+        @for (item of currentItems; track item.title) {
+          <article class="content-card">
+            <div class="poster"></div>
+
+            <div class="card-body">
+              <div class="title-row">
+                <h3>{{ item.title }}</h3>
+                <span class="year">{{ item.year ?? '' }}</span>
+              </div>
+
+              @if (item.rating) {
+                <div class="rating">{{ item.rating }}</div>
+              } @else {
+                <div class="rating muted">Sin valoración</div>
+              }
+
+              <div class="card-actions">
+                <button class="btn-ghost" type="button">Mover</button>
+                <button class="btn-ghost" type="button">Quitar</button>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    }
+
+  </section>
+
+</div>

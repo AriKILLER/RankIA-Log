@@ -1,7 +1,10 @@
-<nav>
-  <a routerLink="/">Inicio</a>
-  <a routerLink="/search">Buscar</a>
-  <a routerLink="/lists">Listas</a>
-  <a routerLink="/recommendations">Recomendaciones</a>
-  <a routerLink="/profile">Perfil</a>
+<nav class="navbar">
+  <a class="navbar-logo" routerLink="/">RANK<span>IA</span></a>
+  <div class="navbar-links">
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Inicio</a>
+    <a routerLink="/search" routerLinkActive="active">Buscar</a>
+    <a routerLink="/lists" routerLinkActive="active">Listas</a>
+    <a routerLink="/recommendations" routerLinkActive="active">Sugerencias</a>
+    <a routerLink="/profile" routerLinkActive="active">Perfil</a>
+  </div>
 </nav>

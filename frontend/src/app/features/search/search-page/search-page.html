@@ -1,4 +1,71 @@
-<h1>Buscar contenido</h1>
+<div class="search-container">
 
-<input type="text" placeholder="Buscar película, serie, libro..." />
-<button>Buscar</button>
+  <header class="search-header">
+    <div>
+      <h1>BUSC<span>AR</span></h1>
+      <p>Encuentra películas, series, anime, manga y libros para registrarlos en tu diario.</p>
+    </div>
+  </header>
+
+  <section class="search-bar">
+    <div class="search-input">
+      <span class="icon">⌕</span>
+      <input
+        [(ngModel)]="query"
+        type="text"
+        placeholder="Buscar por título…"
+        (keyup.enter)="onSearch()"
+      />
+    </div>
+
+    <button class="btn-primary" (click)="onSearch()">
+      Buscar
+    </button>
+  </section>
+
+  <section class="filters">
+    <p class="filters-label">Tipo de contenido</p>
+    <div class="pills">
+      @for (t of contentTypes; track t.key) {
+        <button
+          type="button"
+          class="pill"
+          [class.active]="selectedType === t.key"
+          (click)="selectType(t.key)"
+        >
+          {{ t.label }}
+        </button>
+      }
+    </div>
+  </section>
+
+  <section class="results">
+
+    <div class="results-head">
+      <h2>RESULTAD<span>OS</span></h2>
+      <span class="results-meta">{{ results.length }} encontrados</span>
+    </div>
+
+    <div class="grid">
+      @for (item of results; track item.title) {
+        <article class="content-card">
+          <div class="poster"></div>
+          <div class="card-body">
+            <div class="title-row">
+              <h3>{{ item.title }}</h3>
+              <span class="year">{{ item.year }}</span>
+            </div>
+            <div class="rating">{{ item.rating }}</div>
+
+            <div class="card-actions">
+              <button class="btn-ghost" type="button">+ Lista</button>
+              <button class="btn-ghost" type="button">Reseñar</button>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+
+  </section>
+
+</div>

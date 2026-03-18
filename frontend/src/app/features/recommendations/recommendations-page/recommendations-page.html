@@ -1,2 +1,50 @@
-<h1>Recomendaciones</h1>
-<p>Contenido recomendado para ti.</p>
+<div class="rec-container">
+  <header class="rec-header">
+    <div>
+      <h1>SUGEREN<span>CIAS</span></h1>
+      <p>Recomendaciones personalizadas basadas en tus preferencias y tu actividad.</p>
+    </div>
+
+    <button class="btn-primary" type="button" (click)="refresh()">Actualizar</button>
+  </header>
+
+  <section class="recs">
+    <div class="recs-head">
+      <h2>PARA <span>TI</span></h2>
+      <span class="recs-meta">{{ recommendations.length }} sugerencias</span>
+    </div>
+
+    @if (recommendations.length === 0) {
+      <div class="empty-state">
+        <span>🧠</span>
+        <p>Aún no hay recomendaciones.</p>
+        <small>Completa preferencias o añade contenido a tus listas.</small>
+      </div>
+    } @else {
+      <div class="grid">
+        @for (item of recommendations; track item.title) {
+          <article class="content-card">
+            <div class="poster"></div>
+
+            <div class="card-body">
+              <div class="title-row">
+                <h3>{{ item.title }}</h3>
+                <span class="year">{{ item.year }}</span>
+              </div>
+
+              <p class="reason">{{ item.reason }}</p>
+
+              <div class="rating">{{ item.rating }}</div>
+
+              <div class="card-actions">
+                <button class="btn-ghost" type="button">Ver</button>
+                <button class="btn-ghost" type="button">+ Lista</button>
+                <button class="btn-ghost" type="button">Reseñar</button>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </section>
+</div>

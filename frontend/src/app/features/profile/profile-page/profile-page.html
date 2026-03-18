@@ -1,2 +1,47 @@
-<h1>Perfil</h1>
-<p>Aquí aparecerá la información del usuario.</p>
+<div class="profile-container">
+  <div class="profile-header">
+    <div class="profile-avatar">
+      {{ user?.nombre?.charAt(0)?.toUpperCase() ?? '?' }}
+    </div>
+    <div class="profile-info">
+      <h1>{{ user?.nombre }}</h1>
+      <p class="profile-email">{{ user?.email }}</p>
+      <p class="profile-since">Miembro de RankIA Log</p>
+    </div>
+  </div>
+
+  <div class="profile-stats">
+    <div class="stat">
+      <span class="stat-number">0</span>
+      <span class="stat-label">Reseñas</span>
+    </div>
+    <div class="stat">
+      <span class="stat-number">0</span>
+      <span class="stat-label">Completados</span>
+    </div>
+    <div class="stat">
+      <span class="stat-number">0</span>
+      <span class="stat-label">Pendientes</span>
+    </div>
+    <div class="stat">
+      <span class="stat-number">0</span>
+      <span class="stat-label">Favoritos</span>
+    </div>
+  </div>
+
+  <div class="profile-section">
+    <h2>FAVORIT<span>OS</span></h2>
+    <div class="empty-state">
+      <span>🎬</span>
+      <p>Aún no tienes favoritos</p>
+    </div>
+  </div>
+
+  <div class="profile-section">
+    <h2>ÚLTIMAS RESEÑ<span>AS</span></h2>
+    <div class="empty-state">
+      <span>✍️</span>
+      <p>Aún no has escrito ninguna reseña</p>
+    </div>
+  </div>
+</div>

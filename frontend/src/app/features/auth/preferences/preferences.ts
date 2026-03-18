@@ -15,7 +15,23 @@ export class Preferences {
   private http   = inject(HttpClient);
   private router = inject(Router);
 
-private readonly API_URL = '/api';
+  private readonly API_URL = '/api';
+
+  // Géneros según seed.sql (orden = IDs 1..10)
+  generos = [
+    { id: 1, nombre: 'Acción' },
+    { id: 2, nombre: 'Drama' },
+    { id: 3, nombre: 'Comedia' },
+    { id: 4, nombre: 'Terror' },
+    { id: 5, nombre: 'Thriller' },
+    { id: 6, nombre: 'Ciencia ficción' },
+    { id: 7, nombre: 'Fantasía' },
+    { id: 8, nombre: 'Romance' },
+    { id: 9, nombre: 'Animación' },
+    { id: 10, nombre: 'Documental' },
+  ];
+
+  selectedGeneros = new Set<number>();
 
   form = this.fb.group({
     tipo_preferido:          ['', Validators.required],
@@ -27,8 +43,23 @@ private readonly API_URL = '/api';
   loading = false;
   error   = '';
 
+  toggleGenero(id: number): void {
+    if (this.selectedGeneros.has(id)) this.selectedGeneros.delete(id);
+    else this.selectedGeneros.add(id);
+  }
+
+  isGeneroSelected(id: number): boolean {
+    return this.selectedGeneros.has(id);
+  }
+
   onSubmit(): void {
     if (this.form.invalid) return;
+
+    // Validación extra: mínimo 1 género
+    if (this.selectedGeneros.size === 0) {
+      this.error = 'Selecciona al menos un género';
+      return;
+    }
 
     this.loading = true;
     this.error   = '';
@@ -39,6 +70,9 @@ private readonly API_URL = '/api';
     formData.append('duracion_preferida',      this.form.value.duracion_preferida!);
     formData.append('max_temporadas',          this.form.value.max_temporadas!);
     formData.append('preferencia_popularidad', this.form.value.preferencia_popularidad!);
+
+    // Backend espera generos_ids en JSON
+    formData.append('generos_ids', JSON.stringify(Array.from(this.selectedGeneros)));
 
     this.http.post<any>(this.API_URL, formData).subscribe({
       next: res => {
