@@ -1,9 +1,12 @@
 <?php
-session_start();
 // Aqui van las rutas de la API del backend. Se define todo lo que se vaya a usar en frontend
 require_once __DIR__ . '/../app/controllers/AutenticacionController.php';
 require_once __DIR__ . '/../app/controllers/PreferenciaController.php';
 require_once __DIR__ . '/../app/middleware/Autenticacion.php';
+
+if(session_status() === PHP_SESSION_NONE){
+    session_start();
+}
 
 $autenticacion = new Autenticacion();
 $autenticacionController = new AutenticacionController();
@@ -21,10 +24,23 @@ if ($method !== 'POST') {
 // Ruta para el registro de usuarios
 if ($method === 'POST' && $action === 'registroUsuario') {
     try {
-        $nombre = $_POST['nombre'];
-        $email = $_POST['email'];
-        $password = $_POST['password'];
+        $nombre = trim($_POST['nombre'] ?? '');
+        $email = mb_strtolower(trim($_POST['email'] ?? ''));
+        $password = $_POST['password'] ?? '';
         $fecha_registro = new DateTime();
+
+        if(empty($nombre) || empty($email) || empty($password)){
+            throw new Exception("Todos los campos son obligatorios para el registro de usuario");
+        }
+
+        if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
+            throw new Exception("El correo electrónico proporcionado no es válido. Por favor, ingrese un correo electrónico válido.");
+        }
+
+        if(strlen($password) < 8){
+            throw new Exception("La contraseña debe tener al menos 8 caracteres. Por favor, ingrese una contraseña más segura.");
+        }
+
         $id_usuario = $autenticacionController->registroUsuario($nombre, $email, $password, $fecha_registro);
         echo json_encode(['success' => true, 'message' => 'Usuario registrado exitosamente', 'id_usuario' => $id_usuario]);
     } catch (Exception $e) {
@@ -34,13 +50,24 @@ if ($method === 'POST' && $action === 'registroUsuario') {
 
 if ($method === 'POST' && $action === 'inicioSesion') {
     try {
-        $email = $_POST['email'];
-        $password = $_POST['password'];
+        $email = mb_strtolower(trim($_POST['email'] ?? ''));
+        $password = $_POST['password'] ?? '';
+
+        if(empty($email) || empty($password)){
+            throw new Exception("Todos los campos son obligatorios para el inicio de sesion");
+        }
+
+        if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
+            throw new Exception("El correo electrónico proporcionado no es válido. Por favor, ingrese un correo electrónico válido.");
+        }
+
         $usuario = $autenticacionController->inicioSesion($email, $password);
         unset($usuario['password_hash']);
+
         session_regenerate_id(true);
         $_SESSION['usuario_id'] = $usuario['id'];
         $_SESSION['usuario_email'] = $usuario['email'];
+        
         echo json_encode(['success' => true, 'message' => 'Inicio de sesion exitoso', 'usuario' => $usuario]);
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
