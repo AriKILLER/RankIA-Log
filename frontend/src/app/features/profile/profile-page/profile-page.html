@@ -8,6 +8,7 @@
       <p class="profile-email">{{ user?.email }}</p>
       <p class="profile-since">Miembro de RankIA Log</p>
     </div>
+    <a routerLink="/review/new" class="btn-primary">✍️ Nueva reseña</a>
   </div>
 
   <div class="profile-stats">
@@ -38,10 +39,16 @@
   </div>
 
   <div class="profile-section">
-    <h2>ÚLTIMAS RESEÑ<span>AS</span></h2>
-    <div class="empty-state">
-      <span>✍️</span>
-      <p>Aún no has escrito ninguna reseña</p>
+    <div class="section-header">
+      <h2>MIS RESEÑ<span>AS</span></h2>
+      <a routerLink="/review/new" class="btn-secondary">+ Nueva reseña</a>
+    </div>
+    <div class="reviews-grid">
+      <div class="empty-state">
+        <span>✍️</span>
+        <p>Aún no has escrito ninguna reseña</p>
+        <a routerLink="/review/new" class="btn-primary">Escribe tu primera reseña</a>
+      </div>
     </div>
   </div>
 </div>

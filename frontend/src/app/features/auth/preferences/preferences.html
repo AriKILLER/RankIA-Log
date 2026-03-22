@@ -13,9 +13,7 @@
         <div class="options">
           <label><input type="radio" formControlName="tipo_preferido" value="pelicula" /><span>🎬 Películas</span></label>
           <label><input type="radio" formControlName="tipo_preferido" value="serie" /><span>📺 Series</span></label>
-          <label><input type="radio" formControlName="tipo_preferido" value="anime" /><span>⛩️ Anime</span></label>
-          <label><input type="radio" formControlName="tipo_preferido" value="manga" /><span>📚 Manga</span></label>
-          <label><input type="radio" formControlName="tipo_preferido" value="libro" /><span>📖 Libros</span></label>
+          <label><input type="radio" formControlName="tipo_preferido" value="ambos" /><span>🎭 Ambos</span></label>
         </div>
         @if (tipo_preferido.invalid && tipo_preferido.touched) {
           <span class="error">Selecciona una opción</span>
@@ -23,11 +21,12 @@
       </div>
 
       <div class="field">
-        <label>¿Cuánto tiempo tienes para consumir contenido?</label>
+        <label>¿Qué duración de película prefieres?</label>
         <div class="options">
-          <label><input type="radio" formControlName="duracion_preferida" value="corta" /><span>⚡ Corta</span></label>
-          <label><input type="radio" formControlName="duracion_preferida" value="media" /><span>⏱️ Media</span></label>
-          <label><input type="radio" formControlName="duracion_preferida" value="larga" /><span>🕰️ Larga</span></label>
+          <label><input type="radio" formControlName="duracion_preferida" value="corta" /><span>⚡ Menos de 2 horas</span></label>
+          <label><input type="radio" formControlName="duracion_preferida" value="media" /><span>⏱️ Cerca de 2 horas</span></label>
+          <label><input type="radio" formControlName="duracion_preferida" value="larga" /><span>🕰️ Más de 2 horas</span></label>
+          <label><input type="radio" formControlName="duracion_preferida" value="indiferente" /><span>🤷 Indiferente</span></label>
         </div>
         @if (duracion_preferida.invalid && duracion_preferida.touched) {
           <span class="error">Selecciona una opción</span>
@@ -38,9 +37,9 @@
         <label>¿Cuántas temporadas máximo?</label>
         <div class="options">
           <label><input type="radio" formControlName="max_temporadas" value="1" /><span>1 temporada</span></label>
-          <label><input type="radio" formControlName="max_temporadas" value="3" /><span>Hasta 3</span></label>
-          <label><input type="radio" formControlName="max_temporadas" value="5" /><span>Hasta 5</span></label>
-          <label><input type="radio" formControlName="max_temporadas" value="10+" /><span>Sin límite</span></label>
+          <label><input type="radio" formControlName="max_temporadas" value="2-3" /><span>2-3 temporadas</span></label>
+          <label><input type="radio" formControlName="max_temporadas" value="4+" /><span>4 o más</span></label>
+          <label><input type="radio" formControlName="max_temporadas" value="indiferente" /><span>🤷 Indiferente</span></label>
         </div>
         @if (max_temporadas.invalid && max_temporadas.touched) {
           <span class="error">Selecciona una opción</span>
@@ -51,16 +50,16 @@
         <label>¿Qué tipo de popularidad prefieres?</label>
         <div class="options">
           <label><input type="radio" formControlName="preferencia_popularidad" value="popular" /><span>🔥 Popular</span></label>
-          <label><input type="radio" formControlName="preferencia_popularidad" value="independiente" /><span>💎 Independiente</span></label>
-          <label><input type="radio" formControlName="preferencia_popularidad" value="ambas" /><span>✨ Ambas</span></label>
+          <label><input type="radio" formControlName="preferencia_popularidad" value="menos_conocido" /><span>💎 Independiente</span></label>
+          <label><input type="radio" formControlName="preferencia_popularidad" value="indiferente" /><span>✨ Indiferente</span></label>
         </div>
         @if (preferencia_popularidad.invalid && preferencia_popularidad.touched) {
           <span class="error">Selecciona una opción</span>
         }
       </div>
+
       <div class="field">
         <label>Selecciona tus géneros favoritos</label>
-
         <div class="options">
           @for (g of generos; track g.id) {
             <button
@@ -73,11 +72,11 @@
             </button>
           }
         </div>
-
         @if (selectedGeneros.size === 0 && error === 'Selecciona al menos un género') {
           <span class="error">Selecciona al menos un género</span>
         }
       </div>
+
       @if (error) {
         <p class="error-global">{{ error }}</p>
       }

@@ -1,0 +1,68 @@
+<div class="review-container">
+  <div class="review-box">
+
+    <div class="review-header">
+      <h1>NUEVA <span>RESEÑA</span></h1>
+      <p>Comparte tu opinión sobre una película o serie</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+      <div class="field">
+        <label>Título</label>
+        <input
+          type="text"
+          formControlName="titulo"
+          placeholder="¿Qué has visto?"
+        />
+        @if (titulo.invalid && titulo.touched) {
+          <span class="error">El título es obligatorio</span>
+        }
+      </div>
+
+      <div class="field">
+        <label>Puntuación</label>
+        <div class="stars-container" (mouseleave)="resetHover()">
+          @for (star of stars; track star) {
+            <span
+              class="star"
+              [class.active]="star <= (hoveredStars || selectedStars)"
+              (mouseenter)="hoverStars(star)"
+              (click)="setStars(star)"
+            >★</span>
+          }
+        </div>
+        <p class="stars-label">
+          @if (selectedStars === 1) { Pésimo }
+          @else if (selectedStars === 2) { Regular }
+          @else if (selectedStars === 3) { Bueno }
+          @else if (selectedStars === 4) { Excelente }
+          @else if (selectedStars === 5) { Favorito }
+          @else { Selecciona una puntuación }
+        </p>
+      </div>
+
+      <div class="field">
+        <label>Reseña</label>
+        <textarea
+          formControlName="comentario"
+          placeholder="Escribe tu opinión..."
+          rows="5"
+        ></textarea>
+        @if (comentario.invalid && comentario.touched) {
+          <span class="error">La reseña es obligatoria</span>
+        }
+      </div>
+
+      @if (error) {
+        <p class="error-global">{{ error }}</p>
+      }
+
+      <button class="btn-primary" type="submit" [disabled]="loading">
+        {{ loading ? 'Publicando...' : 'Publicar reseña' }}
+      </button>
+
+    </form>
+
+  </div>
+</div>
