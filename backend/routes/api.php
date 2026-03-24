@@ -83,7 +83,29 @@ if ($method === 'POST' && $action === 'cerrarSesion') {
     }
 }
 
+if ($method === 'POST' && $action === 'sesionActual') {
+    try {
+        $autenticacion->verificarSesion();
+
+        $usuario_id = (int)$_SESSION['usuario_id'];
+        $usuario = $autenticacionController->obtenerUsuarioPorId($usuario_id);
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Sesion activa',
+            'usuario' => $usuario
+        ]);
+    } catch (Exception $e) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Usuario no autenticado'
+        ]);
+    }
+}
+
 if($method === 'POST' && $action === 'crearPreferenciaUsuario'){
+
+    $preferenciaController->Transaccion();
     try{
         $autenticacion->verificarSesion();
 
@@ -92,10 +114,6 @@ if($method === 'POST' && $action === 'crearPreferenciaUsuario'){
         $duracion_preferida = $_POST['duracion_preferida'];
         $max_temporadas = $_POST['max_temporadas'];
         $preferencia_popularidad = $_POST['preferencia_popularidad'];
-        $preferencia_id = $preferenciaController->crearPreferenciaUsuario(
-            $usuario_id, $tipo_preferido, $duracion_preferida, $max_temporadas,
-            $preferencia_popularidad
-        );
 
         $generos_ids = json_decode($_POST['generos_ids'] ?? '[]', true);
 
@@ -103,10 +121,16 @@ if($method === 'POST' && $action === 'crearPreferenciaUsuario'){
             throw new Exception("Debe haber al menos un genero favorito seleccionado para el usuario");
         }
 
+        $preferencia_id = $preferenciaController->crearPreferenciaUsuario(
+            $usuario_id, $tipo_preferido, $duracion_preferida, $max_temporadas,
+            $preferencia_popularidad
+        );
         $preferenciaController->guardarGenerosFavoritosUsuario($usuario_id, $generos_ids);
 
+        $preferenciaController->Commit();
         echo json_encode(['success' => true, 'message' => 'Preferencias de usuario creadas exitosamente', 'preferencia_id' => $preferencia_id]);
     }catch (Exception $e){
+        $preferenciaController->Rollback();
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
 }

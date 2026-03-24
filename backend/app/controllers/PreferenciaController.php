@@ -17,6 +17,22 @@ class PreferenciaController{
             throw new Exception("Todos los campos son obligatorios para crear una preferencia");
         }
 
+        $max_temporadas = match($max_temporadas){
+            '1' => '1',
+            '3' => '2-3',
+            '5', '10+' => '4+',
+            'Sin límite' => 'indiferente',
+            default => $max_temporadas
+        };
+
+        $preferencia_popularidad = match($preferencia_popularidad){
+            'popular' => 'popular',
+            'independiente' => 'indiferente',
+            'ambas' => 'indiferente',
+            default => $preferencia_popularidad
+        };
+
+
         if(!in_array($tipo_preferido, ['pelicula', 'serie', 'ambos'])){
             throw new Exception("El tipo preferido debe ser 'pelicula', 'serie' o 'ambos'");
         }
@@ -43,6 +59,18 @@ class PreferenciaController{
 
     public function guardarGenerosFavoritosUsuario(int $usuario_id, array $generos_ids){
         return $this->generoModel->guardarGenerosUsuario($usuario_id, $generos_ids);
+    }
+
+    public function Transaccion(): void{
+        $this->preferenciaModel->Transaccion();
+    }
+
+    public function Commit(): void{
+        $this->preferenciaModel->Commit();
+    }
+
+    public function Rollback(): void{
+        $this->preferenciaModel->Rollback();
     }
 }
 
