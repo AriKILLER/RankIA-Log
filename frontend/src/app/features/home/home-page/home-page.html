@@ -2,7 +2,10 @@
   <div class="hero-content">
     <p class="hero-tag">Tu diario de contenido</p>
     <h1>REGISTRA LO QUE <span>SIENTES</span></h1>
-    <p class="hero-desc">Películas, series, anime, manga y libros. Todo en un solo lugar. Valora, reseña y descubre nuevo contenido basado en tus gustos.</p>
+    <p class="hero-desc">
+      Películas y series. Todo en un solo lugar. Valora, reseña y descubre nuevo contenido basado en
+      tus gustos.
+    </p>
     <div class="hero-actions">
       <a routerLink="/register" class="btn-primary">Empezar gratis</a>
       <a routerLink="/search" class="btn-secondary">Explorar contenido</a>
@@ -19,7 +22,7 @@
     <div class="card card-featured">
       <div class="card-poster card-2"></div>
       <div class="card-info">
-        <span class="card-title">Attack on Titan</span>
+        <span class="card-title">Oppenheimer</span>
         <div class="card-stars">★★★★★</div>
       </div>
     </div>
@@ -34,17 +37,17 @@
 </div>
 
 <div class="features">
-  <div class="feature">
-    <span class="feature-icon">⭐</span>
-    <h3>VALORA</h3>
-    <p>Puntúa cada obra con estrellas y lleva un registro de todo lo que has visto.</p>
+  <div class="feature" routerLink="/search" style="cursor: pointer">
+    <span class="feature-icon">🔍</span>
+    <h3>BUSCA</h3>
+    <p>Encuentra películas y series entre miles de títulos y añádelas a tu lista.</p>
   </div>
-  <div class="feature">
+  <div class="feature" routerLink="/review/new" style="cursor: pointer">
     <span class="feature-icon">✍️</span>
     <h3>RESEÑA</h3>
     <p>Comparte tu opinión con la comunidad y lee las reseñas de otros usuarios.</p>
   </div>
-  <div class="feature">
+  <div class="feature" routerLink="/recommendations" style="cursor: pointer">
     <span class="feature-icon">🎯</span>
     <h3>DESCUBRE</h3>
     <p>Recibe recomendaciones personalizadas basadas en tus preferencias.</p>

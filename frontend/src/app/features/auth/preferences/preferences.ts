@@ -11,13 +11,12 @@ import { HttpClient } from '@angular/common/http';
   styleUrl: './preferences.css',
 })
 export class Preferences {
-  private fb     = inject(FormBuilder);
-  private http   = inject(HttpClient);
+  private fb = inject(FormBuilder);
+  private http = inject(HttpClient);
   private router = inject(Router);
 
   private readonly API_URL = '/api';
 
-  // Géneros según seed.sql (orden = IDs 1..10)
   generos = [
     { id: 1, nombre: 'Acción' },
     { id: 2, nombre: 'Drama' },
@@ -34,14 +33,14 @@ export class Preferences {
   selectedGeneros = new Set<number>();
 
   form = this.fb.group({
-    tipo_preferido:          ['', Validators.required],
-    duracion_preferida:      ['', Validators.required],
-    max_temporadas:          ['', Validators.required],
+    tipo_preferido: ['', Validators.required],
+    duracion_preferida: ['', Validators.required],
+    max_temporadas: ['', Validators.required],
     preferencia_popularidad: ['', Validators.required],
   });
 
   loading = false;
-  error   = '';
+  error = '';
 
   toggleGenero(id: number): void {
     if (this.selectedGeneros.has(id)) this.selectedGeneros.delete(id);
@@ -55,43 +54,48 @@ export class Preferences {
   onSubmit(): void {
     if (this.form.invalid) return;
 
-    // Validación extra: mínimo 1 género
     if (this.selectedGeneros.size === 0) {
       this.error = 'Selecciona al menos un género';
       return;
     }
 
     this.loading = true;
-    this.error   = '';
+    this.error = '';
 
     const formData = new FormData();
     formData.append('action', 'crearPreferenciaUsuario');
-    formData.append('tipo_preferido',          this.form.value.tipo_preferido!);
-    formData.append('duracion_preferida',      this.form.value.duracion_preferida!);
-    formData.append('max_temporadas',          this.form.value.max_temporadas!);
+    formData.append('tipo_preferido', this.form.value.tipo_preferido!);
+    formData.append('duracion_preferida', this.form.value.duracion_preferida!);
+    formData.append('max_temporadas', this.form.value.max_temporadas!);
     formData.append('preferencia_popularidad', this.form.value.preferencia_popularidad!);
-
-    // Backend espera generos_ids en JSON
     formData.append('generos_ids', JSON.stringify(Array.from(this.selectedGeneros)));
 
     this.http.post<any>(this.API_URL, formData).subscribe({
-      next: res => {
+      next: (res) => {
         if (res.success) {
           this.router.navigate(['']);
         } else {
-          this.error   = res.message;
+          this.error = res.message;
           this.loading = false;
         }
       },
       error: () => {
-        this.error   = 'Error al conectar con el servidor';
+        this.error = 'Error al conectar con el servidor';
         this.loading = false;
-      }
+      },
     });
   }
 
-  get tipo_preferido()          { return this.form.get('tipo_preferido')!; }
-  get duracion_preferida()      { return this.form.get('duracion_preferida')!; }
-  get max_temporadas()          { return this.form.get('max_temporadas')!; }
-  get preferencia_popularidad() { return this.form.get('preferencia_popularidad')!; }
+  get tipo_preferido() {
+    return this.form.get('tipo_preferido')!;
+  }
+  get duracion_preferida() {
+    return this.form.get('duracion_preferida')!;
+  }
+  get max_temporadas() {
+    return this.form.get('max_temporadas')!;
+  }
+  get preferencia_popularidad() {
+    return this.form.get('preferencia_popularidad')!;
+  }
 }

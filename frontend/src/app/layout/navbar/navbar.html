@@ -1,10 +1,29 @@
 <nav class="navbar">
   <a class="navbar-logo" routerLink="/">RANK<span>IA</span></a>
+
   <div class="navbar-links">
-    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Inicio</a>
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
+      >Inicio</a
+    >
     <a routerLink="/search" routerLinkActive="active">Buscar</a>
-    <a routerLink="/lists" routerLinkActive="active">Listas</a>
     <a routerLink="/recommendations" routerLinkActive="active">Sugerencias</a>
-    <a routerLink="/profile" routerLinkActive="active">Perfil</a>
+  </div>
+
+  <div class="navbar-user" (click)="toggleMenu()">
+    <div class="navbar-avatar">
+      {{ user?.nombre?.charAt(0)?.toUpperCase() ?? '?' }}
+    </div>
+    <span class="navbar-username">{{ user?.nombre }}</span>
+    <span class="navbar-arrow" [class.open]="menuOpen">▾</span>
+
+    @if (menuOpen) {
+      <div class="navbar-dropdown">
+        <a routerLink="/profile" (click)="closeMenu()">👤 Mi perfil</a>
+        <a routerLink="/review/new" (click)="closeMenu()">✍️ Nueva reseña</a>
+        <a routerLink="/lists" (click)="closeMenu()">📋 Mis listas</a>
+        <div class="dropdown-divider"></div>
+        <button (click)="logout()">🚪 Cerrar sesión</button>
+      </div>
+    }
   </div>
 </nav>

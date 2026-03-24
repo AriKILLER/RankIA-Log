@@ -1,9 +1,8 @@
 <div class="search-container">
-
   <header class="search-header">
     <div>
       <h1>BUSC<span>AR</span></h1>
-      <p>Encuentra películas, series, anime, manga y libros para registrarlos en tu diario.</p>
+      <p>Encuentra películas y series para registrarlos en tu diario.</p>
     </div>
   </header>
 
@@ -18,9 +17,7 @@
       />
     </div>
 
-    <button class="btn-primary" (click)="onSearch()">
-      Buscar
-    </button>
+    <button class="btn-primary" (click)="onSearch()">Buscar</button>
   </section>
 
   <section class="filters">
@@ -40,7 +37,6 @@
   </section>
 
   <section class="results">
-
     <div class="results-head">
       <h2>RESULTAD<span>OS</span></h2>
       <span class="results-meta">{{ results.length }} encontrados</span>
@@ -65,7 +61,5 @@
         </article>
       }
     </div>
-
   </section>
-
 </div>
