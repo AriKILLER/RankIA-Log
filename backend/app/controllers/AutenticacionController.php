@@ -46,6 +46,17 @@ class AutenticacionController{
     public function cerrarSesion(){
         $this->autenticacionMiddleware->verificarCierreSesion();
     }
+
+    public function obtenerUsuarioPorId(int $usuario_id){
+        $usuario = $this->usuarioModel->buscarPorId($usuario_id);
+
+        if(!$usuario){
+            throw new Exception("Usuario no encontrado. Por favor, verifique su sesión o intente de nuevo.");
+        }
+
+        unset($usuario['password_hash']);
+        return $usuario;
+    }
 }
 
 ?>

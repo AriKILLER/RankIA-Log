@@ -29,6 +29,24 @@ class Preferencia extends Model{
         return $preferencias ?: null;
     }
 
+    public function Transaccion(): void{
+        if(!$this->db->inTransaction()){
+            $this->db->beginTransaction();
+        }
+    }
+
+    public function Commit(): void{
+        if($this->db->inTransaction()){
+            $this->db->commit();
+        }
+    }
+
+    public function Rollback(): void{
+        if($this->db->inTransaction()){
+            $this->db->rollBack();
+        }
+    }
+
 }
 
 ?>
