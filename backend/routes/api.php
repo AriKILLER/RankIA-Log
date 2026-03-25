@@ -2,6 +2,7 @@
 // Aqui van las rutas de la API del backend. Se define todo lo que se vaya a usar en frontend
 require_once __DIR__ . '/../app/controllers/AutenticacionController.php';
 require_once __DIR__ . '/../app/controllers/PreferenciaController.php';
+require_once __DIR__ . '/../app/controllers/ContenidoController.php';
 require_once __DIR__ . '/../app/middleware/Autenticacion.php';
 
 if(session_status() === PHP_SESSION_NONE){
@@ -11,6 +12,7 @@ if(session_status() === PHP_SESSION_NONE){
 $autenticacion = new Autenticacion();
 $autenticacionController = new AutenticacionController();
 $preferenciaController = new PreferenciaController();
+$contenidoController = new ContenidoController();
 header('Content-Type: application/json');
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -131,6 +133,64 @@ if($method === 'POST' && $action === 'crearPreferenciaUsuario'){
         echo json_encode(['success' => true, 'message' => 'Preferencias de usuario creadas exitosamente', 'preferencia_id' => $preferencia_id]);
     }catch (Exception $e){
         $preferenciaController->Rollback();
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+if($method === 'POST' && $action === 'obtenerDetalleTmdb'){
+    try{
+        $tmdbId = (int)$_POST['tmdbId'];
+        $tipo = $_POST['tipo'];
+        $contenido = $contenidoController->obtenerDetalleTmdb($tmdbId, $tipo);
+        echo json_encode(['success' => true, 'contenido' => $contenido]);        
+    }catch (Exception $e){
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+if($method === 'POST' && $action === 'obtenerCatalogoTmdb'){
+    try{
+        $tipo = $_POST['tipo'] ?? 'ambos';
+        $pagina = (int)($_POST['pagina'] ?? 1);
+        $catalogo = $contenidoController->obtenerCatalogoTmdb($tipo, $pagina);
+        echo json_encode(['success' => true, 'catalogo' => $catalogo]);
+    }catch (Exception $e){
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+if($method === 'POST' && $action === 'guardarDetalleEnBd'){
+    try{
+        $external_id = (int)$_POST['external_id'];
+        $titulo = $_POST['titulo'];
+        $tipo = $_POST['tipo'];
+        $sinopsis = $_POST['sinopsis'];
+        $poster = $_POST['poster'];
+        $fecha_lanzamiento = $_POST['fecha_lanzamiento'] ?? null;
+        $duracion = (int)($_POST['duracion'] ?? 0);
+        $numero_temporadas = (int)($_POST['numero_temporadas'] ?? 0);
+        $popularidad = (float)($_POST['popularidad'] ?? 0);
+        $contenido_id = $contenidoController->guardarDetalleEnBd($external_id, $titulo, $tipo, $sinopsis, $poster, 
+                                            $fecha_lanzamiento, $duracion, $numero_temporadas, $popularidad);
+        echo json_encode(['success' => true, 'message' => 'Detalle guardado en BD exitosamente', 'contenido_id' => $contenido_id]);
+    }catch (Exception $e){
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+if($method === 'POST' && $action === 'obtenerDetalleDeBd'){
+    try{
+        $external_id = (int)($_POST['external_id'] ?? 0);
+        $tipo = $_POST['tipo'] ?? '';
+
+        if($external_id <= 0 || $tipo !== 'pelicula' && $tipo !== 'serie'){
+            throw new Exception("El ID externo es requerido y el tipo debe ser pelicula o serie.");
+        }
+
+        $detalle = $contenidoController->obtenerDetalleDeBd($external_id, $tipo);
+
+        echo json_encode(['success' => true, 'message' => 'Detalle obtenido de BD exitosamente', 'detalle' => $detalle]);
+    }catch (Exception $e){
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
 }
