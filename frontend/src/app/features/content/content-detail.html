@@ -1,0 +1,34 @@
+<div class="detail-container">
+  @if (loading) {
+    <div class="state">Cargando detalle...</div>
+  } @else if (error) {
+    <div class="state error">{{ error }}</div>
+  } @else {
+    <div class="detail">
+      <div class="poster">
+        @if (posterUrl) {
+          <img [src]="posterUrl" [alt]="titulo" />
+        } @else {
+          <div class="poster-placeholder"></div>
+        }
+      </div>
+
+      <div class="info">
+        <h1>{{ titulo }}</h1>
+        <p class="meta">
+          {{ tipo === 'pelicula' ? 'Película' : 'Serie' }}
+          @if (fecha) {
+            · {{ fecha.slice(0, 4) }}
+          }
+        </p>
+
+        <p class="synopsis">{{ sinopsis || 'Sin sinopsis disponible.' }}</p>
+
+        <div class="actions">
+          <button class="btn-primary" type="button" (click)="resenar()">Reseñar</button>
+          <a class="btn-secondary" routerLink="/search">Volver a buscar</a>
+        </div>
+      </div>
+    </div>
+  }
+</div>

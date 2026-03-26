@@ -7,8 +7,16 @@
       tus gustos.
     </p>
     <div class="hero-actions">
-      <a routerLink="/register" class="btn-primary">Empezar gratis</a>
-      <a routerLink="/search" class="btn-secondary">Explorar contenido</a>
+      @if (auth.isLoggedIn()) {
+        <a routerLink="/profile" class="btn-primary">Ver perfil</a>
+      } @else {
+        <a routerLink="/register" class="btn-primary">Empezar gratis</a>
+      }
+      @if (auth.isLoggedIn()) {
+        <a routerLink="/search" class="btn-secondary">Explorar contenido</a>
+      } @else {
+        <a [routerLink]="['/']" fragment="catalogo" class="btn-secondary">Ver catálogo</a>
+      }
     </div>
   </div>
   <div class="hero-cards">
@@ -35,6 +43,74 @@
     </div>
   </div>
 </div>
+
+<section id="catalogo" class="catalog">
+  <div class="catalog-head">
+    <div>
+      <h2>CATÁLOG<span>O</span></h2>
+      <p>Explora películas y series.</p>
+    </div>
+
+    <div class="catalog-pills">
+      <button
+        type="button"
+        class="pill"
+        [class.active]="tipoCatalogo === 'ambos'"
+        (click)="setTipo('ambos')"
+      >
+        Ambos
+      </button>
+      <button
+        type="button"
+        class="pill"
+        [class.active]="tipoCatalogo === 'pelicula'"
+        (click)="setTipo('pelicula')"
+      >
+        Películas
+      </button>
+      <button
+        type="button"
+        class="pill"
+        [class.active]="tipoCatalogo === 'serie'"
+        (click)="setTipo('serie')"
+      >
+        Series
+      </button>
+    </div>
+  </div>
+
+  @if (loadingCatalogo) {
+    <div class="catalog-loading">Cargando catálogo...</div>
+  } @else if (catalogoError) {
+    <div class="catalog-error">{{ catalogoError }}</div>
+  } @else {
+    <div class="catalog-grid">
+      @for (item of catalogo; track item.externalId) {
+        <article
+          class="catalog-card"
+          [routerLink]="['/content', item.tipo, item.externalId]"
+          style="cursor: pointer"
+        >
+          @if (item.posterUrl) {
+            <img class="catalog-poster" [src]="item.posterUrl" [alt]="item.titulo" />
+          } @else {
+            <div class="catalog-poster placeholder"></div>
+          }
+
+          <div class="catalog-info">
+            <span class="catalog-title">{{ item.titulo }}</span>
+            <span class="catalog-meta">
+              {{ item.tipo === 'pelicula' ? 'Película' : 'Serie' }}
+              @if (item.fecha) {
+                · {{ item.fecha.slice(0, 4) }}
+              }
+            </span>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>
 
 <div class="features">
   <div class="feature" routerLink="/search" style="cursor: pointer">
