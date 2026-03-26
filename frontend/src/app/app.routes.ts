@@ -23,7 +23,8 @@ export const routes: Routes = [
   },
 
   // Rutas protegidas
-  { path: '', canActivate: [authGuard], component: HomePage },
+  { path: '', component: HomePage },
+  { path: 'content/:tipo/:id', loadComponent: () => import('./features/content/content-detail').then(m => m.ContentDetail) },
   { path: 'search', canActivate: [authGuard], component: SearchPage },
   { path: 'profile', canActivate: [authGuard], component: ProfilePage },
   { path: 'lists', canActivate: [authGuard], component: ListsPage },
