@@ -82,7 +82,9 @@ form {
   font-size: 2rem;
   color: var(--border);
   cursor: pointer;
-  transition: color 0.15s ease, transform 0.15s ease;
+  transition:
+    color 0.15s ease,
+    transform 0.15s ease;
 }
 
 .star.active {
@@ -124,7 +126,9 @@ form {
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  transition: background 0.2s ease, transform 0.1s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.1s ease;
   margin-top: 0.5rem;
 }
 
@@ -136,4 +140,14 @@ form {
 .btn-primary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.success-global {
+  font-size: 0.85rem;
+  color: #2ecc71;
+  text-align: center;
+  padding: 0.75rem;
+  background: rgba(46, 204, 113, 0.1);
+  border-radius: var(--radius);
+  border: 1px solid rgba(46, 204, 113, 0.3);
 }
