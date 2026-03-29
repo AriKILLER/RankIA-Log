@@ -1,36 +1,34 @@
 <div class="search-container">
   <header class="search-header">
     <div>
-      <h1>BUSC<span>AR</span></h1>
+      <h1>CATÁL<span>OGO</span></h1>
       <p>Encuentra películas y series para registrarlos en tu diario.</p>
     </div>
   </header>
 
   <section class="search-bar">
     <div class="search-input">
-      <span class="icon">⌕</span>
+      <span class="icon">🔍</span>
       <input
         [(ngModel)]="query"
         type="text"
-        placeholder="Buscar por título…"
-        (keyup.enter)="onSearch()"
+        placeholder="Buscar por título..."
+        (keyup)="onSearch()"
       />
     </div>
-
-    <button class="btn-primary" (click)="onSearch()">Buscar</button>
   </section>
 
   <section class="filters">
     <p class="filters-label">Tipo de contenido</p>
     <div class="pills">
-      @for (t of contentTypes; track t.key) {
+      @for (f of filtros; track f.key) {
         <button
           type="button"
           class="pill"
-          [class.active]="selectedType === t.key"
-          (click)="selectType(t.key)"
+          [class.active]="selectedFiltro === f.key"
+          (click)="selectFiltro(f.key)"
         >
-          {{ t.label }}
+          {{ f.label }}
         </button>
       }
     </div>
@@ -39,27 +37,41 @@
   <section class="results">
     <div class="results-head">
       <h2>RESULTAD<span>OS</span></h2>
-      <span class="results-meta">{{ results.length }} encontrados</span>
+      <span class="results-meta">{{ catalogo.length }} encontrados</span>
     </div>
 
-    <div class="grid">
-      @for (item of results; track item.title) {
-        <article class="content-card">
-          <div class="poster"></div>
-          <div class="card-body">
-            <div class="title-row">
-              <h3>{{ item.title }}</h3>
-              <span class="year">{{ item.year }}</span>
+    @if (loading) {
+      <div class="loading-state">Cargando catálogo...</div>
+    } @else if (error) {
+      <div class="error-state">{{ error }}</div>
+    } @else if (catalogo.length === 0) {
+      <div class="empty-state">
+        <span>🎬</span>
+        <p>No se encontraron resultados.</p>
+      </div>
+    } @else {
+      <div class="grid">
+        @for (item of catalogo; track item.externalId) {
+          <article class="content-card" (click)="irADetalle(item)">
+            <div class="poster">
+              @if (item.posterUrl) {
+                <img [src]="item.posterUrl" [alt]="item.titulo" />
+              } @else {
+                <div class="poster-placeholder"></div>
+              }
             </div>
-            <div class="rating">{{ item.rating }}</div>
-
-            <div class="card-actions">
-              <button class="btn-ghost" type="button">+ Lista</button>
-              <button class="btn-ghost" type="button">Reseñar</button>
+            <div class="card-body">
+              <div class="title-row">
+                <h3>{{ item.titulo }}</h3>
+                <span class="year">{{ item.fecha?.slice(0, 4) ?? '' }}</span>
+              </div>
+              <span class="tipo-badge">
+                {{ item.tipo === 'pelicula' ? '🎬 Película' : '📺 Serie' }}
+              </span>
             </div>
-          </div>
-        </article>
-      }
-    </div>
+          </article>
+        }
+      </div>
+    }
   </section>
 </div>

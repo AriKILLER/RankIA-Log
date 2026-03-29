@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { ContenidoService, CatalogoItemUI, CatalogoTipo } from '../../../core/services/contenido';
 
 @Component({
   selector: 'app-search-page',
@@ -9,29 +11,63 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './search-page.css',
 })
 export class SearchPage {
+  private contenido = inject(ContenidoService);
+  private router    = inject(Router);
+
   query = '';
 
-  contentTypes = [
+  filtros: { key: CatalogoTipo; label: string }[] = [
+    { key: 'ambos',    label: '🎭 Ambos' },
     { key: 'pelicula', label: '🎬 Películas' },
-    { key: 'serie', label: '📺 Series' },
+    { key: 'serie',    label: '📺 Series' },
   ];
 
-  selectedType: string = 'pelicula';
+  selectedFiltro: CatalogoTipo = 'ambos';
 
-  results = [
-    { title: 'Dune', year: '2021', rating: '★★★★☆' },
-    { title: 'Interstellar', year: '2014', rating: '★★★★★' },
-    { title: 'Breaking Bad', year: '2008', rating: '★★★★★' },
-    { title: 'The Witcher', year: '2019', rating: '★★★★☆' },
-    { title: 'Oppenheimer', year: '2023', rating: '★★★★★' },
-    { title: 'Stranger Things', year: '2016', rating: '★★★★☆' },
-  ];
+  catalogo: CatalogoItemUI[]     = [];
+  catalogoFull: CatalogoItemUI[] = [];
+  loading = false;
+  error   = '';
+
+  ngOnInit(): void {
+    this.cargarCatalogo();
+  }
+
+  cargarCatalogo(): void {
+    this.loading = true;
+    this.error   = '';
+    this.query   = '';
+
+    this.contenido.obtenerCatalogoTmdb(this.selectedFiltro).subscribe({
+      next: items => {
+        this.catalogoFull = items;
+        this.catalogo     = items;
+        this.loading      = false;
+      },
+      error: () => {
+        this.error   = 'Error al cargar el catálogo';
+        this.loading = false;
+      }
+    });
+  }
+
+  selectFiltro(filtro: CatalogoTipo): void {
+    this.selectedFiltro = filtro;
+    this.cargarCatalogo();
+  }
 
   onSearch(): void {
     this.query = this.query.trim();
+    if (!this.query) {
+      this.catalogo = this.catalogoFull;
+      return;
+    }
+    this.catalogo = this.catalogoFull.filter(item =>
+      item.titulo.toLowerCase().includes(this.query.toLowerCase())
+    );
   }
 
-  selectType(type: string): void {
-    this.selectedType = type;
+  irADetalle(item: CatalogoItemUI): void {
+    this.router.navigate(['/content', item.tipo, item.externalId]);
   }
 }
