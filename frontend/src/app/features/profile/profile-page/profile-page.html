@@ -1,6 +1,6 @@
 <div class="profile-container">
   <div class="profile-header">
-    <div class="profile-avatar">
+    <div class="profile-avatar" [style.background]="getAvatarColor(user?.nombre ?? '')">
       {{ user?.nombre?.charAt(0)?.toUpperCase() ?? '?' }}
     </div>
     <div class="profile-info">
@@ -35,6 +35,7 @@
     <div class="empty-state">
       <span>🎬</span>
       <p>Aún no tienes favoritos</p>
+      <small>Marca contenido como favorito desde el catálogo</small>
     </div>
   </div>
 
@@ -47,7 +48,8 @@
       <div class="empty-state">
         <span>✍️</span>
         <p>Aún no has escrito ninguna reseña</p>
-        <a routerLink="/review/new" class="btn-primary">Escribe tu primera reseña</a>
+        <small>Ve al catálogo, elige una película o serie y reséñala</small>
+        <a routerLink="/search" class="btn-primary">Ir al catálogo</a>
       </div>
     </div>
   </div>

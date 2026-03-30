@@ -3,7 +3,8 @@
     <p class="hero-tag">Tu diario de contenido</p>
     <h1>REGISTRA LO QUE <span>SIENTES</span></h1>
     <p class="hero-desc">
-      Películas y series. Todo en un solo lugar. Valora, reseña y descubre nuevo contenido basado en tus gustos.
+      Películas y series. Todo en un solo lugar. Valora, reseña y descubre nuevo contenido basado en
+      tus gustos.
     </p>
     <div class="hero-actions">
       @if (auth.isLoggedIn()) {
@@ -16,42 +17,41 @@
     </div>
   </div>
   <div class="hero-cards">
-    <div class="card">
-      <div class="card-poster card-1"></div>
-      <div class="card-info">
-        <span class="card-title">Breaking Bad</span>
-        <div class="card-stars">★★★★★</div>
+    @for (p of posters; track p.id) {
+      <div
+        class="card"
+        [class.card-featured]="p.titulo === 'Oppenheimer'"
+        [routerLink]="['/content', p.tipo, p.id]"
+        style="cursor: pointer"
+      >
+        <div class="card-poster">
+          @if (p.url) {
+            <img [src]="p.url" [alt]="p.titulo" />
+          } @else {
+            <div class="card-placeholder"></div>
+          }
+        </div>
+        <div class="card-info">
+          <span class="card-title">{{ p.titulo }}</span>
+          <div class="card-stars">★★★★★</div>
+        </div>
       </div>
-    </div>
-    <div class="card card-featured">
-      <div class="card-poster card-2"></div>
-      <div class="card-info">
-        <span class="card-title">Oppenheimer</span>
-        <div class="card-stars">★★★★★</div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-poster card-3"></div>
-      <div class="card-info">
-        <span class="card-title">Dune</span>
-        <div class="card-stars">★★★★☆</div>
-      </div>
-    </div>
+    }
   </div>
 </div>
 
 <div class="features">
-  <div class="feature" routerLink="/search" style="cursor:pointer">
+  <div class="feature" routerLink="/search" style="cursor: pointer">
     <span class="feature-icon">🔍</span>
     <h3>BUSCA</h3>
     <p>Encuentra películas y series entre miles de títulos y añádelas a tu lista.</p>
   </div>
-  <div class="feature" routerLink="/review/new" style="cursor:pointer">
+  <div class="feature" routerLink="/review/new" style="cursor: pointer">
     <span class="feature-icon">✍️</span>
     <h3>RESEÑA</h3>
     <p>Comparte tu opinión con la comunidad y lee las reseñas de otros usuarios.</p>
   </div>
-  <div class="feature" routerLink="/recommendations" style="cursor:pointer">
+  <div class="feature" routerLink="/recommendations" style="cursor: pointer">
     <span class="feature-icon">🎯</span>
     <h3>DESCUBRE</h3>
     <p>Recibe recomendaciones personalizadas basadas en tus preferencias.</p>

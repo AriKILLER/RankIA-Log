@@ -1,8 +1,22 @@
 <div class="review-container">
   <div class="review-box">
+    @if (titulo || posterUrl) {
+      <div class="review-content-info">
+        @if (posterUrl) {
+          <img class="review-poster" [src]="posterUrl" [alt]="titulo" />
+        }
+        <div class="review-content-meta">
+          <p class="review-content-tipo">
+            {{ tipo === 'pelicula' ? '🎬 Película' : '📺 Serie' }}
+          </p>
+          <h2 class="review-content-titulo">{{ titulo }}</h2>
+        </div>
+      </div>
+    }
+
     <div class="review-header">
       <h1>NUEVA <span>RESEÑA</span></h1>
-      <p>Comparte tu opinión sobre una película o serie</p>
+      <p>Comparte tu opinión sobre esta {{ tipo === 'pelicula' ? 'película' : 'serie' }}</p>
     </div>
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()">

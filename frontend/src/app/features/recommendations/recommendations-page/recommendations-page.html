@@ -4,17 +4,20 @@
       <h1>SUGEREN<span>CIAS</span></h1>
       <p>Recomendaciones personalizadas basadas en tus preferencias y tu actividad.</p>
     </div>
-
-    <button class="btn-primary" type="button" (click)="refresh()">Actualizar</button>
+    <button class="btn-primary" type="button" (click)="cargar()">Actualizar</button>
   </header>
 
   <section class="recs">
     <div class="recs-head">
       <h2>PARA <span>TI</span></h2>
-      <span class="recs-meta">{{ recommendations.length }} sugerencias</span>
+      <span class="recs-meta">{{ catalogo.length }} sugerencias</span>
     </div>
 
-    @if (recommendations.length === 0) {
+    @if (loading) {
+      <div class="loading-state">Cargando sugerencias...</div>
+    } @else if (error) {
+      <div class="error-state">{{ error }}</div>
+    } @else if (catalogo.length === 0) {
       <div class="empty-state">
         <span>🧠</span>
         <p>Aún no hay recomendaciones.</p>
@@ -22,24 +25,26 @@
       </div>
     } @else {
       <div class="grid">
-        @for (item of recommendations; track item.title) {
+        @for (item of catalogo; track item.externalId) {
           <article class="content-card">
-            <div class="poster"></div>
-
+            <div class="poster" (click)="irADetalle(item)" style="cursor: pointer">
+              @if (item.posterUrl) {
+                <img [src]="item.posterUrl" [alt]="item.titulo" />
+              } @else {
+                <div class="poster-placeholder"></div>
+              }
+            </div>
             <div class="card-body">
               <div class="title-row">
-                <h3>{{ item.title }}</h3>
-                <span class="year">{{ item.year }}</span>
+                <h3>{{ item.titulo }}</h3>
+                <span class="year">{{ item.fecha?.slice(0, 4) ?? '' }}</span>
               </div>
-
-              <p class="reason">{{ item.reason }}</p>
-
-              <div class="rating">{{ item.rating }}</div>
-
+              <span class="tipo-badge">
+                {{ item.tipo === 'pelicula' ? '🎬 Película' : '📺 Serie' }}
+              </span>
               <div class="card-actions">
-                <button class="btn-ghost" type="button">Ver</button>
-                <button class="btn-ghost" type="button">+ Lista</button>
-                <button class="btn-ghost" type="button">Reseñar</button>
+                <button class="btn-ghost" type="button" (click)="irADetalle(item)">Ver</button>
+                <button class="btn-ghost" type="button" (click)="resenar(item)">Reseñar</button>
               </div>
             </div>
           </article>

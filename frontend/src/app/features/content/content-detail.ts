@@ -1,15 +1,17 @@
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { DecimalPipe } from '@angular/common';
 import { map } from 'rxjs';
 import { AuthService } from '../../core/services/auth';
 
 type Tipo = 'pelicula' | 'serie';
+type ListaTab = 'viendo' | 'pendientes' | null;
 
 @Component({
   selector: 'app-content-detail',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, DecimalPipe],
   templateUrl: './content-detail.html',
   styleUrl: './content-detail.css',
 })
@@ -36,6 +38,8 @@ export class ContentDetail {
   duracion: number | null = null;
   numeroTemporadas: number | null = null;
   popularidad: number | null = null;
+
+  enLista: ListaTab = null;
 
   constructor() {
     const tipoParam = (this.route.snapshot.paramMap.get('tipo') ?? 'pelicula') as Tipo;
@@ -79,7 +83,6 @@ export class ContentDetail {
     this.loading = true;
     this.error = '';
 
-    // 1) intentar BD
     const fdBd = new FormData();
     fdBd.append('action', 'obtenerDetalleDeBd');
     fdBd.append('external_id', String(this.id));
@@ -111,7 +114,6 @@ export class ContentDetail {
           this.loading = false;
           return;
         }
-
         const d = res?.contenido ?? res?.detalle ?? res;
         this.aplicarDetalle(d);
         this.loading = false;
@@ -130,7 +132,15 @@ export class ContentDetail {
     this.posterUrl = this.toPosterUrl(d?.poster ?? d?.poster_path ?? null);
     this.duracion = d?.duracion ?? d?.runtime ?? null;
     this.numeroTemporadas = d?.numero_temporadas ?? d?.number_of_seasons ?? null;
-    this.popularidad = d?.popularidad ?? d?.popularity ?? null;
+    this.popularidad = d?.vote_average ?? d?.popularidad ?? null;
+  }
+
+  toggleLista(lista: 'viendo' | 'pendientes'): void {
+    if (!this.auth.isLoggedIn()) {
+      this.router.navigate(['/login']);
+      return;
+    }
+    this.enLista = this.enLista === lista ? null : lista;
   }
 
   resenar(): void {
@@ -139,7 +149,6 @@ export class ContentDetail {
       return;
     }
 
-    // Guardar en BD antes de redirigir
     const fd = new FormData();
     fd.append('action', 'guardarDetalleEnBd');
     fd.append('external_id', String(this.id));
@@ -153,17 +162,10 @@ export class ContentDetail {
     fd.append('popularidad', String(this.popularidad ?? ''));
 
     this.postParsed(fd).subscribe({
-      next: () => {
-        this.router.navigate(['/review/new'], {
-          queryParams: { tipo: this.tipo, id: this.id },
-        });
-      },
-      error: () => {
-        // Si falla guardar, redirigimos igual
-        this.router.navigate(['/review/new'], {
-          queryParams: { tipo: this.tipo, id: this.id },
-        });
-      },
+      next: () =>
+        this.router.navigate(['/review/new'], { queryParams: { tipo: this.tipo, id: this.id } }),
+      error: () =>
+        this.router.navigate(['/review/new'], { queryParams: { tipo: this.tipo, id: this.id } }),
     });
   }
 }

@@ -9,21 +9,49 @@
     <a routerLink="/recommendations" routerLinkActive="active">Sugerencias</a>
   </div>
 
-  <div class="navbar-user" (click)="toggleMenu()">
-    <div class="navbar-avatar">
-      {{ user?.nombre?.charAt(0)?.toUpperCase() ?? '?' }}
-    </div>
-    <span class="navbar-username">{{ user?.nombre }}</span>
-    <span class="navbar-arrow" [class.open]="menuOpen">▾</span>
-
-    @if (menuOpen) {
-      <div class="navbar-dropdown">
-        <a routerLink="/profile" (click)="closeMenu()">👤 Mi perfil</a>
-        <a routerLink="/review/new" (click)="closeMenu()">✍️ Nueva reseña</a>
-        <a routerLink="/lists" (click)="closeMenu()">📋 Mis listas</a>
-        <div class="dropdown-divider"></div>
-        <button (click)="logout()">🚪 Cerrar sesión</button>
+  @if (auth.isLoggedIn()) {
+    <div class="navbar-user" (click)="toggleMenu()">
+      <div class="navbar-avatar" [style.background]="getAvatarColor(user?.nombre ?? '')">
+        {{ user?.nombre?.charAt(0)?.toUpperCase() ?? '?' }}
       </div>
-    }
-  </div>
+      <span class="navbar-username">{{ user?.nombre }}</span>
+      <span class="navbar-arrow" [class.open]="menuOpen">▾</span>
+
+      @if (menuOpen) {
+        <div class="navbar-dropdown">
+          <a routerLink="/profile" (click)="closeMenu()">👤 Mi perfil</a>
+          <a routerLink="/review/new" (click)="closeMenu()">✍️ Nueva reseña</a>
+          <a routerLink="/lists" (click)="closeMenu()">📋 Mis listas</a>
+          <div class="dropdown-divider"></div>
+          <button (click)="logout()">🚪 Cerrar sesión</button>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="navbar-auth">
+      <a routerLink="/login" class="btn-login">Iniciar sesión</a>
+      <a routerLink="/register" class="btn-register">Registrarse</a>
+    </div>
+  }
+
+  <button class="navbar-mobile-btn" (click)="toggleMobile()">
+    {{ mobileOpen ? '✕' : '☰' }}
+  </button>
+
+  @if (mobileOpen) {
+    <div class="navbar-mobile-menu">
+      <a routerLink="/" (click)="closeMobile()">Inicio</a>
+      <a routerLink="/search" (click)="closeMobile()">Catálogo</a>
+      <a routerLink="/recommendations" (click)="closeMobile()">Sugerencias</a>
+      @if (auth.isLoggedIn()) {
+        <a routerLink="/profile" (click)="closeMobile()">Mi perfil</a>
+        <a routerLink="/review/new" (click)="closeMobile()">Nueva reseña</a>
+        <a routerLink="/lists" (click)="closeMobile()">Mis listas</a>
+        <button class="mobile-logout" (click)="logout()">Cerrar sesión</button>
+      } @else {
+        <a routerLink="/login" (click)="closeMobile()">Iniciar sesión</a>
+        <a routerLink="/register" (click)="closeMobile()">Registrarse</a>
+      }
+    </div>
+  }
 </nav>

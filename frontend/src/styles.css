@@ -7,17 +7,18 @@
 }
 
 :root {
-  --bg:        #0d0d0f;
-  --bg-card:   #16161a;
-  --border:    #2a2a30;
-  --accent:    #e63946;
-  --accent-2:  #f4a261;
-  --text:      #f0eff4;
-  --text-muted:#8e8ea0;
-  --radius:    10px;
+  --bg: #0d0d0f;
+  --bg-card: #16161a;
+  --border: #2a2a30;
+  --accent: #e63946;
+  --accent-2: #f4a261;
+  --text: #f0eff4;
+  --text-muted: #8e8ea0;
+  --radius: 10px;
 }
 
-html, body {
+html,
+body {
   background-color: var(--bg);
   color: var(--text);
   font-family: 'DM Sans', sans-serif;
@@ -36,7 +37,107 @@ button {
   font-family: 'DM Sans', sans-serif;
 }
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   font-family: 'Bebas Neue', sans-serif;
   letter-spacing: 0.05em;
+}
+
+/* ── Responsive global ── */
+@media (max-width: 768px) {
+  /* Navbar */
+  .navbar {
+    padding: 0 1rem;
+  }
+
+  .navbar-links {
+    display: none;
+  }
+
+  .navbar-username {
+    display: none;
+  }
+
+  /* Hero home */
+  .hero {
+    flex-direction: column;
+    padding: 3rem 1.5rem;
+    min-height: auto;
+    gap: 2rem;
+  }
+
+  .hero-content h1 {
+    font-size: 3.5rem;
+  }
+
+  .hero-cards {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .features {
+    flex-direction: column;
+    padding: 2rem 1.5rem;
+  }
+
+  /* Auth */
+  .auth-container,
+  .preferences-container,
+  .review-container {
+    padding: 1.5rem 1rem;
+  }
+
+  .auth-box,
+  .preferences-box,
+  .review-box {
+    padding: 2rem 1.5rem;
+  }
+
+  /* Profile */
+  .profile-container {
+    padding: 2rem 1rem;
+  }
+
+  .profile-header {
+    flex-wrap: wrap;
+  }
+
+  .profile-stats {
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    min-width: calc(50% - 0.5rem);
+  }
+
+  /* Detail */
+  .detail {
+    grid-template-columns: 1fr;
+  }
+
+  /* Search / Lists / Recommendations */
+  .search-container,
+  .lists-container,
+  .rec-container {
+    padding: 2rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-content h1 {
+    font-size: 2.8rem;
+  }
+
+  .hero-cards {
+    gap: 0.5rem;
+  }
+
+  .card {
+    width: 110px;
+  }
+
+  .card-featured {
+    width: 130px;
+  }
 }

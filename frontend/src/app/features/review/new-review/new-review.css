@@ -151,3 +151,43 @@ form {
   border-radius: var(--radius);
   border: 1px solid rgba(46, 204, 113, 0.3);
 }
+
+.review-content-info {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.review-poster {
+  width: 70px;
+  height: 105px;
+  object-fit: cover;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.review-content-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.review-content-tipo {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+
+.review-content-titulo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.8rem;
+  color: var(--text);
+  line-height: 1;
+}
