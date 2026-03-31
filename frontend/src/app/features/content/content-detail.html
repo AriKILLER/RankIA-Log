@@ -14,19 +14,39 @@
       </div>
 
       <div class="info">
-        <h1>{{ titulo }}</h1>
-        <p class="meta">
-          {{ tipo === 'pelicula' ? 'Película' : 'Serie' }}
+        <p class="meta-tipo">
+          {{ tipo === 'pelicula' ? '🎬 Película' : '📺 Serie' }}
           @if (fecha) {
             · {{ fecha.slice(0, 4) }}
           }
+          @if (duracion) {
+            · {{ duracion }} min
+          }
+          @if (numeroTemporadas) {
+            · {{ numeroTemporadas }} temporadas
+          }
         </p>
+
+        <h1>{{ titulo }}</h1>
+
+        @if (popularidad) {
+          <div class="popularidad">
+            <span class="pop-label">Valoración</span>
+            <span class="pop-value">{{ popularidad | number: '1.1-1' }} / 10</span>
+          </div>
+        }
 
         <p class="synopsis">{{ sinopsis || 'Sin sinopsis disponible.' }}</p>
 
         <div class="actions">
-          <button class="btn-primary" type="button" (click)="resenar()">Reseñar</button>
-          <a class="btn-secondary" routerLink="/search">Volver a buscar</a>
+          <button class="btn-primary" type="button" (click)="resenar()">✍️ Reseñar</button>
+          <button class="btn-list" type="button" (click)="toggleLista('viendo')">
+            {{ enLista === 'viendo' ? '✅ Viendo' : '👀 Viendo' }}
+          </button>
+          <button class="btn-list" type="button" (click)="toggleLista('pendientes')">
+            {{ enLista === 'pendientes' ? '✅ Pendiente' : '⏳ Pendiente' }}
+          </button>
+          <a class="btn-secondary" routerLink="/search">← Volver al catálogo</a>
         </div>
       </div>
     </div>

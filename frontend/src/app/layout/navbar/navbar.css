@@ -132,7 +132,9 @@
   width: 100%;
   text-align: left;
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
   font-family: 'DM Sans', sans-serif;
 }
 
@@ -146,4 +148,112 @@
   height: 1px;
   background: var(--border);
   margin: 0.25rem 0;
+}
+
+.navbar-auth {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.btn-login {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transition: color 0.2s ease;
+}
+
+.btn-login:hover {
+  color: var(--text);
+}
+
+.btn-register {
+  background: var(--accent);
+  color: white;
+  border-radius: var(--radius);
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transition: background 0.2s ease;
+}
+
+.btn-register:hover {
+  background: #c1121f;
+}
+
+.navbar-mobile-btn {
+  display: none;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 0.4rem 0.75rem;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.navbar-mobile-menu {
+  position: absolute;
+  top: 64px;
+  left: 0;
+  right: 0;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  z-index: 200;
+}
+
+.navbar-mobile-menu a,
+.navbar-mobile-menu button {
+  padding: 1rem 1.5rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  text-align: left;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.navbar-mobile-menu a:hover,
+.navbar-mobile-menu button:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+}
+
+.mobile-logout {
+  color: var(--accent) !important;
+}
+
+@media (max-width: 768px) {
+  .navbar-links {
+    display: none;
+  }
+
+  .navbar-auth {
+    display: none;
+  }
+
+  .navbar-username {
+    display: none;
+  }
+
+  .navbar-user {
+    display: none;
+  }
+
+  .navbar-mobile-btn {
+    display: block;
+  }
 }

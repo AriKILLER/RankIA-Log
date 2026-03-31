@@ -64,6 +64,7 @@
     transform 0.1s ease;
   display: inline-block;
   white-space: nowrap;
+  cursor: pointer;
 }
 
 .btn-primary:hover {
@@ -131,7 +132,6 @@
 .profile-section h2 {
   font-size: 1.8rem;
   color: var(--text);
-  margin-bottom: 1.5rem;
 }
 
 .profile-section h2 span {
@@ -163,8 +163,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
   color: var(--text-muted);
+  text-align: center;
 }
 
 .empty-state span {
@@ -172,5 +173,66 @@
 }
 
 .empty-state p {
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.empty-state small {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.lists-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.list-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.5rem;
+  transition: border-color 0.2s ease;
+  cursor: pointer;
+}
+
+.list-item:hover {
+  border-color: var(--accent);
+}
+
+.list-icon {
+  font-size: 1.25rem;
+}
+
+.list-name {
+  flex: 1;
   font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.list-count {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.5rem;
+  color: var(--accent);
+  line-height: 1;
+}
+
+@media (max-width: 640px) {
+  .profile-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .profile-stats {
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    min-width: calc(50% - 0.5rem);
+  }
 }

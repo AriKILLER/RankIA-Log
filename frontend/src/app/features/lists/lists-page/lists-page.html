@@ -1,5 +1,4 @@
 <div class="lists-container">
-
   <header class="lists-header">
     <div>
       <h1>MIS <span>LISTAS</span></h1>
@@ -24,42 +23,51 @@
   </section>
 
   <section class="list-content">
-
     <div class="list-head">
       <h2>
-        @if (activeTab === 'viendo') { VIEND<span>O</span> }
-        @if (activeTab === 'pendientes') { PENDIENT<span>ES</span> }
-        @if (activeTab === 'completadas') { COMPLETAD<span>AS</span> }
+        @if (activeTab === 'viendo') {
+          VIEND<span>O</span>
+        }
+        @if (activeTab === 'pendientes') {
+          PENDIENT<span>ES</span>
+        }
+        @if (activeTab === 'completadas') {
+          COMPLETAD<span>AS</span>
+        }
       </h2>
       <span class="list-meta">{{ currentItems.length }} items</span>
     </div>
 
-    @if (currentItems.length === 0) {
+    @if (loading) {
+      <div class="loading-state">Cargando lista...</div>
+    } @else if (currentItems.length === 0) {
       <div class="empty-state">
-        <span>📭</span>
+        <span>📋</span>
         <p>No hay contenido en esta lista todavía.</p>
-        <small>Ve a Buscar para añadir algo.</small>
+        <small>Ve al catálogo para añadir algo.</small>
       </div>
     } @else {
       <div class="grid">
-        @for (item of currentItems; track item.title) {
+        @for (item of currentItems; track item.externalId) {
           <article class="content-card">
-            <div class="poster"></div>
-
+            <div class="poster" (click)="irADetalle(item)" style="cursor: pointer">
+              @if (item.posterUrl) {
+                <img [src]="item.posterUrl" [alt]="item.titulo" />
+              } @else {
+                <div class="poster-placeholder"></div>
+              }
+            </div>
             <div class="card-body">
               <div class="title-row">
-                <h3>{{ item.title }}</h3>
-                <span class="year">{{ item.year ?? '' }}</span>
+                <h3>{{ item.titulo }}</h3>
+                <span class="year">{{ item.fecha?.slice(0, 4) ?? '' }}</span>
               </div>
-
-              @if (item.rating) {
-                <div class="rating">{{ item.rating }}</div>
-              } @else {
-                <div class="rating muted">Sin valoración</div>
-              }
-
+              <span class="tipo-badge">
+                {{ item.tipo === 'pelicula' ? '🎬 Película' : '📺 Serie' }}
+              </span>
               <div class="card-actions">
-                <button class="btn-ghost" type="button">Mover</button>
+                <button class="btn-ghost" type="button" (click)="irADetalle(item)">Ver</button>
+                <button class="btn-ghost" type="button" (click)="resenar(item)">Reseñar</button>
                 <button class="btn-ghost" type="button">Quitar</button>
               </div>
             </div>
@@ -67,7 +75,5 @@
         }
       </div>
     }
-
   </section>
-
 </div>

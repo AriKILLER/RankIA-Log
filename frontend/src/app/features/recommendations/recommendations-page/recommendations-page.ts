@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { ContenidoService, CatalogoItemUI } from '../../../core/services/contenido';
 
 @Component({
   selector: 'app-recommendations-page',
@@ -8,24 +10,42 @@ import { Component } from '@angular/core';
   styleUrl: './recommendations-page.css',
 })
 export class RecommendationsPage {
-  // demo: “reglas” que explicarían por qué se recomienda algo
-  rules = [
-    { title: 'Tipo preferido', value: 'Películas', icon: '🎬' },
-    { title: 'Duración', value: 'Media', icon: '⏱️' },
-    { title: 'Popularidad', value: 'Popular', icon: '🔥' },
-  ];
+  private contenido = inject(ContenidoService);
+  private router = inject(Router);
 
-  // demo: recomendaciones fake (para maquetación)
-  recommendations = [
-    { title: 'Interstellar', year: '2014', reason: 'Sci-fi popular con alta valoración', rating: '★★★★★' },
-    { title: 'Dune', year: '2021', reason: 'Épica moderna, similar a tus gustos', rating: '★★★★☆' },
-    { title: 'Breaking Bad', year: '2008', reason: 'Top series por comunidad', rating: '★★★★★' },
-    { title: 'Attack on Titan', year: '2013', reason: 'Anime muy recomendado', rating: '★★★★★' },
-    { title: 'The Witcher', year: '2019', reason: 'Fantasía popular', rating: '★★★★☆' },
-    { title: 'Harry Potter', year: '1997', reason: 'Clásico muy valorado', rating: '★★★★☆' },
-  ];
+  catalogo: CatalogoItemUI[] = [];
+  loading = false;
+  error = '';
 
-  refresh(): void {
-    // demo: aquí iría la lógica real (backend/reglas)
+  ngOnInit(): void {
+    this.cargar();
+  }
+
+  cargar(): void {
+    this.loading = true;
+    this.error = '';
+
+    this.contenido.obtenerCatalogoTmdb('ambos').subscribe({
+      next: (items) => {
+        // Mezclamos y cogemos solo 6
+        const mezclado = items.sort(() => Math.random() - 0.5);
+        this.catalogo = mezclado.slice(0, 6);
+        this.loading = false;
+      },
+      error: () => {
+        this.error = 'Error al cargar sugerencias';
+        this.loading = false;
+      },
+    });
+  }
+
+  irADetalle(item: CatalogoItemUI): void {
+    this.router.navigate(['/content', item.tipo, item.externalId]);
+  }
+
+  resenar(item: CatalogoItemUI): void {
+    this.router.navigate(['/review/new'], {
+      queryParams: { tipo: item.tipo, id: item.externalId },
+    });
   }
 }

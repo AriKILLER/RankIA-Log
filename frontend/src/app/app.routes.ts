@@ -8,6 +8,7 @@ import { RecommendationsPage } from './features/recommendations/recommendations-
 
 export const routes: Routes = [
   // Rutas públicas
+  { path: '', component: HomePage },
   {
     path: 'login',
     loadComponent: () => import('./features/auth/login/login').then((m) => m.Login),
@@ -21,10 +22,12 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/auth/preferences/preferences').then((m) => m.Preferences),
   },
+  {
+    path: 'content/:tipo/:id',
+    loadComponent: () => import('./features/content/content-detail').then((m) => m.ContentDetail),
+  },
 
   // Rutas protegidas
-  { path: '', component: HomePage },
-  { path: 'content/:tipo/:id', loadComponent: () => import('./features/content/content-detail').then(m => m.ContentDetail) },
   { path: 'search', canActivate: [authGuard], component: SearchPage },
   { path: 'profile', canActivate: [authGuard], component: ProfilePage },
   { path: 'lists', canActivate: [authGuard], component: ListsPage },
@@ -33,5 +36,9 @@ export const routes: Routes = [
     path: 'review/new',
     canActivate: [authGuard],
     loadComponent: () => import('./features/review/new-review/new-review').then((m) => m.NewReview),
+  },
+  {
+    path: '**',
+    loadComponent: () => import('./features/not-found/not-found').then((m) => m.NotFound),
   },
 ];

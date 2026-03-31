@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs';
+import { ContenidoService } from '../../../core/services/contenido';
 
 @Component({
   selector: 'app-new-review',
@@ -12,33 +13,63 @@ import { map } from 'rxjs';
   styleUrl: './new-review.css',
 })
 export class NewReview {
-  private fb     = inject(FormBuilder);
+  private fb = inject(FormBuilder);
   private router = inject(Router);
-  private route  = inject(ActivatedRoute);
-  private http   = inject(HttpClient);
+  private route = inject(ActivatedRoute);
+  private http = inject(HttpClient);
+  private contenido = inject(ContenidoService);
 
   private readonly API_URL = '/api';
 
-  // Params que vienen desde el detalle
   tipo: string = '';
   externalId: string = '';
 
+  // Datos del contenido a reseñar
+  titulo: string = '';
+  posterUrl: string | null = null;
+  loadingDetalle = false;
+
   stars = [1, 2, 3, 4, 5];
   selectedStars = 0;
-  hoveredStars  = 0;
+  hoveredStars = 0;
 
   form = this.fb.group({
-    puntuacion: [0,  Validators.min(1)],
+    puntuacion: [0, Validators.min(1)],
     comentario: ['', Validators.required],
   });
 
   loading = false;
-  error   = '';
+  error = '';
   success = false;
 
   constructor() {
-    this.tipo       = this.route.snapshot.queryParamMap.get('tipo') ?? '';
-    this.externalId = this.route.snapshot.queryParamMap.get('id')   ?? '';
+    this.tipo = this.route.snapshot.queryParamMap.get('tipo') ?? '';
+    this.externalId = this.route.snapshot.queryParamMap.get('id') ?? '';
+
+    if (this.externalId && this.tipo) {
+      this.cargarDetalle();
+    }
+  }
+
+  private cargarDetalle(): void {
+    this.loadingDetalle = true;
+
+    const fd = new FormData();
+    fd.append('action', 'obtenerDetalleTmdb');
+    fd.append('tmdbId', this.externalId);
+    fd.append('tipo', this.tipo);
+
+    this.contenido.postParsed(fd).subscribe({
+      next: (res: any) => {
+        const d = res?.contenido ?? res?.detalle ?? res;
+        this.titulo = d?.titulo ?? d?.title ?? d?.name ?? '';
+        this.posterUrl = this.contenido.toPosterUrl(d?.poster ?? d?.poster_path ?? null);
+        this.loadingDetalle = false;
+      },
+      error: () => {
+        this.loadingDetalle = false;
+      },
+    });
   }
 
   private postParsed(formData: FormData) {
@@ -46,12 +77,12 @@ export class NewReview {
       map((text: string) => {
         const cleaned = (text ?? '').replace(/^\uFEFF/, '').trim();
         const first = cleaned.indexOf('{');
-        const last  = cleaned.lastIndexOf('}');
+        const last = cleaned.lastIndexOf('}');
         if (first === -1 || last === -1 || last <= first) {
           throw new Error('Respuesta sin JSON válido.');
         }
         return JSON.parse(cleaned.slice(first, last + 1));
-      })
+      }),
     );
   }
 
@@ -63,7 +94,6 @@ export class NewReview {
   hoverStars(n: number): void {
     this.hoveredStars = n;
   }
-
   resetHover(): void {
     this.hoveredStars = 0;
   }
@@ -80,31 +110,33 @@ export class NewReview {
     }
 
     this.loading = true;
-    this.error   = '';
+    this.error = '';
 
     const fd = new FormData();
-    fd.append('action',      'crearResena');
+    fd.append('action', 'crearResena');
     fd.append('external_id', this.externalId);
-    fd.append('tipo',        this.tipo);
-    fd.append('puntuacion',  String(this.selectedStars));
-    fd.append('comentario',  this.form.value.comentario!);
+    fd.append('tipo', this.tipo);
+    fd.append('puntuacion', String(this.selectedStars));
+    fd.append('comentario', this.form.value.comentario!);
 
     this.postParsed(fd).subscribe({
-      next: res => {
+      next: (res) => {
         if (res.success) {
           this.success = true;
           setTimeout(() => this.router.navigate(['/profile']), 1500);
         } else {
-          this.error   = res.message ?? 'Error al publicar la reseña';
+          this.error = res.message ?? 'Error al publicar la reseña';
           this.loading = false;
         }
       },
       error: () => {
-        this.error   = 'Error al conectar con el servidor';
+        this.error = 'Error al conectar con el servidor';
         this.loading = false;
-      }
+      },
     });
   }
 
-  get comentario() { return this.form.get('comentario')!; }
+  get comentario() {
+    return this.form.get('comentario')!;
+  }
 }

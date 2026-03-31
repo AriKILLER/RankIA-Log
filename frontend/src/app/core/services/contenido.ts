@@ -35,18 +35,18 @@ export class ContenidoService {
   }
 
   /** POST que devuelve texto, recorta JSON y lo parsea (por si hay warnings/BOM) */
-  private postParsed(formData: FormData): Observable<any> {
+  postParsed(formData: FormData): Observable<any> {
     return this.http.post(this.API_URL, formData, { responseType: 'text' }).pipe(
       map((text: string) => {
         const cleaned = (text ?? '').replace(/^\uFEFF/, '').trim();
         const first = cleaned.indexOf('{');
-        const last  = cleaned.lastIndexOf('}');
+        const last = cleaned.lastIndexOf('}');
         if (first === -1 || last === -1 || last <= first) {
           throw new Error('Respuesta sin JSON válido (no se encontró objeto JSON).');
         }
         const jsonStr = cleaned.slice(first, last + 1);
         return JSON.parse(jsonStr);
-      })
+      }),
     );
   }
 
@@ -64,10 +64,8 @@ export class ContenidoService {
         const raw = res?.catalogo ?? [];
         if (!Array.isArray(raw)) return [];
 
-        return raw
-          .map((it: any) => this.mapCatalogoToUI(it))
-          .filter(Boolean) as CatalogoItemUI[];
-      })
+        return raw.map((it: any) => this.mapCatalogoToUI(it)).filter(Boolean) as CatalogoItemUI[];
+      }),
     );
   }
 
