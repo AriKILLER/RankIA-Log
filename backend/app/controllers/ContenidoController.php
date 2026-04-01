@@ -12,8 +12,8 @@ class ContenidoController{
         return $this->contenidoModel->obtenerDetalleTmdb($tmdbId, $tipo);
     }
 
-    public function buscarContenidoTmdb(string $texto, int $pagina = 1): array{
-        return $this->contenidoModel->buscarContenidoTmdb($texto, $pagina);
+    public function buscarContenidoTmdb(string $texto, string $tipo = 'ambos', int $pagina = 1, int $limite = 100): array{
+        return $this->contenidoModel->buscarContenidoTmdb($texto, $tipo, $pagina, $limite);
     }
 
     public function guardarDetalleEnBd(int $external_id, string $titulo, string $tipo, string $sinopsis, string $poster, 
@@ -26,7 +26,7 @@ class ContenidoController{
         return $this->contenidoModel->obtenerDetalleDeBd($external_id, $tipo);
     }
 
-    public function obtenerCatalogoTmdb(string $tipo = 'ambos', int $pagina = 1): array{
-        return $this->contenidoModel->obtenerCatalogoTmdb($tipo, $pagina);
+    public function obtenerCatalogoTmdb(string $tipo = 'ambos', int $pagina = 1, int $limite = 120, string $query = ''): array{
+        return $this->contenidoModel->obtenerCatalogoTmdb($tipo, $pagina, $limite, $query);
     }
 }
