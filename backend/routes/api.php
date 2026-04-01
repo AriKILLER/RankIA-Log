@@ -152,7 +152,27 @@ if($method === 'POST' && $action === 'obtenerCatalogoTmdb'){
     try{
         $tipo = $_POST['tipo'] ?? 'ambos';
         $pagina = (int)($_POST['pagina'] ?? 1);
-        $catalogo = $contenidoController->obtenerCatalogoTmdb($tipo, $pagina);
+        $limite = (int)($_POST['limite'] ?? 120);
+        $query = trim($_POST['query'] ?? '');
+        $catalogo = $contenidoController->obtenerCatalogoTmdb($tipo, $pagina, $limite, $query);
+        echo json_encode(['success' => true, 'catalogo' => $catalogo]);
+    }catch (Exception $e){
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+if($method === 'POST' && $action === 'buscarContenidoTmdb'){
+    try{
+        $texto = trim($_POST['texto'] ?? '');
+        $tipo = $_POST['tipo'] ?? 'ambos';
+        $pagina = (int)($_POST['pagina'] ?? 1);
+        $limite = (int)($_POST['limite'] ?? 100);
+
+        if($texto === ''){
+            throw new Exception("El texto de busqueda es obligatorio.");
+        }
+
+        $catalogo = $contenidoController->buscarContenidoTmdb($texto, $tipo, $pagina, $limite);
         echo json_encode(['success' => true, 'catalogo' => $catalogo]);
     }catch (Exception $e){
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);

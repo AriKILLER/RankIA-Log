@@ -73,23 +73,80 @@ class TmdbService{
         ];
     }
 
-    public function obtenerCatalogoTmdb(string $tipo = 'ambos', int $pagina = 1): array{
+    public function buscarContenidoTmdb(string $texto, string $tipo = 'ambos', int $pagina = 1, int $limite = 100): array{
+        $texto = trim($texto);
+        if ($texto === '') {
+            return [];
+        }
+
+        $pagina = max(1, $pagina);
+        $limite = max(1, min($limite, 200));
+        $paginasNecesarias = (int)ceil($limite / 20);
+
         $catalogo = [];
-        if($tipo === 'pelicula' || $tipo === 'ambos'){
-            $peliculas = $this->obtenerDatos($this->url . "movie/popular?page={$pagina}&language={$this->idioma}");
-            foreach($peliculas['results'] ?? [] as $pelicula){
-                $catalogo[] = $this->normalizar($pelicula, 'pelicula');
+        for ($i = 0; $i < $paginasNecesarias; $i++) {
+            $paginaActual = $pagina + $i;
+            $resultados = $this->buscarMulti($texto, $paginaActual);
+            $items = $resultados['results'] ?? [];
+            if (empty($items)) {
+                break;
+            }
+
+            foreach ($items as $item) {
+                $mediaType = $item['media_type'] ?? '';
+                $tipoItem = '';
+                if ($mediaType === 'movie') {
+                    $tipoItem = 'pelicula';
+                } elseif ($mediaType === 'tv') {
+                    $tipoItem = 'serie';
+                } else {
+                    continue;
+                }
+
+                if ($tipo !== 'ambos' && $tipoItem !== $tipo) {
+                    continue;
+                }
+
+                $catalogo[] = $this->normalizar($item, $tipoItem);
             }
         }
-        if($tipo === 'serie' || $tipo === 'ambos'){
-            $series = $this->obtenerDatos($this->url . "tv/popular?page={$pagina}&language={$this->idioma}");
-            foreach($series['results'] ?? [] as $serie){
-                $catalogo[] = $this->normalizar($serie, 'serie');
+
+        usort($catalogo, fn($a, $b) => $b['popularity'] <=> $a['popularity']);
+        return array_slice($catalogo, 0, $limite);
+    }
+
+    public function obtenerCatalogoTmdb(string $tipo = 'ambos', int $pagina = 1, int $limite = 120, string $query = ''): array{
+        $query = trim($query);
+        if ($query !== '') {
+            return $this->buscarContenidoTmdb($query, $tipo, $pagina, $limite);
+        }
+
+        $pagina = max(1, $pagina);
+        $limite = max(1, min($limite, 200));
+        $itemsPorPagina = $tipo === 'ambos' ? 40 : 20;
+        $paginasNecesarias = (int)ceil($limite / $itemsPorPagina);
+
+        $catalogo = [];
+        for ($i = 0; $i < $paginasNecesarias; $i++) {
+            $paginaActual = $pagina + $i;
+
+            if($tipo === 'pelicula' || $tipo === 'ambos'){
+                $peliculas = $this->obtenerDatos($this->url . "movie/popular?page={$paginaActual}&language={$this->idioma}");
+                foreach($peliculas['results'] ?? [] as $pelicula){
+                    $catalogo[] = $this->normalizar($pelicula, 'pelicula');
+                }
+            }
+
+            if($tipo === 'serie' || $tipo === 'ambos'){
+                $series = $this->obtenerDatos($this->url . "tv/popular?page={$paginaActual}&language={$this->idioma}");
+                foreach($series['results'] ?? [] as $serie){
+                    $catalogo[] = $this->normalizar($serie, 'serie');
+                }
             }
         }
         
         usort($catalogo, fn($a, $b) => $b['popularity'] <=> $a['popularity']);
-        return $catalogo;
+        return array_slice($catalogo, 0, $limite);
     }
 }
 ?>

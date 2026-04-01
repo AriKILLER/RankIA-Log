@@ -21,8 +21,8 @@ class Contenido extends Model{
         }
     }
 
-    public function buscarContenidoTmdb(string $texto, int $pagina = 1): array{
-        return $this->tmdbService->buscarMulti($texto, $pagina);
+    public function buscarContenidoTmdb(string $texto, string $tipo = 'ambos', int $pagina = 1, int $limite = 100): array{
+        return $this->tmdbService->buscarContenidoTmdb($texto, $tipo, $pagina, $limite);
     }
 
     public function guardarDetalleEnBd(int $external_id, string $titulo, string $tipo, string $sinopsis, string $poster, 
@@ -124,8 +124,8 @@ class Contenido extends Model{
         return $tmdb;
     }
 
-    public function obtenerCatalogoTmdb(string $tipo = 'ambos', int $pagina = 1): array{
-        return $this->tmdbService->obtenerCatalogoTmdb($tipo, $pagina);
+    public function obtenerCatalogoTmdb(string $tipo = 'ambos', int $pagina = 1, int $limite = 120, string $query = ''): array{
+        return $this->tmdbService->obtenerCatalogoTmdb($tipo, $pagina, $limite, $query);
     }
     
 }
