@@ -1,6 +1,6 @@
 <div class="detail-container">
   @if (loading) {
-    <div class="state">Cargando detalle...</div>
+    <app-loading mensaje="Cargando detalle..."></app-loading>
   } @else if (error) {
     <div class="state error">{{ error }}</div>
   } @else {

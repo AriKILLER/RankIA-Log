@@ -111,4 +111,26 @@ export class ContenidoService {
 
     return this.postParsed(formData);
   }
+
+  // ---------- BUSCAR TMDB (backend: buscarContenidoTmdb) ----------
+  buscarContenidoTmdb(
+    texto: string,
+    tipo: CatalogoTipo = 'ambos',
+    pagina = 1,
+  ): Observable<CatalogoItemUI[]> {
+    const formData = new FormData();
+    formData.append('action', 'buscarContenidoTmdb');
+    formData.append('texto', texto);
+    formData.append('tipo', tipo);
+    formData.append('pagina', String(pagina));
+
+    return this.postParsed(formData).pipe(
+      map((res: any) => {
+        if (!res?.success) throw new Error(res?.message ?? 'Error del backend');
+        const raw = res?.catalogo ?? [];
+        if (!Array.isArray(raw)) return [];
+        return raw.map((it: any) => this.mapCatalogoToUI(it)).filter(Boolean) as CatalogoItemUI[];
+      }),
+    );
+  }
 }

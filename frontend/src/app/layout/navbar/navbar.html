@@ -22,6 +22,7 @@
           <a routerLink="/profile" (click)="closeMenu()">👤 Mi perfil</a>
           <a routerLink="/review/new" (click)="closeMenu()">✍️ Nueva reseña</a>
           <a routerLink="/lists" (click)="closeMenu()">📋 Mis listas</a>
+          <a routerLink="/settings" (click)="closeMenu()">⚙️ Ajustes</a>
           <div class="dropdown-divider"></div>
           <button (click)="logout()">🚪 Cerrar sesión</button>
         </div>
@@ -47,6 +48,7 @@
         <a routerLink="/profile" (click)="closeMobile()">Mi perfil</a>
         <a routerLink="/review/new" (click)="closeMobile()">Nueva reseña</a>
         <a routerLink="/lists" (click)="closeMobile()">Mis listas</a>
+        <a routerLink="/settings" (click)="closeMobile()">⚙️ Ajustes</a>
         <button class="mobile-logout" (click)="logout()">Cerrar sesión</button>
       } @else {
         <a routerLink="/login" (click)="closeMobile()">Iniciar sesión</a>

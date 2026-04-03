@@ -1,11 +1,12 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { LoadingComponent } from '../../../shared/loading/loading';
 import { ContenidoService, CatalogoItemUI } from '../../../core/services/contenido';
 
 @Component({
   selector: 'app-recommendations-page',
   standalone: true,
-  imports: [],
+  imports: [LoadingComponent],
   templateUrl: './recommendations-page.html',
   styleUrl: './recommendations-page.css',
 })

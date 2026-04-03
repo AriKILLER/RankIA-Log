@@ -3,6 +3,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { DecimalPipe } from '@angular/common';
 import { map } from 'rxjs';
+import { LoadingComponent } from '../../shared/loading/loading';
 import { AuthService } from '../../core/services/auth';
 
 type Tipo = 'pelicula' | 'serie';
@@ -11,7 +12,7 @@ type ListaTab = 'viendo' | 'pendientes' | null;
 @Component({
   selector: 'app-content-detail',
   standalone: true,
-  imports: [RouterLink, DecimalPipe],
+  imports: [RouterLink, DecimalPipe, LoadingComponent],
   templateUrl: './content-detail.html',
   styleUrl: './content-detail.css',
 })

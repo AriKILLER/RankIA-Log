@@ -27,10 +27,7 @@ export class HomePage implements OnInit {
       fd.append('tmdbId', String(p.id));
       fd.append('tipo', p.tipo);
 
-      this.contenido['postParsed'] ? null : null;
-
-      // Usamos HttpClient directamente via contenido
-      (this.contenido as any)['postParsed'](fd).subscribe({
+      this.contenido.postParsed(fd).subscribe({
         next: (res: any) => {
           const d = res?.contenido ?? res?.detalle ?? res;
           const path = d?.poster ?? d?.poster_path ?? null;

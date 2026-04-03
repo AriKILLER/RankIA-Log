@@ -41,7 +41,7 @@
     </div>
 
     @if (loading) {
-      <div class="loading-state">Cargando catálogo...</div>
+      <app-loading mensaje="Cargando catálogo..."></app-loading>
     } @else if (error) {
       <div class="error-state">{{ error }}</div>
     } @else if (catalogo.length === 0) {

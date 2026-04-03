@@ -14,7 +14,7 @@
     </div>
 
     @if (loading) {
-      <div class="loading-state">Cargando sugerencias...</div>
+      <app-loading mensaje="Cargando sugerencias..."></app-loading>
     } @else if (error) {
       <div class="error-state">{{ error }}</div>
     } @else if (catalogo.length === 0) {

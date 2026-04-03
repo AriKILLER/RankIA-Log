@@ -1,0 +1,82 @@
+<div class="settings-container">
+
+  <div class="settings-header">
+    <h1>AJUST<span>ES</span></h1>
+    <p>Gestiona tu cuenta y preferencias</p>
+  </div>
+
+  <div class="settings-section">
+    <h2>PERFIL</h2>
+    <div class="settings-card">
+      <div class="settings-avatar" [style.background]="getAvatarColor(user?.nombre ?? '')">
+        {{ user?.nombre?.charAt(0)?.toUpperCase() ?? '?' }}
+      </div>
+      <div class="settings-info">
+        <span class="settings-nombre">{{ user?.nombre }}</span>
+        <span class="settings-email">{{ user?.email }}</span>
+      </div>
+      <a routerLink="/profile" class="btn-secondary">Ver perfil</a>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <h2>CUENTA</h2>
+    <div class="settings-list">
+      <div class="settings-item">
+        <div class="settings-item-info">
+          <span class="settings-item-title">Nombre de usuario</span>
+          <span class="settings-item-value">{{ user?.nombre }}</span>
+        </div>
+        <button class="btn-ghost" disabled>Próximamente</button>
+      </div>
+      <div class="settings-item">
+        <div class="settings-item-info">
+          <span class="settings-item-title">Email</span>
+          <span class="settings-item-value">{{ user?.email }}</span>
+        </div>
+        <button class="btn-ghost" disabled>Próximamente</button>
+      </div>
+      <div class="settings-item">
+        <div class="settings-item-info">
+          <span class="settings-item-title">Contraseña</span>
+          <span class="settings-item-value">••••••••</span>
+        </div>
+        <button class="btn-ghost" disabled>Próximamente</button>
+      </div>
+      <div class="settings-item">
+        <div class="settings-item-info">
+          <span class="settings-item-title">Foto de perfil</span>
+          <span class="settings-item-value">Avatar con inicial</span>
+        </div>
+        <button class="btn-ghost" disabled>Próximamente</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <h2>PREFERENCIAS</h2>
+    <div class="settings-list">
+      <div class="settings-item">
+        <div class="settings-item-info">
+          <span class="settings-item-title">Tipo de contenido favorito</span>
+          <span class="settings-item-value">Configurado al registrarse</span>
+        </div>
+        <a routerLink="/preferences" class="btn-ghost">Editar</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-section danger-section">
+    <h2>ZONA DE PELIGRO</h2>
+    <div class="settings-list">
+      <div class="settings-item">
+        <div class="settings-item-info">
+          <span class="settings-item-title">Cerrar sesión</span>
+          <span class="settings-item-value">Salir de tu cuenta actual</span>
+        </div>
+        <button class="btn-danger" (click)="auth.logout()">Cerrar sesión</button>
+      </div>
+    </div>
+  </div>
+
+</div>
