@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { LoadingComponent } from '../../../shared/loading/loading';
 import { ContenidoService, CatalogoItemUI } from '../../../core/services/contenido';
 
 type ListTab = 'viendo' | 'pendientes' | 'completadas';
@@ -16,7 +17,7 @@ interface ListItem {
 @Component({
   selector: 'app-lists-page',
   standalone: true,
-  imports: [],
+  imports: [LoadingComponent],
   templateUrl: './lists-page.html',
   styleUrl: './lists-page.css',
 })

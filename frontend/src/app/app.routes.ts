@@ -38,6 +38,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/review/new-review/new-review').then((m) => m.NewReview),
   },
   {
+    path: 'settings',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/settings/settings').then((m) => m.Settings),
+  },
+  {
     path: '**',
     loadComponent: () => import('./features/not-found/not-found').then((m) => m.NotFound),
   },

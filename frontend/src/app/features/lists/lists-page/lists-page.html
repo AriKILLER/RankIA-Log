@@ -39,7 +39,7 @@
     </div>
 
     @if (loading) {
-      <div class="loading-state">Cargando lista...</div>
+      <app-loading mensaje="Cargando lista..."></app-loading>
     } @else if (currentItems.length === 0) {
       <div class="empty-state">
         <span>📋</span>

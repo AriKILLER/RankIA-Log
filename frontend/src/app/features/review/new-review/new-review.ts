@@ -2,13 +2,14 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 import { map } from 'rxjs';
-import { ContenidoService } from '../../../core/services/contenido';
+import { ContenidoService, CatalogoItemUI } from '../../../core/services/contenido';
 
 @Component({
   selector: 'app-new-review',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, FormsModule],
   templateUrl: './new-review.html',
   styleUrl: './new-review.css',
 })
@@ -24,10 +25,14 @@ export class NewReview {
   tipo: string = '';
   externalId: string = '';
 
-  // Datos del contenido a reseñar
   titulo: string = '';
   posterUrl: string | null = null;
   loadingDetalle = false;
+
+  // Búsqueda
+  busqueda = '';
+  resultadosBusqueda: CatalogoItemUI[] = [];
+  loadingBusqueda = false;
 
   stars = [1, 2, 3, 4, 5];
   selectedStars = 0;
@@ -70,6 +75,43 @@ export class NewReview {
         this.loadingDetalle = false;
       },
     });
+  }
+
+  buscar(): void {
+    const q = this.busqueda.trim();
+    if (!q) return;
+
+    this.loadingBusqueda = true;
+    this.resultadosBusqueda = [];
+
+    this.contenido.buscarContenidoTmdb(q).subscribe({
+      next: (items) => {
+        this.resultadosBusqueda = items.slice(0, 8);
+        this.loadingBusqueda = false;
+      },
+      error: () => {
+        this.loadingBusqueda = false;
+      },
+    });
+  }
+
+  seleccionarContenido(item: CatalogoItemUI): void {
+    this.externalId = String(item.externalId);
+    this.tipo = item.tipo;
+    this.titulo = item.titulo;
+    this.posterUrl = item.posterUrl;
+    this.resultadosBusqueda = [];
+    this.busqueda = '';
+  }
+
+  limpiarSeleccion(): void {
+    this.externalId = '';
+    this.tipo = '';
+    this.titulo = '';
+    this.posterUrl = null;
+    this.form.reset();
+    this.selectedStars = 0;
+    this.error = '';
   }
 
   private postParsed(formData: FormData) {

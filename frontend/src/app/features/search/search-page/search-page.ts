@@ -1,33 +1,32 @@
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { LoadingComponent } from '../../../shared/loading/loading';
 import { ContenidoService, CatalogoItemUI, CatalogoTipo } from '../../../core/services/contenido';
 
 @Component({
   selector: 'app-search-page',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, LoadingComponent],
   templateUrl: './search-page.html',
   styleUrl: './search-page.css',
 })
 export class SearchPage {
   private contenido = inject(ContenidoService);
-  private router    = inject(Router);
+  private router = inject(Router);
 
   query = '';
 
   filtros: { key: CatalogoTipo; label: string }[] = [
-    { key: 'ambos',    label: '🎭 Ambos' },
+    { key: 'ambos', label: '🎭 Ambos' },
     { key: 'pelicula', label: '🎬 Películas' },
-    { key: 'serie',    label: '📺 Series' },
+    { key: 'serie', label: '📺 Series' },
   ];
 
   selectedFiltro: CatalogoTipo = 'ambos';
-
-  catalogo: CatalogoItemUI[]     = [];
-  catalogoFull: CatalogoItemUI[] = [];
+  catalogo: CatalogoItemUI[] = [];
   loading = false;
-  error   = '';
+  error = '';
 
   ngOnInit(): void {
     this.cargarCatalogo();
@@ -35,36 +34,63 @@ export class SearchPage {
 
   cargarCatalogo(): void {
     this.loading = true;
-    this.error   = '';
-    this.query   = '';
+    this.error = '';
+    this.query = '';
 
     this.contenido.obtenerCatalogoTmdb(this.selectedFiltro).subscribe({
-      next: items => {
-        this.catalogoFull = items;
-        this.catalogo     = items;
-        this.loading      = false;
+      next: (items) => {
+        this.catalogo = items;
+        this.loading = false;
       },
       error: () => {
-        this.error   = 'Error al cargar el catálogo';
+        this.error = 'Error al cargar el catálogo';
         this.loading = false;
-      }
+      },
     });
   }
 
   selectFiltro(filtro: CatalogoTipo): void {
     this.selectedFiltro = filtro;
-    this.cargarCatalogo();
+    if (this.query.trim()) {
+      this.buscar();
+    } else {
+      this.cargarCatalogo();
+    }
   }
 
+  private searchTimeout: any = null;
+
   onSearch(): void {
-    this.query = this.query.trim();
-    if (!this.query) {
-      this.catalogo = this.catalogoFull;
+    const q = this.query.trim();
+
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
+
+    if (!q) {
+      this.cargarCatalogo();
       return;
     }
-    this.catalogo = this.catalogoFull.filter(item =>
-      item.titulo.toLowerCase().includes(this.query.toLowerCase())
-    );
+
+    this.searchTimeout = setTimeout(() => {
+      this.buscar();
+    }, 500);
+  }
+
+  private buscar(): void {
+    this.loading = true;
+    this.error = '';
+
+    this.contenido.buscarContenidoTmdb(this.query.trim(), this.selectedFiltro).subscribe({
+      next: (items) => {
+        this.catalogo = items;
+        this.loading = false;
+      },
+      error: () => {
+        this.error = 'Error al buscar contenido';
+        this.loading = false;
+      },
+    });
   }
 
   irADetalle(item: CatalogoItemUI): void {

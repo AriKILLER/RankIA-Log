@@ -19,4 +19,5 @@ export interface User {
   nombre: string;
   email: string;
   avatar?: string;
+  fecha_registro?: string;
 }
