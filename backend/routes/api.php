@@ -4,6 +4,7 @@ require_once __DIR__ . '/../app/controllers/AutenticacionController.php';
 require_once __DIR__ . '/../app/controllers/PreferenciaController.php';
 require_once __DIR__ . '/../app/controllers/ContenidoController.php';
 require_once __DIR__ . '/../app/middleware/Autenticacion.php';
+require_once __DIR__ . '/../app/controllers/ResenaController.php';
 
 if(session_status() === PHP_SESSION_NONE){
     session_start();
@@ -13,6 +14,7 @@ $autenticacion = new Autenticacion();
 $autenticacionController = new AutenticacionController();
 $preferenciaController = new PreferenciaController();
 $contenidoController = new ContenidoController();
+$resenaController = new ResenaController();
 header('Content-Type: application/json');
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -210,6 +212,123 @@ if($method === 'POST' && $action === 'obtenerDetalleDeBd'){
         $detalle = $contenidoController->obtenerDetalleDeBd($external_id, $tipo);
 
         echo json_encode(['success' => true, 'message' => 'Detalle obtenido de BD exitosamente', 'detalle' => $detalle]);
+    }catch (Exception $e){
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+if($method === 'POST' && $action === 'crearResena'){
+    try{
+        $autenticacion->verificarSesion();
+
+        $usuario_id = $_SESSION['usuario_id'];
+        $contenido_id = (int)$_POST['contenido_id'];
+        $puntuacion = (int)$_POST['puntuacion'];
+        $comentario = trim($_POST['comentario'] ?? '');
+        $fecha_creacion = new DateTime();
+        if(empty($contenido_id) || empty($puntuacion)){
+            throw new Exception("La puntuacion y el contenido son obligatorios para crear una reseña");
+        }
+        if($puntuacion < 1 || $puntuacion > 5){                                                                                                                          
+            throw new Exception("La puntuación debe estar entre 1 y 5");
+        }
+        $resenaController->crearResena($usuario_id, $contenido_id, $puntuacion, $comentario, $fecha_creacion);
+        echo json_encode(['success' => true, 'message' => 'Reseña creada exitosamente']);
+    }catch (Exception $e){
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+if($method === 'POST' && $action === 'obtenerTodasResenasDeUsuario'){
+    try{
+        $autenticacion->verificarSesion();
+
+        $usuario_id = (int)$_SESSION['usuario_id'];
+        if(empty($usuario_id)){
+            throw new Exception("No se ha seleccionado usuario para obtener sus reseñas");
+        }
+        $resenas = $resenaController->obtenerTodasResenasDeUsuario($usuario_id);
+        echo json_encode(['success' => true, 'resenas' => $resenas]);
+    }catch (Exception $e){
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+
+if($method === 'POST' && $action === 'obtenerResenasPorPuntuacion'){
+    try{
+        $autenticacion->verificarSesion();
+        
+        $puntuacion = (int)$_POST['puntuacion'];
+        $usuario_id = (int)$_SESSION['usuario_id'];
+        if(empty($usuario_id)){
+            throw new Exception("No se ha seleccionado usuario para obtener sus reseñas");
+        }
+        if($puntuacion < 1 || $puntuacion > 5){                                                                                                                          
+            throw new Exception("La puntuación debe estar entre 1 y 5");
+        }
+        $resenas = $resenaController->obtenerResenasPorPuntuacion($usuario_id, $puntuacion);
+        echo json_encode(['success' => true, 'resenas' => $resenas]);
+    }catch (Exception $e){
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+if($method === 'POST' && $action === 'editarResena'){
+    try{
+        $autenticacion->verificarSesion();
+
+        $id = (int)$_POST['id'];
+        $contenido_id = (int)$_POST['contenido_id'];
+        $puntuacion = (int)$_POST['puntuacion'];
+        $comentario = trim($_POST['comentario'] ?? '');
+        $usuario_id = (int)$_SESSION['usuario_id'];
+        if(empty($contenido_id) || empty($puntuacion)){
+            throw new Exception("La puntuacion y el contenido son obligatorios para editar una reseña");
+        }
+        if($puntuacion < 1 || $puntuacion > 5){                                                                                                                          
+            throw new Exception("La puntuación debe estar entre 1 y 5");
+        }
+        $resenaActualizada = $resenaController->editarResena($id, $usuario_id, $contenido_id, $puntuacion, $comentario);
+        echo json_encode(['success' => true, 'message' => 'Reseña editada exitosamente', 'resena' => $resenaActualizada]);
+    }catch (Exception $e){
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+if($method === 'POST' && $action === 'eliminarResena'){
+    try{
+        $autenticacion->verificarSesion();
+
+        $id = (int)$_POST['id'];
+        $usuario_id = (int)$_SESSION['usuario_id'];
+        if(empty($id)){
+            throw new Exception("No se ha seleccionado una reseña para eliminar");
+        }
+        $eliminada = $resenaController->eliminarResena($id, $usuario_id);
+        if(!$eliminada){
+            throw new Exception("No se pudo eliminar la reseña. Asegúrate de que la reseña exista y te pertenezca.");
+        }
+        echo json_encode(['success' => true, 'message' => 'Reseña eliminada exitosamente']);
+    }catch (Exception $e){
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+if($method === 'POST' && $action === 'ultimasResenasDeUsuario'){
+    try{
+        $autenticacion->verificarSesion();
+
+        $usuario_id = (int)$_SESSION['usuario_id'];
+        $limite = (int)($_POST['limite'] ?? 5);
+        if(empty($usuario_id)){
+            throw new Exception("No se ha seleccionado usuario para obtener sus reseñas");
+        }
+        if($limite < 1 || $limite > 20){
+            throw new Exception("El limite de reseñas a obtener debe estar entre 1 y 20");
+        }
+        $resenas = $resenaController->ultimasResenasDeUsuario($usuario_id, $limite);
+        echo json_encode(['success' => true, 'resenas' => $resenas]);
     }catch (Exception $e){
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
