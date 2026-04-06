@@ -24,7 +24,7 @@ class Database{
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             return $this->conn;
         } catch(PDOException $e) {
-            echo "Ha ocurrido un error: " . $e->getMessage();
+            throw new RuntimeException("Ha ocurrido un error: " . $e->getMessage());
         }
     }
 }
