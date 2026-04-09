@@ -20,7 +20,12 @@ class Database{
 
     public function conexion(){
         try{
-            $this->conn = new PDO("mysql:host=$this->host;dbname=$this->dbname", $this->user, $this->password);
+            $this->conn = new PDO(
+                "mysql:host=$this->host;dbname=$this->dbname;charset=utf8mb4",
+                $this->user,
+                $this->password,
+                [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"]
+            );
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             return $this->conn;
         } catch(PDOException $e) {
