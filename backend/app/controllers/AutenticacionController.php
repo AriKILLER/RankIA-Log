@@ -4,13 +4,16 @@
 // o buscar un usuario por su correo electrónico, lo que permite verificar las credenciales de los usuarios durante el proceso de inicio de sesión.
 require_once __DIR__ . '/../models/Usuario.php';
 require_once __DIR__ . '/../middleware/Autenticacion.php';
+require_once __DIR__ . '/../services/EmailService.php';
 class AutenticacionController{
     private $usuarioModel;
     private $autenticacionMiddleware;
+    private $emailService;
 
     public function __construct(){
         $this->usuarioModel = new Usuario();
         $this->autenticacionMiddleware = new Autenticacion();
+        $this->emailService = new EmailService();
     }
 
     // El método registroUsuario se encarga de registrar un nuevo usuario en el sistema. Verifica si el correo electrónico ya está registrado y, si no lo está, crea un nuevo usuario utilizando la clase Usuario.
@@ -21,6 +24,7 @@ class AutenticacionController{
             $password_hash = password_hash($password, PASSWORD_DEFAULT);
             $usuario_id = (int)$this->usuarioModel->crearUsuario($nombre, $email, $password_hash, $fecha_registro);
             
+            $this->emailService->enviarCorreoVerificacion($email, "Verificación de cuenta en RankIA-Log", "http://localhost:3000/verificar?token=1234567890");
             $this->autenticacionMiddleware->crearSesion($usuario_id, $email);
             
             return $usuario_id;

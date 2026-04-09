@@ -30,7 +30,18 @@ CREATE TABLE preferencias_usuario (
 -- =========================
 CREATE TABLE generos (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(50) NOT NULL UNIQUE
+    nombre VARCHAR(50) NOT NULL UNIQUE,
+    INSERT INTO generos (id, nombre) VALUES
+    (1,'Acción'),
+    (2,'Drama'),
+    (3,'Comedia'),
+    (4,'Terror'),
+    (5,'Thriller'),
+    (6,'Ciencia ficción'),
+    (7,'Fantasía'),
+    (8,'Romance'),
+    (9,'Animación'),
+    (10,'Documental');
 );
 
 -- =========================

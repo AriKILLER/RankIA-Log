@@ -15,7 +15,7 @@ $autenticacionController = new AutenticacionController();
 $preferenciaController = new PreferenciaController();
 $contenidoController = new ContenidoController();
 $resenaController = new ResenaController();
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=UTF-8');
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $action = $_POST['action'] ?? null;
