@@ -216,3 +216,9 @@
     padding: 2rem 1.25rem;
   }
 }
+.razon-texto {
+  font-size: 0.85rem;
+  color: var(--accent);
+  margin-top: 0.4rem;
+  font-style: italic;
+}

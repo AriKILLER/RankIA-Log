@@ -15,13 +15,13 @@
         }}
       </p>
     </div>
-    <a routerLink="/review/new" class="btn-primary">✍️ Nueva reseña</a>
+    <a routerLink="/review/new" class="btn-primary">✏️ Nueva reseña</a>
     <a routerLink="/settings" class="btn-secondary">⚙️ Ajustes</a>
   </div>
 
   <div class="profile-stats">
     <div class="stat">
-      <span class="stat-number">0</span>
+      <span class="stat-number">{{ totalResenas }}</span>
       <span class="stat-label">Reseñas</span>
     </div>
     <div class="stat">
@@ -52,13 +52,51 @@
       <h2>MIS RESEÑ<span>AS</span></h2>
       <a routerLink="/review/new" class="btn-secondary">+ Nueva reseña</a>
     </div>
-    <div class="reviews-grid">
+
+    @if (loadingResenas) {
+      <div class="loading-resenas">Cargando reseñas...</div>
+    } @else if (resenasVisibles.length === 0) {
       <div class="empty-state">
-        <span>✍️</span>
+        <span>✏️</span>
         <p>Aún no has escrito ninguna reseña</p>
         <small>Ve al catálogo, elige una película o serie y reséñala</small>
         <a routerLink="/search" class="btn-primary">Ir al catálogo</a>
       </div>
-    </div>
+    } @else {
+      <div class="reviews-grid">
+        @for (resena of resenasVisibles; track resena.id) {
+          <div class="review-card">
+            <div class="review-poster">
+              @if (toPosterUrl(resena.poster)) {
+                <img [src]="toPosterUrl(resena.poster)" [alt]="resena.titulo" />
+              } @else {
+                <div class="poster-placeholder">🎬</div>
+              }
+            </div>
+            <div class="review-body">
+              <h3 class="review-titulo">{{ resena.titulo }}</h3>
+              <div class="review-estrellas">{{ estrellas(resena.puntuacion) }}</div>
+              @if (resena.comentario) {
+                <p class="review-comentario">{{ resena.comentario }}</p>
+              }
+              <span class="review-fecha">
+                {{ resena.fecha_creacion | date: 'd MMM yyyy' : '' : 'es' }}
+              </span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="ver-mas-container">
+        @if (!mostrarTodas && totalResenas > 5) {
+          <button class="btn-ver-mas" (click)="verTodas()">
+            Ver todas las reseñas ({{ totalResenas }})
+          </button>
+        }
+        @if (mostrarTodas) {
+          <button class="btn-ver-mas" (click)="verMenos()">Ver menos</button>
+        }
+      </div>
+    }
   </div>
 </div>

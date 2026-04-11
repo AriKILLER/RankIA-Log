@@ -9,12 +9,17 @@
 
   <section class="recs">
     <div class="recs-head">
-      <h2>PARA <span>TI</span></h2>
+      <div>
+        <h2>PARA <span>TI</span></h2>
+        @if (razonTexto) {
+          <p class="razon-texto">{{ razonTexto }}</p>
+        }
+      </div>
       <span class="recs-meta">{{ catalogo.length }} sugerencias</span>
     </div>
 
     @if (loading) {
-      <app-loading mensaje="Cargando sugerencias..."></app-loading>
+      <app-loading mensaje="Analizando tus gustos..."></app-loading>
     } @else if (error) {
       <div class="error-state">{{ error }}</div>
     } @else if (catalogo.length === 0) {

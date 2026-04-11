@@ -1,13 +1,11 @@
 <div class="auth-container">
   <div class="auth-box">
-
     <div class="auth-header">
       <h1>INIC<span>IA</span> SESIÓN</h1>
       <p>Bienvenido de nuevo a RankIA Log</p>
     </div>
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
-
       <div class="field">
         <label for="email">Email</label>
         <input id="email" type="email" formControlName="email" placeholder="tu@email.com" />
@@ -28,12 +26,12 @@
       <button class="btn-primary" type="submit" [disabled]="form.invalid || loading">
         {{ loading ? 'Entrando...' : 'Iniciar sesión' }}
       </button>
-
     </form>
 
     <div class="auth-footer">
-      ¿No tienes cuenta? <a routerLink="/register">Regístrate</a>
+      <a routerLink="/forgot-password">¿Olvidaste tu contraseña?</a>
     </div>
 
+    <div class="auth-footer">¿No tienes cuenta? <a routerLink="/register">Regístrate</a></div>
   </div>
 </div>
