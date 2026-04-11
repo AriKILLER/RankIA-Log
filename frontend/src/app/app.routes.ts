@@ -23,6 +23,21 @@ export const routes: Routes = [
       import('./features/auth/preferences/preferences').then((m) => m.Preferences),
   },
   {
+    path: 'forgot-password',
+    loadComponent: () =>
+      import('./features/auth/forgot-password/forgot-password').then((m) => m.ForgotPassword),
+  },
+  {
+    path: 'verify-email',
+    loadComponent: () =>
+      import('./features/auth/verify-email/verify-email').then((m) => m.VerifyEmail),
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () =>
+      import('./features/auth/reset-password/reset-password').then((m) => m.ResetPassword),
+  },
+  {
     path: 'content/:tipo/:id',
     loadComponent: () => import('./features/content/content-detail').then((m) => m.ContentDetail),
   },

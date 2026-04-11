@@ -1,0 +1,28 @@
+<div class="auth-container">
+  <div class="auth-box">
+    @if (loading) {
+      <div class="state-box">
+        <div class="spinner"></div>
+        <p>Verificando tu cuenta...</p>
+      </div>
+    }
+
+    @if (!loading && success) {
+      <div class="state-box">
+        <div class="state-icon success-icon">✔️</div>
+        <h1>¡CUENTA <span>VERIFICADA</span>!</h1>
+        <p>Tu correo ha sido verificado correctamente. Ya puedes disfrutar de RankIA Log.</p>
+        <a class="btn-primary" routerLink="/login">Iniciar sesión</a>
+      </div>
+    }
+
+    @if (!loading && error) {
+      <div class="state-box">
+        <div class="state-icon error-icon">✖️</div>
+        <h1>ENLA<span>CE</span> INVÁLIDO</h1>
+        <p>{{ error }}</p>
+        <a class="btn-primary" routerLink="/login">Volver al inicio</a>
+      </div>
+    }
+  </div>
+</div>
