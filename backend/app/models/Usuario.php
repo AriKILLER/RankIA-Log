@@ -8,15 +8,16 @@ class Usuario extends Model{
     // El método crearUsuario se encarga de insertar un nuevo usuario en la base de datos.
     public function crearUsuario(String $nombre, String $email, String $password_hash, DateTime $fecha_registro){
 
-        $sql = "INSERT INTO usuarios (nombre, email, password_hash, fecha_registro) VALUES 
-        (:nombre, :email, :password_hash, :fecha_registro)";
+        $sql = "INSERT INTO usuarios (nombre, email, password_hash, fecha_registro, email_verificado) VALUES 
+        (:nombre, :email, :password_hash, :fecha_registro, :email_verificado)";
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
             ':nombre' => $nombre,
             ':email' => $email,
             ':password_hash' => $password_hash,
-            ':fecha_registro' => $fecha_registro->format('Y-m-d H:i:s')
+            ':fecha_registro' => $fecha_registro->format('Y-m-d H:i:s'),
+            ':email_verificado' => false
         ]);
 
         return $this->db->lastInsertId();
@@ -40,8 +41,12 @@ class Usuario extends Model{
         return $usuario ?: null;
     }
 
+    public function verificarEmail(int $usuario_id): bool{
+        $sql = "UPDATE usuarios SET email_verificado = TRUE WHERE id = :usuario_id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':usuario_id' => $usuario_id]);
+        return $stmt->rowCount() > 0; // Devuelve true si se actualizó el usuario, lo que indica que se verificó el correo, de lo contrario false
+    }
 
 
 }
-
-?>
