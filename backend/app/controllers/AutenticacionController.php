@@ -5,15 +5,18 @@
 require_once __DIR__ . '/../models/Usuario.php';
 require_once __DIR__ . '/../middleware/Autenticacion.php';
 require_once __DIR__ . '/../services/EmailService.php';
+require_once __DIR__ . '/../models/UsuarioToken.php';
 class AutenticacionController{
     private $usuarioModel;
     private $autenticacionMiddleware;
     private $emailService;
+    private $usuarioTokenModel;
 
     public function __construct(){
         $this->usuarioModel = new Usuario();
         $this->autenticacionMiddleware = new Autenticacion();
         $this->emailService = new EmailService();
+        $this->usuarioTokenModel = new UsuarioToken();
     }
 
     // El método registroUsuario se encarga de registrar un nuevo usuario en el sistema. Verifica si el correo electrónico ya está registrado y, si no lo está, crea un nuevo usuario utilizando la clase Usuario.
@@ -24,7 +27,7 @@ class AutenticacionController{
             $password_hash = password_hash($password, PASSWORD_DEFAULT);
             $usuario_id = (int)$this->usuarioModel->crearUsuario($nombre, $email, $password_hash, $fecha_registro);
             
-            $this->emailService->enviarCorreoVerificacion($email, "Verificación de cuenta en RankIA-Log", "http://localhost:3000/verificar?token=1234567890");
+            $this->emailService->enviarCorreoVerificacion($email, $token = $this->usuarioTokenModel->crearToken($usuario_id, (new DateTime())->modify('+1 day')));
             $this->autenticacionMiddleware->crearSesion($usuario_id, $email);
             
             return $usuario_id;
@@ -61,6 +64,23 @@ class AutenticacionController{
         unset($usuario['password_hash']);
         return $usuario;
     }
-}
 
+    public function verificarCorreo(string $token): void{
+    $usuario_id = $this->usuarioTokenModel->obtenerUsuarioIdPorToken($token);
+
+    if(!$usuario_id){
+        throw new Exception("Token de verificación no válido o expirado.");
+    }
+
+    $verificado = $this->usuarioModel->verificarEmail($usuario_id);
+    if(!$verificado){
+        throw new Exception("No se pudo marcar el correo como verificado.");
+    }
+
+    $usado = $this->usuarioTokenModel->tokenUtilizado($token);
+    if(!$usado){
+        throw new Exception("No se pudo marcar el token como utilizado.");
+    }
+}
+}    
 ?>

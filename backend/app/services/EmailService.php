@@ -3,7 +3,6 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 class EmailService{
-    
     private $phpmailer;
     private $emailConfig;
 
@@ -20,10 +19,11 @@ class EmailService{
         $this->phpmailer->Password = $this->emailConfig['password'];
         $this->phpmailer->setFrom($this->emailConfig['from_email'], $this->emailConfig['from_name']);
         $this->phpmailer->isHTML($this->emailConfig['isHTML']);
-
     }
 // cuando esto este acabado, en registro de usuario si el usuario se registra correctamente se tendra que llamar a este metodo para enviar el correo de verificacion al usuario
-    public function enviarCorreoVerificacion(string $destinatario, string $asunto, string $cuerpo){
+    public function enviarCorreoVerificacion(string $destinatario, string $token){
+      $frontendUrl = $this->emailConfig['frontend_url'];
+      $enlace = $frontendUrl . '/verify-email?token=' . urlencode($token);
         $this->phpmailer->clearAddresses();
         $asunto = "Verificación de cuenta en RankIA-Log";
         $cuerpo = "<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #0d0d0d; padding: 0;\">
@@ -51,7 +51,7 @@ class EmailService{
 
     <!-- boton -->
     <div style=\"text-align: center; padding-bottom: 28px;\">
-      <a href=\"{{enlace_verificacion}}\"
+      <a href=\"$enlace\"
         style=\"display: inline-block; background-color: #e63946; color: #ffffff; text-decoration: none;
                font-size: 16px; letter-spacing: 2px; font-weight: bold;
                padding: 14px 40px; border-radius: 8px; text-transform: uppercase;\">
@@ -63,7 +63,7 @@ class EmailService{
       Si el botón no funciona, copia y pega este enlace en tu navegador:
     </p>
     <p style=\"margin: 0 0 28px 0; font-size: 12px; color: #e63946; text-align: center; word-break: break-all;\">
-      <a href=\"{{enlace_verificacion}}\" target=\"_blank\">Enlace de verificación: {{enlace_verificacion}}</a>
+      <a href=\"$enlace\" target=\"_blank\">Enlace de verificación: $enlace</a>
     </p>
 
     <!-- separador -->

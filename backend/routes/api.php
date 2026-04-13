@@ -5,6 +5,7 @@ require_once __DIR__ . '/../app/controllers/PreferenciaController.php';
 require_once __DIR__ . '/../app/controllers/ContenidoController.php';
 require_once __DIR__ . '/../app/middleware/Autenticacion.php';
 require_once __DIR__ . '/../app/controllers/ResenaController.php';
+require_once __DIR__ . '/../app/models/Usuario.php';
 
 if(session_status() === PHP_SESSION_NONE){
     session_start();
@@ -15,6 +16,7 @@ $autenticacionController = new AutenticacionController();
 $preferenciaController = new PreferenciaController();
 $contenidoController = new ContenidoController();
 $resenaController = new ResenaController();
+$usuarioModel = new Usuario();
 header('Content-Type: application/json; charset=UTF-8');
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -334,4 +336,18 @@ if($method === 'POST' && $action === 'ultimasResenasDeUsuario'){
     }
 }
 
+if($method === 'POST' && $action === 'verificarCorreo'){
+    try{
+        $token = trim($_POST['token'] ?? '');
+        if($token === ''){
+            throw new Exception("Token no proporcionado para verificación de correo.");
+        }
+
+        $autenticacionController->verificarCorreo($token);
+
+        echo json_encode(['success' => true,'message' => 'Correo verificado exitosamente']);
+    }catch (Exception $e){
+        echo json_encode(['success' => false,'message' => $e->getMessage()]);
+    }
+}
 ?>
