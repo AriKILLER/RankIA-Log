@@ -26,7 +26,7 @@ class Contenido extends Model{
     }
 
     public function guardarDetalleEnBd(int $external_id, string $titulo, string $tipo, string $sinopsis, string $poster, 
-                                            string $fecha_lanzamiento, int $duracion, int $numero_temporadas, float $popularidad){
+                                            ?string $fecha_lanzamiento, int $duracion, int $numero_temporadas, float $popularidad){
         
         if(empty($external_id) || empty($titulo) || empty($tipo)){
             throw new Exception("Los campos external_id, titulo y tipo son obligatorios para guardar el contenido en la base de datos.");
@@ -99,29 +99,40 @@ class Contenido extends Model{
          if($tmdb && $tipo === 'pelicula'){
                 $this->guardarDetalleEnBd(
                  $external_id,
-                 $tmdb['title'],
+                 $tmdb['title'] ?? '',
                  $tipo,
-                 $tmdb['overview'],
-                 $tmdb['poster_path'],
-                 $tmdb['release_date'],
-                 $tmdb['runtime'],
+                 $tmdb['overview'] ?? '',
+                 $tmdb['poster_path'] ?? '',
+                 $tmdb['release_date'] ?? '',
+                 (int)($tmdb['runtime'] ?? 0),
                  0,
-                 $tmdb['vote_average']
+                 (float)($tmdb['vote_average'] ?? 0)
                 );
             }else if($tmdb && $tipo === 'serie'){
                 $this->guardarDetalleEnBd(
                  $external_id,
-                 $tmdb['name'],
+                 $tmdb['name'] ?? '',
                  $tipo,
-                 $tmdb['overview'],
-                 $tmdb['poster_path'],
-                 $tmdb['first_air_date'],
+                 $tmdb['overview'] ?? '',
+                 $tmdb['poster_path'] ?? '',
+                 $tmdb['first_air_date'] ?? '',
                  0,
-                 $tmdb['number_of_seasons'],
-                 $tmdb['vote_average']
+                 (int)($tmdb['number_of_seasons'] ?? 0),
+                 (float)($tmdb['vote_average'] ?? 0)
                 );
+            }else{
+                throw new Exception("No se pudo obtener el detalle del contenido ni de la base de datos ni de TMDb.");
             }
-        return $tmdb;
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([
+                ':external_id' => $external_id,
+                ':tipo' => $tipo
+            ]);
+            $contenidoGuardado = $stmt->fetch(PDO::FETCH_ASSOC);
+            if(!$contenidoGuardado){
+                throw new Exception("Error al guardar o obtener el contenido en la base de datos después de obtenerlo de TMDb.");
+            }
+        return $contenidoGuardado;
     }
 
     public function obtenerCatalogoTmdb(string $tipo = 'ambos', int $pagina = 1, int $limite = 120, string $query = ''): array{

@@ -224,10 +224,25 @@ if($method === 'POST' && $action === 'crearResena'){
         $autenticacion->verificarSesion();
 
         $usuario_id = $_SESSION['usuario_id'];
-        $contenido_id = (int)$_POST['contenido_id'];
-        $puntuacion = (int)$_POST['puntuacion'];
+        $contenido_id = (int)($_POST['contenido_id'] ?? 0);
+        $puntuacion = (int)($_POST['puntuacion'] ?? 0);
         $comentario = trim($_POST['comentario'] ?? '');
         $fecha_creacion = new DateTime();
+        if($contenido_id <= 0){
+            $external_id = (int)($_POST['external_id'] ?? 0);
+            $tipo = $_POST['tipo'] ?? '';
+
+        if($external_id <= 0 || ($tipo !== 'pelicula' && $tipo !== 'serie')){
+            throw new Exception("Debes enviar contenido_id o external_id + tipo.");
+        }
+
+        $detalle = $contenidoController->obtenerDetalleDeBd($external_id, $tipo);
+        $contenido_id = (int)($detalle['id'] ?? 0);
+
+        if($contenido_id <= 0){
+            throw new Exception("No se pudo resolver el contenido en BD.");
+        }
+        }
         if(empty($contenido_id) || empty($puntuacion)){
             throw new Exception("La puntuacion y el contenido son obligatorios para crear una reseña");
         }
