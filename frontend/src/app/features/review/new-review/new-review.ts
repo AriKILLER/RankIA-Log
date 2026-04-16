@@ -154,30 +154,57 @@ export class NewReview {
     this.loading = true;
     this.error = '';
 
-    const fd = new FormData();
-    fd.append('action', 'crearResena');
-    fd.append('external_id', this.externalId);
-    fd.append('tipo', this.tipo);
-    fd.append('puntuacion', String(this.selectedStars));
-    fd.append('comentario', this.form.value.comentario!);
+    // Primero guardamos el contenido en BD para obtener el contenido_id
+    const fdGuardar = new FormData();
+    fdGuardar.append('action', 'guardarDetalleEnBd');
+    fdGuardar.append('external_id', this.externalId);
+    fdGuardar.append('titulo', this.titulo);
+    fdGuardar.append('tipo', this.tipo);
+    fdGuardar.append('sinopsis', '');
+    fdGuardar.append('poster', this.posterUrl ?? '');
+    fdGuardar.append('fecha_lanzamiento', '');
+    fdGuardar.append('duracion', '0');
+    fdGuardar.append('numero_temporadas', '0');
+    fdGuardar.append('popularidad', '0');
 
-    this.postParsed(fd).subscribe({
-      next: (res) => {
-        if (res.success) {
-          this.success = true;
-          setTimeout(() => this.router.navigate(['/profile']), 1500);
-        } else {
-          this.error = res.message ?? 'Error al publicar la reseña';
+    this.postParsed(fdGuardar).subscribe({
+      next: (resGuardar) => {
+        const contenidoId = resGuardar?.contenido_id;
+        if (!contenidoId) {
+          this.error = 'Error al registrar el contenido';
           this.loading = false;
+          return;
         }
+
+        // Ahora creamos la reseña con el contenido_id real
+        const fd = new FormData();
+        fd.append('action', 'crearResena');
+        fd.append('contenido_id', String(contenidoId));
+        fd.append('puntuacion', String(this.selectedStars));
+        fd.append('comentario', this.form.value.comentario!);
+
+        this.postParsed(fd).subscribe({
+          next: (res) => {
+            if (res.success) {
+              this.success = true;
+              setTimeout(() => this.router.navigate(['/profile']), 1500);
+            } else {
+              this.error = res.message ?? 'Error al publicar la reseña';
+              this.loading = false;
+            }
+          },
+          error: () => {
+            this.error = 'Error al conectar con el servidor';
+            this.loading = false;
+          },
+        });
       },
       error: () => {
-        this.error = 'Error al conectar con el servidor';
+        this.error = 'Error al registrar el contenido';
         this.loading = false;
       },
     });
   }
-
   get comentario() {
     return this.form.get('comentario')!;
   }
