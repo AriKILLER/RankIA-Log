@@ -6,6 +6,7 @@ require_once __DIR__ . '/../app/controllers/ContenidoController.php';
 require_once __DIR__ . '/../app/middleware/Autenticacion.php';
 require_once __DIR__ . '/../app/controllers/ResenaController.php';
 require_once __DIR__ . '/../app/models/Usuario.php';
+require_once __DIR__ . '/../app/controllers/ListaController.php';
 
 if(session_status() === PHP_SESSION_NONE){
     session_start();
@@ -17,6 +18,7 @@ $preferenciaController = new PreferenciaController();
 $contenidoController = new ContenidoController();
 $resenaController = new ResenaController();
 $usuarioModel = new Usuario();
+$listaController = new ListaController();
 header('Content-Type: application/json; charset=UTF-8');
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -363,6 +365,185 @@ if($method === 'POST' && $action === 'verificarCorreo'){
         echo json_encode(['success' => true,'message' => 'Correo verificado exitosamente']);
     }catch (Exception $e){
         echo json_encode(['success' => false,'message' => $e->getMessage()]);
+    }
+}
+
+if($method === 'POST' && $action === 'crearLista'){
+    try{
+        $autenticacion->verificarSesion();
+
+        $usuario_id = (int)$_SESSION['usuario_id'];
+        $nombre = trim($_POST['nombre'] ?? '');
+        $tipo_lista = $_POST['tipo_lista'] ?? 'personalizada';
+        if(empty($nombre)){
+            throw new Exception("El nombre de la lista no puede estar vacío");
+        }
+        if($nombre === 'Viendo' || $nombre === 'Completado' || $nombre === 'Pendiente'){
+            throw new Exception("No se pueden crear listas con nombres reservados. Por favor, elija otro nombre.");
+        }
+        $lista_id = $listaController->crearLista($usuario_id, $nombre, $tipo_lista);
+        echo json_encode(['success' => true, 'message' => 'Lista creada exitosamente', 'lista_id' => $lista_id]);
+    }catch (Exception $e){
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+if($method === 'POST' && $action === 'obtenerListasDeUsuario'){
+    try{
+        $autenticacion->verificarSesion();
+
+        $usuario_id = (int)$_SESSION['usuario_id'];
+        if(empty($usuario_id)){
+            throw new Exception("No se ha seleccionado usuario para obtener sus listas");
+        }
+        $listas = $listaController->obtenerListasDeUsuario($usuario_id);
+        echo json_encode(['success' => true, 'listas' => $listas]);
+    }catch (Exception $e){
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+if($method === 'POST' && $action === 'eliminarLista'){
+    try{
+        $autenticacion->verificarSesion();
+
+        $id = (int)$_POST['id'];
+        $usuario_id = (int)$_SESSION['usuario_id'];
+        if(empty($id)){
+            throw new Exception("No se ha seleccionado una lista para eliminar");
+        }
+        $eliminada = $listaController->eliminarLista($id, $usuario_id);
+        if(!$eliminada){
+            throw new Exception("No se pudo eliminar la lista. Asegúrate de que la lista exista, te pertenezca y no sea una lista predefinida.");
+        }
+        echo json_encode(['success' => true, 'message' => 'Lista eliminada exitosamente']);
+    }catch (Exception $e){
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+if($method === 'POST' && $action === 'editarLista'){
+    try{
+        $autenticacion->verificarSesion();
+
+        $id = (int)$_POST['id'];
+        $nuevo_nombre = trim($_POST['nuevo_nombre'] ?? '');
+        $usuario_id = (int)$_SESSION['usuario_id'];
+        if(empty($id)){
+            throw new Exception("No se ha seleccionado una lista para editar");
+        }
+        if(empty($nuevo_nombre)){
+            throw new Exception("Añada un nuevo para la lista. El nombre no puede estar vacío");            
+        }
+        if($nuevo_nombre === 'Viendo' || $nuevo_nombre === 'Completado' || $nuevo_nombre === 'Pendiente'){
+            throw new Exception("No se pueden usar nombres reservados para las listas. Por favor, elija otro nombre.");
+        }
+        $editada = $listaController->editarLista($id, $usuario_id, $nuevo_nombre);
+        if(!$editada){
+            throw new Exception("No se pudo editar la lista. Asegúrate de que la lista exista, te pertenezca y no sea una lista predefinida.");
+        }
+        echo json_encode(['success' => true, 'message' => 'Lista editada exitosamente']);
+    }catch (Exception $e){
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+if($method === 'POST' && $action === 'agregarContenidoALista'){
+    try{
+        $autenticacion->verificarSesion();
+
+        $usuario_id = (int)$_SESSION['usuario_id'];
+        $lista_id = (int)$_POST['lista_id'];
+        $contenido_id = (int)($_POST['contenido_id'] ?? 0);
+        $external_id = (int)($_POST['external_id'] ?? 0);
+        $tipoRaw = trim($_POST['tipo'] ?? '');
+        $tipo = match($tipoRaw){
+            'movie' => 'pelicula',
+            'tv' => 'serie',
+            default => $tipoRaw
+        };
+
+        if($lista_id <= 0){
+            throw new Exception("No se ha seleccionado una lista válida.");
+        }
+
+        if(!$listaController->listaPerteneceAUsuario($lista_id, $usuario_id)){
+            throw new Exception("La lista no existe o no te pertenece.");
+        }
+
+        // Prioridad 1: si viene external_id + tipo válido, resolver siempre por BD/TMDB.
+        if($external_id > 0 && ($tipo === 'pelicula' || $tipo === 'serie')){
+            $detalle = $contenidoController->obtenerDetalleDeBd($external_id, $tipo);
+            $contenido_id = (int)($detalle['id'] ?? 0);
+
+            if($contenido_id <= 0){
+                throw new Exception("No se pudo resolver el contenido en BD para agregarlo a la lista.");
+            }
+        } else {
+            // Prioridad 2: usar contenido_id interno solo si existe en BD.
+            if($contenido_id > 0 && $contenidoController->existeContenidoPorId($contenido_id)){
+                // Nada más que hacer.
+            } else {
+                // Si el cliente manda contenido_id de TMDB en lugar del id interno, intentamos resolverlo.
+                if($contenido_id > 0 && ($tipo === 'pelicula' || $tipo === 'serie')){
+                    $detalle = $contenidoController->obtenerDetalleDeBd($contenido_id, $tipo);
+                    $contenido_id = (int)($detalle['id'] ?? 0);
+                }
+
+                if($contenido_id <= 0 || !$contenidoController->existeContenidoPorId($contenido_id)){
+                    throw new Exception("Debes enviar contenido_id interno válido o external_id + tipo para resolver el contenido.");
+                }
+            }
+        }
+
+        $agregado = $listaController->agregarContenidoALista($lista_id, $contenido_id);
+        if(!$agregado){
+            throw new Exception("No se pudo agregar el contenido a la lista. Asegúrate de que la lista exista, te pertenezca y el contenido no esté ya en la lista.");
+        }
+        echo json_encode(['success' => true, 'message' => 'Contenido agregado a la lista exitosamente']);
+    }catch (Exception $e){
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+if($method === 'POST' && $action === 'eliminarContenidoDeLista'){
+    try{
+        $autenticacion->verificarSesion();
+
+        $usuario_id = (int)$_SESSION['usuario_id'];
+        $lista_id = (int)$_POST['lista_id'];
+        $contenido_id = (int)$_POST['contenido_id'];
+        if($lista_id <= 0){
+            throw new Exception("No se ha seleccionado una lista válida.");
+        }
+        if(!$listaController->listaPerteneceAUsuario($lista_id, $usuario_id)){
+            throw new Exception("La lista no existe o no te pertenece.");
+        }
+        if(empty($contenido_id)){
+            throw new Exception("No has seleccionado ningún contenido. Por favor, seleccione un contenido para eliminar de la lista.");
+        }
+        $eliminado = $listaController->eliminarContenidoDeLista($lista_id, $contenido_id);
+        if(!$eliminado){
+            throw new Exception("No se pudo eliminar el contenido de la lista. Asegúrate de que la lista exista, te pertenezca y el contenido esté en la lista.");
+        }
+        echo json_encode(['success' => true, 'message' => 'Contenido eliminado de la lista exitosamente']);
+    }catch (Exception $e){
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+if($method === 'POST' && $action === 'obtenerContenidosDeLista'){
+    try{
+        $autenticacion->verificarSesion();
+
+        $lista_id = (int)$_POST['lista_id'];
+        if(empty($lista_id)){
+            throw new Exception("No se ha seleccionado una lista para obtener su contenido");
+        }
+        $contenidos = $listaController->obtenerContenidosDeLista($lista_id);
+        echo json_encode(['success' => true, 'contenidos' => $contenidos]);
+    }catch (Exception $e){
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
 }
 ?>

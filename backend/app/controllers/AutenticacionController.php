@@ -6,17 +6,20 @@ require_once __DIR__ . '/../models/Usuario.php';
 require_once __DIR__ . '/../middleware/Autenticacion.php';
 require_once __DIR__ . '/../services/EmailService.php';
 require_once __DIR__ . '/../models/UsuarioToken.php';
+require_once __DIR__ . '/../models/Lista.php';
 class AutenticacionController{
     private $usuarioModel;
     private $autenticacionMiddleware;
     private $emailService;
     private $usuarioTokenModel;
+    private $listaModel;
 
     public function __construct(){
         $this->usuarioModel = new Usuario();
         $this->autenticacionMiddleware = new Autenticacion();
         $this->emailService = new EmailService();
         $this->usuarioTokenModel = new UsuarioToken();
+        $this->listaModel = new Lista();
     }
 
     // El método registroUsuario se encarga de registrar un nuevo usuario en el sistema. Verifica si el correo electrónico ya está registrado y, si no lo está, crea un nuevo usuario utilizando la clase Usuario.
@@ -27,7 +30,8 @@ class AutenticacionController{
             $password_hash = password_hash($password, PASSWORD_DEFAULT);
             $usuario_id = (int)$this->usuarioModel->crearUsuario($nombre, $email, $password_hash, $fecha_registro);
             
-            $this->emailService->enviarCorreoVerificacion($email, $token = $this->usuarioTokenModel->crearToken($usuario_id, (new DateTime())->modify('+1 day')));
+            $this->emailService->enviarCorreoVerificacion($email, $token = $this->usuarioTokenModel->crearToken($usuario_id, (new DateTime())->modify('+3 day')));
+            $this->listaModel->listasPredefinidas($usuario_id);
             $this->autenticacionMiddleware->crearSesion($usuario_id, $email);
             
             return $usuario_id;

@@ -92,7 +92,8 @@ CREATE TABLE listas (
     usuario_id INT NOT NULL,
     nombre VARCHAR(100) NOT NULL,
     tipo_lista ENUM('predefinida','personalizada') NOT NULL,
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    UNIQUE KEY uq_lista_usuario_nombre (usuario_id, nombre)
 );
 
 -- =========================
