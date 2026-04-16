@@ -138,5 +138,12 @@ class Contenido extends Model{
     public function obtenerCatalogoTmdb(string $tipo = 'ambos', int $pagina = 1, int $limite = 120, string $query = ''): array{
         return $this->tmdbService->obtenerCatalogoTmdb($tipo, $pagina, $limite, $query);
     }
+
+    public function existeContenidoPorId(int $contenido_id): bool{
+        $sql = "SELECT COUNT(*) FROM contenidos WHERE id = :contenido_id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':contenido_id' => $contenido_id]);
+        return (int)$stmt->fetchColumn() > 0;
+    }
     
 }

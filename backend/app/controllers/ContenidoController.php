@@ -29,4 +29,8 @@ class ContenidoController{
     public function obtenerCatalogoTmdb(string $tipo = 'ambos', int $pagina = 1, int $limite = 120, string $query = ''): array{
         return $this->contenidoModel->obtenerCatalogoTmdb($tipo, $pagina, $limite, $query);
     }
+
+    public function existeContenidoPorId(int $contenido_id): bool{
+        return $this->contenidoModel->existeContenidoPorId($contenido_id);
+    }
 }
