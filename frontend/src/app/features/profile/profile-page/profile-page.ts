@@ -22,8 +22,14 @@ export class ProfilePage implements OnInit {
   loadingResenas = false;
   totalResenas = 0;
 
+  // Stats de listas
+  totalViendo = 0;
+  totalPendientes = 0;
+  totalCompletadas = 0;
+
   ngOnInit(): void {
     this.cargarUltimasResenas();
+    this.cargarStatsListas();
   }
 
   cargarUltimasResenas(): void {
@@ -34,9 +40,7 @@ export class ProfilePage implements OnInit {
 
     this.contenido.postParsed(fd).subscribe({
       next: (res: any) => {
-        if (res?.success) {
-          this.resenas = res.resenas ?? [];
-        }
+        if (res?.success) this.resenas = res.resenas ?? [];
         this.loadingResenas = false;
       },
       error: () => {
@@ -44,7 +48,6 @@ export class ProfilePage implements OnInit {
       },
     });
 
-    // Stats: total de reseñas
     const fd2 = new FormData();
     fd2.append('action', 'obtenerTodasResenasDeUsuario');
     this.contenido.postParsed(fd2).subscribe({
@@ -57,10 +60,41 @@ export class ProfilePage implements OnInit {
     });
   }
 
+  cargarStatsListas(): void {
+    const fd = new FormData();
+    fd.append('action', 'obtenerListasDeUsuario');
+
+    this.contenido.postParsed(fd).subscribe({
+      next: (res: any) => {
+        if (res?.success) {
+          const listas = res.listas ?? [];
+          listas.forEach((lista: any) => {
+            const nombre = lista.nombre.toLowerCase();
+            this.cargarConteoLista(lista.id, nombre);
+          });
+        }
+      },
+    });
+  }
+
+  private cargarConteoLista(listaId: number, nombre: string): void {
+    const fd = new FormData();
+    fd.append('action', 'obtenerContenidosDeLista');
+    fd.append('lista_id', String(listaId));
+
+    this.contenido.postParsed(fd).subscribe({
+      next: (res: any) => {
+        const count = (res?.contenidos ?? []).length;
+        if (nombre === 'viendo') this.totalViendo = count;
+        if (nombre === 'pendiente') this.totalPendientes = count;
+        if (nombre === 'completado') this.totalCompletadas = count;
+      },
+    });
+  }
+
   verTodas(): void {
     this.mostrarTodas = true;
   }
-
   verMenos(): void {
     this.mostrarTodas = false;
   }
@@ -84,8 +118,7 @@ export class ProfilePage implements OnInit {
       '#e76f51',
       '#2ec4b6',
     ];
-    const index = nombre.charCodeAt(0) % colors.length;
-    return colors[index];
+    return colors[nombre.charCodeAt(0) % colors.length];
   }
 
   toPosterUrl(poster: string | null): string | null {

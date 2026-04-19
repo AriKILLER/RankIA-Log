@@ -40,15 +40,20 @@
 
     @if (loading) {
       <app-loading mensaje="Cargando lista..."></app-loading>
+    } @else if (error) {
+      <div class="empty-state">
+        <span>⚠️</span>
+        <p>{{ error }}</p>
+      </div>
     } @else if (currentItems.length === 0) {
       <div class="empty-state">
         <span>📋</span>
         <p>No hay contenido en esta lista todavía.</p>
-        <small>Ve al catálogo para añadir algo.</small>
+        <small>Ve al catálogo y añade algo desde el detalle del contenido.</small>
       </div>
     } @else {
       <div class="grid">
-        @for (item of currentItems; track item.externalId) {
+        @for (item of currentItems; track item.contenidoId) {
           <article class="content-card">
             <div class="poster" (click)="irADetalle(item)" style="cursor: pointer">
               @if (item.posterUrl) {
@@ -68,7 +73,9 @@
               <div class="card-actions">
                 <button class="btn-ghost" type="button" (click)="irADetalle(item)">Ver</button>
                 <button class="btn-ghost" type="button" (click)="resenar(item)">Reseñar</button>
-                <button class="btn-ghost" type="button">Quitar</button>
+                <button class="btn-ghost btn-quitar" type="button" (click)="quitarDeLista(item)">
+                  Quitar
+                </button>
               </div>
             </div>
           </article>

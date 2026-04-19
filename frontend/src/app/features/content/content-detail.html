@@ -39,14 +39,29 @@
         <p class="synopsis">{{ sinopsis || 'Sin sinopsis disponible.' }}</p>
 
         <div class="actions">
-          <button class="btn-primary" type="button" (click)="resenar()">✍️ Reseñar</button>
-          <button class="btn-list" type="button" (click)="toggleLista('viendo')">
-            {{ enLista === 'viendo' ? '✅ Viendo' : '👀 Viendo' }}
+          <button class="btn-primary" type="button" (click)="resenar()">✏️ Reseñar</button>
+
+          <button
+            class="btn-list"
+            type="button"
+            [class.active]="enViendo"
+            [disabled]="loadingLista"
+            (click)="toggleLista('viendo')"
+          >
+            {{ enViendo ? '✅ Viendo' : '👀 Viendo' }}
           </button>
-          <button class="btn-list" type="button" (click)="toggleLista('pendientes')">
-            {{ enLista === 'pendientes' ? '✅ Pendiente' : '⏳ Pendiente' }}
+
+          <button
+            class="btn-list"
+            type="button"
+            [class.active]="enPendiente"
+            [disabled]="loadingLista"
+            (click)="toggleLista('pendientes')"
+          >
+            {{ enPendiente ? '✅ Pendiente' : '⏳ Pendiente' }}
           </button>
-          <a class="btn-secondary" routerLink="/search">← Volver al catálogo</a>
+
+          <a class="btn-secondary" routerLink="/search">← Volver</a>
         </div>
       </div>
     </div>

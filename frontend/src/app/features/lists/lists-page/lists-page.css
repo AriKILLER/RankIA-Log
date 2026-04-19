@@ -228,3 +228,7 @@
     padding: 2rem 1.25rem;
   }
 }
+.btn-quitar:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
