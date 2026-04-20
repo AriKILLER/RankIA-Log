@@ -14,6 +14,7 @@ class EmailService{
       $this->phpmailer->CharSet = 'UTF-8';
       $this->phpmailer->Encoding = 'base64';
         $this->phpmailer->SMTPAuth = $this->emailConfig['SMTPAuth'];
+        $this->phpmailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $this->phpmailer->Port = $this->emailConfig['port'];
         $this->phpmailer->Username = $this->emailConfig['username'];
         $this->phpmailer->Password = $this->emailConfig['password'];
