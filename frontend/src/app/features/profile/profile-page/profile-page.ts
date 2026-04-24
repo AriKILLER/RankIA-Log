@@ -14,15 +14,14 @@ import { ContenidoService } from '../../../core/services/contenido';
 export class ProfilePage implements OnInit {
   auth = inject(AuthService);
   contenido = inject(ContenidoService);
-  user = this.auth.currentUser() ?? null;
 
+  user = this.auth.currentUser() ?? null;
   resenas: any[] = [];
   todasResenas: any[] = [];
   mostrarTodas = false;
   loadingResenas = false;
   totalResenas = 0;
 
-  // Stats de listas
   totalViendo = 0;
   totalPendientes = 0;
   totalCompletadas = 0;
@@ -34,6 +33,7 @@ export class ProfilePage implements OnInit {
 
   cargarUltimasResenas(): void {
     this.loadingResenas = true;
+
     const fd = new FormData();
     fd.append('action', 'ultimasResenasDeUsuario');
     fd.append('limite', '5');
@@ -50,6 +50,7 @@ export class ProfilePage implements OnInit {
 
     const fd2 = new FormData();
     fd2.append('action', 'obtenerTodasResenasDeUsuario');
+
     this.contenido.postParsed(fd2).subscribe({
       next: (res: any) => {
         if (res?.success) {
@@ -69,8 +70,7 @@ export class ProfilePage implements OnInit {
         if (res?.success) {
           const listas = res.listas ?? [];
           listas.forEach((lista: any) => {
-            const nombre = lista.nombre.toLowerCase();
-            this.cargarConteoLista(lista.id, nombre);
+            this.cargarConteoLista(lista.id, lista.nombre.toLowerCase());
           });
         }
       },
@@ -92,11 +92,33 @@ export class ProfilePage implements OnInit {
     });
   }
 
+  eliminarResena(id: number): void {
+    if (!confirm('¿Seguro que quieres eliminar esta reseña?')) return;
+
+    const fd = new FormData();
+    fd.append('action', 'eliminarResena');
+    fd.append('resena_id', String(id));
+
+    this.contenido.postParsed(fd).subscribe({
+      next: (res: any) => {
+        if (res?.success) {
+          this.resenas = this.resenas.filter((r) => r.id !== id);
+          this.todasResenas = this.todasResenas.filter((r) => r.id !== id);
+          this.totalResenas = this.todasResenas.length;
+        }
+      },
+    });
+  }
+
   verTodas(): void {
     this.mostrarTodas = true;
   }
   verMenos(): void {
     this.mostrarTodas = false;
+  }
+
+  scrollToResenas(): void {
+    document.getElementById('resenas')?.scrollIntoView({ behavior: 'smooth' });
   }
 
   get resenasVisibles(): any[] {

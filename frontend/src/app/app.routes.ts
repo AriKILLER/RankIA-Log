@@ -58,6 +58,20 @@ export const routes: Routes = [
     loadComponent: () => import('./features/settings/settings').then((m) => m.Settings),
   },
   {
+    path: 'verify-email',
+    loadComponent: () => import('./features/verify-email/verify-email').then((m) => m.VerifyEmail),
+  },
+  {
+    path: 'forgot-password',
+    loadComponent: () =>
+      import('./features/forgot-password/forgot-password').then((m) => m.ForgotPassword),
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () =>
+      import('./features/reset-password/reset-password').then((m) => m.ResetPassword),
+  },
+  {
     path: '**',
     loadComponent: () => import('./features/not-found/not-found').then((m) => m.NotFound),
   },

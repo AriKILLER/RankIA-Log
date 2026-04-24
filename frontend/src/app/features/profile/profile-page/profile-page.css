@@ -346,3 +346,28 @@
   background: var(--accent);
   color: #fff;
 }
+
+.review-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.btn-ghost-small {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: var(--radius);
+  padding: 0.3rem 0.75rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.btn-ghost-small:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}

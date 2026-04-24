@@ -15,27 +15,27 @@
         }}
       </p>
     </div>
-    <a routerLink="/review/new" class="btn-primary">✏️ Nueva reseña</a>
+    <a routerLink="/review/new" class="btn-primary">✍️ Nueva reseña</a>
     <a routerLink="/settings" class="btn-secondary">⚙️ Ajustes</a>
   </div>
 
   <div class="profile-stats">
-    <div class="stat">
+    <a class="stat" (click)="scrollToResenas()" style="cursor: pointer">
       <span class="stat-number">{{ totalResenas }}</span>
       <span class="stat-label">Reseñas</span>
-    </div>
-    <div class="stat">
+    </a>
+    <a routerLink="/lists" [queryParams]="{ tab: 'completadas' }" class="stat">
       <span class="stat-number">{{ totalCompletadas }}</span>
       <span class="stat-label">Completados</span>
-    </div>
-    <div class="stat">
+    </a>
+    <a routerLink="/lists" [queryParams]="{ tab: 'pendientes' }" class="stat">
       <span class="stat-number">{{ totalPendientes }}</span>
       <span class="stat-label">Pendientes</span>
-    </div>
-    <div class="stat">
+    </a>
+    <a routerLink="/lists" [queryParams]="{ tab: 'viendo' }" class="stat">
       <span class="stat-number">{{ totalViendo }}</span>
       <span class="stat-label">Viendo</span>
-    </div>
+    </a>
   </div>
 
   <div class="profile-section">
@@ -47,7 +47,7 @@
     </div>
   </div>
 
-  <div class="profile-section">
+  <div class="profile-section" id="resenas">
     <div class="section-header">
       <h2>MIS RESEÑ<span>AS</span></h2>
       <a routerLink="/review/new" class="btn-secondary">+ Nueva reseña</a>
@@ -57,7 +57,7 @@
       <div class="loading-resenas">Cargando reseñas...</div>
     } @else if (resenasVisibles.length === 0) {
       <div class="empty-state">
-        <span>✏️</span>
+        <span>✍️</span>
         <p>Aún no has escrito ninguna reseña</p>
         <small>Ve al catálogo, elige una película o serie y reséñala</small>
         <a routerLink="/search" class="btn-primary">Ir al catálogo</a>
@@ -82,11 +82,18 @@
               <span class="review-fecha">
                 {{ resena.fecha_creacion | date: 'd MMM yyyy' : '' : 'es' }}
               </span>
+              <div class="review-actions">
+                <button
+                  class="btn-ghost-small"
+                  (click)="$event.stopPropagation(); eliminarResena(resena.id)"
+                >
+                  🗑️ Eliminar
+                </button>
+              </div>
             </div>
           </div>
         }
       </div>
-
       <div class="ver-mas-container">
         @if (!mostrarTodas && totalResenas > 5) {
           <button class="btn-ver-mas" (click)="verTodas()">
