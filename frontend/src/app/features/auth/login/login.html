@@ -19,6 +19,10 @@
         <input id="password" type="password" formControlName="password" placeholder="••••••••" />
       </div>
 
+      <div class="forgot-link">
+        <a routerLink="/forgot-password">¿Olvidaste tu contraseña?</a>
+      </div>
+
       @if (error) {
         <p class="error-global">{{ error }}</p>
       }
@@ -27,10 +31,6 @@
         {{ loading ? 'Entrando...' : 'Iniciar sesión' }}
       </button>
     </form>
-
-    <div class="auth-footer">
-      <a routerLink="/forgot-password">¿Olvidaste tu contraseña?</a>
-    </div>
 
     <div class="auth-footer">¿No tienes cuenta? <a routerLink="/register">Regístrate</a></div>
   </div>

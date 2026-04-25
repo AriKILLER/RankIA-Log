@@ -335,3 +335,36 @@ form {
   border-color: var(--accent);
   color: var(--text);
 }
+
+.search-bar {
+  display: flex;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
+.search-bar .search-input {
+  flex: 1;
+}
+
+.btn-buscar {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  padding: 0 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  white-space: nowrap;
+  transition:
+    background 0.2s ease,
+    transform 0.1s ease;
+}
+
+.btn-buscar:hover {
+  background: #c1121f;
+  transform: translateY(-1px);
+}

@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { LoadingComponent } from '../../../shared/loading/loading';
 import { ContenidoService } from '../../../core/services/contenido';
 
@@ -30,6 +30,7 @@ interface Lista {
 export class ListsPage implements OnInit {
   private contenido = inject(ContenidoService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   tabs: { key: ListTab; label: string }[] = [
     { key: 'viendo', label: '👀 Viendo' },
@@ -41,7 +42,6 @@ export class ListsPage implements OnInit {
   loading = false;
   error = '';
 
-  // IDs de las listas predefinidas del backend
   listaIds: Record<ListTab, number | null> = {
     viendo: null,
     pendientes: null,
@@ -55,6 +55,10 @@ export class ListsPage implements OnInit {
   };
 
   ngOnInit(): void {
+    const tab = this.route.snapshot.queryParamMap.get('tab') as ListTab;
+    if (tab && ['viendo', 'pendientes', 'completadas'].includes(tab)) {
+      this.activeTab = tab;
+    }
     this.cargarListas();
   }
 
@@ -69,19 +73,13 @@ export class ListsPage implements OnInit {
       next: (res: any) => {
         if (res?.success) {
           const listas: Lista[] = res.listas ?? [];
-
           listas.forEach((lista: Lista) => {
             const nombre = lista.nombre.toLowerCase();
-            if (nombre === 'viendo') {
-              this.listaIds['viendo'] = lista.id;
-            } else if (nombre === 'pendiente') {
-              this.listaIds['pendientes'] = lista.id;
-            } else if (nombre === 'completado') {
-              this.listaIds['completadas'] = lista.id;
-            }
+            if (nombre === 'viendo') this.listaIds['viendo'] = lista.id;
+            if (nombre === 'pendiente') this.listaIds['pendientes'] = lista.id;
+            if (nombre === 'completado') this.listaIds['completadas'] = lista.id;
           });
-
-          this.cargarContenidosDeTab('viendo');
+          this.cargarContenidosDeTab(this.activeTab);
         } else {
           this.error = 'Error al cargar las listas';
           this.loading = false;
@@ -110,8 +108,7 @@ export class ListsPage implements OnInit {
     this.contenido.postParsed(fd).subscribe({
       next: (res: any) => {
         if (res?.success) {
-          const contenidos = res.contenidos ?? [];
-          this.items[tab] = contenidos.map((c: any) => ({
+          this.items[tab] = (res.contenidos ?? []).map((c: any) => ({
             contenidoId: c.id,
             externalId: Number(c.external_id),
             tipo: c.tipo,

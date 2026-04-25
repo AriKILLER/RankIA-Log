@@ -4,15 +4,18 @@
       <div class="review-search">
         <h2>BUSCA EL <span>CONTENIDO</span></h2>
         <p>Busca la película o serie que quieres reseñar</p>
-        <div class="search-input">
-          <span>🔍</span>
-          <input
-            type="text"
-            [(ngModel)]="busqueda"
-            placeholder="Buscar película o serie..."
-            (keyup.enter)="buscar()"
-          />
-          <button class="btn-primary" (click)="buscar()">Buscar</button>
+
+        <div class="search-bar">
+          <div class="search-input">
+            <span>🔍</span>
+            <input
+              type="text"
+              [(ngModel)]="busqueda"
+              placeholder="Buscar película o serie..."
+              (keyup.enter)="buscar()"
+            />
+          </div>
+          <button class="btn-buscar" (click)="buscar()">Buscar</button>
         </div>
 
         @if (loadingBusqueda) {
