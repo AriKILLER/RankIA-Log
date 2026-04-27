@@ -11,44 +11,53 @@ import { AuthService } from '../../../core/services/auth';
   styleUrl: './register.css',
 })
 export class Register {
-  private fb     = inject(FormBuilder);
-  private auth   = inject(AuthService);
+  private fb = inject(FormBuilder);
+  private auth = inject(AuthService);
   private router = inject(Router);
 
   form = this.fb.group({
-    nombre:   ['', [Validators.required, Validators.minLength(3)]],
-    email:    ['', [Validators.required, Validators.email]],
+    nombre: ['', [Validators.required, Validators.minLength(3)]],
+    email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(8)]],
   });
 
   loading = false;
-  error   = '';
+  error = '';
 
   onSubmit(): void {
     if (this.form.invalid) return;
 
     this.loading = true;
-    this.error   = '';
+    this.error = '';
 
     const { nombre, email, password } = this.form.getRawValue();
 
     this.auth.register(nombre!, email!, password!).subscribe({
-      next: res => {
+      next: (res) => {
         if (res.success) {
-          this.router.navigate(['/preferences']);
+          this.auth.sesionActual().subscribe({
+            next: () => this.router.navigate(['/preferences']),
+            error: () => this.router.navigate(['/preferences']),
+          });
         } else {
-          this.error   = res.message;
+          this.error = res.message;
           this.loading = false;
         }
       },
       error: () => {
-        this.error   = 'Error al conectar con el servidor';
+        this.error = 'Error al conectar con el servidor';
         this.loading = false;
-      }
+      },
     });
   }
 
-  get nombre()   { return this.form.get('nombre')!; }
-  get email()    { return this.form.get('email')!; }
-  get password() { return this.form.get('password')!; }
+  get nombre() {
+    return this.form.get('nombre')!;
+  }
+  get email() {
+    return this.form.get('email')!;
+  }
+  get password() {
+    return this.form.get('password')!;
+  }
 }

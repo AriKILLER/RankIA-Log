@@ -65,7 +65,7 @@
     } @else {
       <div class="reviews-grid">
         @for (resena of resenasVisibles; track resena.id) {
-          <div class="review-card">
+          <div class="review-card" (click)="verDetalle(resena)" style="cursor: pointer">
             <div class="review-poster">
               @if (toPosterUrl(resena.poster_contenido)) {
                 <img [src]="toPosterUrl(resena.poster_contenido)" [alt]="resena.titulo_contenido" />

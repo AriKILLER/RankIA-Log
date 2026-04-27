@@ -11,7 +11,9 @@ import { AuthService } from '../../core/services/auth';
 })
 export class Navbar {
   auth = inject(AuthService);
-  user = this.auth.currentUser();
+  get user() {
+    return this.auth.currentUser();
+  }
   menuOpen = false;
   mobileOpen = false;
 

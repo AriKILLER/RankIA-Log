@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { AuthService } from '../../../core/services/auth';
 import { ContenidoService } from '../../../core/services/contenido';
@@ -13,9 +13,12 @@ import { ContenidoService } from '../../../core/services/contenido';
 })
 export class ProfilePage implements OnInit {
   auth = inject(AuthService);
+  private router = inject(Router);
   contenido = inject(ContenidoService);
 
-  user = this.auth.currentUser() ?? null;
+  get user() {
+    return this.auth.currentUser() ?? null;
+  }
   resenas: any[] = [];
   todasResenas: any[] = [];
   mostrarTodas = false;
@@ -97,7 +100,7 @@ export class ProfilePage implements OnInit {
 
     const fd = new FormData();
     fd.append('action', 'eliminarResena');
-    fd.append('resena_id', String(id));
+    fd.append('id', String(id));
 
     this.contenido.postParsed(fd).subscribe({
       next: (res: any) => {
@@ -142,7 +145,20 @@ export class ProfilePage implements OnInit {
     ];
     return colors[nombre.charCodeAt(0) % colors.length];
   }
+  verDetalle(resena: any): void {
+    const fd = new FormData();
+    fd.append('action', 'obtenerDetalleDeBd');
+    fd.append('external_id', String(resena.contenido_id));
+    fd.append('tipo', resena.tipo_contenido);
 
+    this.contenido.postParsed(fd).subscribe({
+      next: (res: any) => {
+        if (res?.success && res.detalle?.external_id) {
+          this.router.navigate(['/content', resena.tipo_contenido, res.detalle.external_id]);
+        }
+      },
+    });
+  }
   toPosterUrl(poster: string | null): string | null {
     return this.contenido.toPosterUrl(poster);
   }
