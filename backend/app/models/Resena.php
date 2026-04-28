@@ -112,4 +112,14 @@ class Resena extends Model{
         return $resenas ?: [];
     }
 
+    public function obtenerResenaFavorita(int $usuario_id, int $limite = 5){
+        $sql = "SELECT r.*, u.nombre AS nombre_usuario, c.titulo AS titulo_contenido, c.poster AS poster_contenido, c.tipo AS tipo_contenido FROM resenas r JOIN usuarios u ON r.usuario_id = u.id JOIN contenidos c ON r.contenido_id = c.id WHERE r.usuario_id = :usuario_id AND r.puntuacion = 5 ORDER BY r.fecha_creacion DESC LIMIT :limite";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(':usuario_id', $usuario_id, PDO::PARAM_INT);
+        $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
+        $stmt->execute();
+        $resenas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $resenas ?: [];
+    }
+
 }

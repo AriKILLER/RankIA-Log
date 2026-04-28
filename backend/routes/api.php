@@ -353,6 +353,26 @@ if($method === 'POST' && $action === 'ultimasResenasDeUsuario'){
     }
 }
 
+if($method === 'POST' && $action === 'obtenerResenaFavorita'){
+    try{
+        $autenticacion->verificarSesion();
+
+        $usuario_id = (int)$_SESSION['usuario_id'];
+        $limite = (int)($_POST['limite'] ?? 5);
+        if(empty($usuario_id)){
+            throw new Exception("No se ha seleccionado usuario para obtener su reseña favorita");
+        }
+        if($limite < 1 || $limite > 20){
+            throw new Exception("El limite de reseñas a obtener debe estar entre 1 y 20");
+        }
+        $resenaFavorita = $resenaController->obtenerResenaFavorita($usuario_id, $limite);
+        $ultimasResenas = $resenaController->ultimasResenasDeUsuario($usuario_id, $limite);
+        echo json_encode(['success' => true, 'resena_favorita' => $resenaFavorita, 'ultimas_resenas' => $ultimasResenas]);
+    }catch (Exception $e){
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
 if($method === 'POST' && $action === 'verificarCorreo'){
     try{
         $token = trim($_POST['token'] ?? '');
