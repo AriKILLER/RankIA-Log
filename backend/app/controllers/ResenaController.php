@@ -45,4 +45,8 @@ class ResenaController{
     public function ultimasResenasDeUsuario(int $usuario_id, int $limite = 5){
         return $this->resenaModel->ultimasResenasDeUsuario($usuario_id, $limite);
     }
+
+    public function obtenerResenaFavorita(int $usuario_id, int $limite = 5){
+        return $this->resenaModel->obtenerResenaFavorita($usuario_id, $limite);
+    }
 }
