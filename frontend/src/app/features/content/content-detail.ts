@@ -47,6 +47,9 @@ export class ContentDetail implements OnInit {
   enViendo = false;
   enPendiente = false;
   loadingLista = false;
+  listasPersonalizadas: any[] = [];
+  listasConContenido: number[] = [];
+  mostrarDropdown = false;
 
   constructor() {
     const tipoParam = (this.route.snapshot.paramMap.get('tipo') ?? 'pelicula') as Tipo;
@@ -161,6 +164,9 @@ export class ContentDetail implements OnInit {
             if (nombre === 'viendo') this.listaViendo = lista.id;
             if (nombre === 'pendiente') this.listaPendiente = lista.id;
           });
+          this.listasPersonalizadas = listas.filter((l: any) => l.tipo_lista === 'personalizada');
+          if (this.contenidoId) this.comprobarEnListas();
+          if (this.contenidoId) this.comprobarEnListasPersonalizadas();
           // Comprobar si el contenido ya está en alguna lista
           if (this.contenidoId) this.comprobarEnListas();
         }
@@ -193,6 +199,22 @@ export class ContentDetail implements OnInit {
     }
   }
 
+  private comprobarEnListasPersonalizadas(): void {
+    this.listasPersonalizadas.forEach((lista: any) => {
+      const fd = new FormData();
+      fd.append('action', 'obtenerContenidosDeLista');
+      fd.append('lista_id', String(lista.id));
+      this.postParsed(fd).subscribe({
+        next: (res: any) => {
+          const contenidos = res?.contenidos ?? [];
+          const estaEnLista = contenidos.some((c: any) => Number(c.external_id) === this.id);
+          if (estaEnLista && !this.listasConContenido.includes(lista.id)) {
+            this.listasConContenido.push(lista.id);
+          }
+        },
+      });
+    });
+  }
   private guardarContenidoEnBd(): Promise<number> {
     return new Promise((resolve, reject) => {
       const fd = new FormData();
@@ -266,7 +288,35 @@ export class ContentDetail implements OnInit {
       },
     });
   }
+  async toggleListaPersonalizada(lista: any): Promise<void> {
+    if (!this.contenidoId) {
+      try {
+        await this.guardarContenidoEnBd();
+      } catch {
+        return;
+      }
+    }
 
+    const estaEnLista = this.listasConContenido.includes(lista.id);
+    const action = estaEnLista ? 'eliminarContenidoDeLista' : 'agregarContenidoALista';
+
+    const fd = new FormData();
+    fd.append('action', action);
+    fd.append('lista_id', String(lista.id));
+    fd.append('contenido_id', String(this.contenidoId));
+
+    this.postParsed(fd).subscribe({
+      next: (res: any) => {
+        if (res?.success) {
+          if (estaEnLista) {
+            this.listasConContenido = this.listasConContenido.filter((id) => id !== lista.id);
+          } else {
+            this.listasConContenido.push(lista.id);
+          }
+        }
+      },
+    });
+  }
   resenar(): void {
     if (!this.auth.isLoggedIn()) {
       this.router.navigate(['/login']);

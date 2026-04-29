@@ -4,7 +4,41 @@
       <h1>MIS <span>LISTAS</span></h1>
       <p>Organiza lo que estás viendo, lo que quieres consumir y lo que ya has completado.</p>
     </div>
+    <button
+      class="btn-primary"
+      type="button"
+      (click)="mostrarFormNuevaLista = !mostrarFormNuevaLista"
+    >
+      + Nueva lista
+    </button>
   </header>
+
+  @if (mostrarFormNuevaLista) {
+    <div class="nueva-lista-form">
+      <input
+        type="text"
+        placeholder="Nombre de la lista"
+        [(ngModel)]="nombreNuevaLista"
+        class="input-nombre-lista"
+      />
+      @if (errorNuevaLista) {
+        <p class="error-lista">{{ errorNuevaLista }}</p>
+      }
+      <div class="nueva-lista-actions">
+        <button
+          class="btn-primary"
+          type="button"
+          (click)="crearLista()"
+          [disabled]="loadingNuevaLista"
+        >
+          {{ loadingNuevaLista ? 'Creando...' : 'Crear' }}
+        </button>
+        <button class="btn-secondary" type="button" (click)="mostrarFormNuevaLista = false">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  }
 
   <section class="tabs">
     <p class="tabs-label">Estado</p>
@@ -22,6 +56,22 @@
     </div>
   </section>
 
+  @if (listasPersonalizadas.length > 0) {
+    <section class="listas-personalizadas">
+      <h2>MIS LISTAS <span>PERSONALIZADAS</span></h2>
+      <div class="listas-pers-grid">
+        @for (lista of listasPersonalizadas; track lista.id) {
+          <div
+            class="lista-pers-card"
+            (click)="router.navigate(['/lists', lista.id])"
+            style="cursor: pointer"
+          >
+            <span class="lista-pers-nombre">{{ lista.nombre }}</span>
+          </div>
+        }
+      </div>
+    </section>
+  }
   <section class="list-content">
     <div class="list-head">
       <h2>

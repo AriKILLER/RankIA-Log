@@ -46,6 +46,12 @@ export const routes: Routes = [
   { path: 'search', canActivate: [authGuard], component: SearchPage },
   { path: 'profile', canActivate: [authGuard], component: ProfilePage },
   { path: 'lists', canActivate: [authGuard], component: ListsPage },
+  {
+    path: 'lists/:id',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/lists/list-detail/list-detail').then((m) => m.ListDetail),
+  },
   { path: 'recommendations', canActivate: [authGuard], component: RecommendationsPage },
   {
     path: 'review/new',

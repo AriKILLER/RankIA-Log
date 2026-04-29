@@ -61,6 +61,23 @@
             {{ enPendiente ? '✅ Pendiente' : '⏳ Pendiente' }}
           </button>
 
+          @if (auth.isLoggedIn() && listasPersonalizadas.length > 0) {
+            <div class="dropdown-wrapper">
+              <button class="btn-list" type="button" (click)="mostrarDropdown = !mostrarDropdown">
+                📋 Mis listas
+              </button>
+              @if (mostrarDropdown) {
+                <div class="dropdown-menu">
+                  @for (lista of listasPersonalizadas; track lista.id) {
+                    <div class="dropdown-item" (click)="toggleListaPersonalizada(lista)">
+                      <span>{{ listasConContenido.includes(lista.id) ? '✅' : '➕' }}</span>
+                      <span>{{ lista.nombre }}</span>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
           <a class="btn-secondary" routerLink="/search">← Volver</a>
         </div>
       </div>
