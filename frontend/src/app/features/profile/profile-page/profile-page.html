@@ -40,11 +40,37 @@
 
   <div class="profile-section">
     <h2>FAVORIT<span>OS</span></h2>
-    <div class="empty-state">
-      <span>🎬</span>
-      <p>Aún no tienes favoritos</p>
-      <small>Marca contenido como favorito desde el catálogo</small>
-    </div>
+    @if (favoritos.length === 0) {
+      <div class="empty-state">
+        <span>⭐</span>
+        <p>Aún no tienes favoritos</p>
+        <small>Las reseñas con 5 estrellas aparecerán aquí</small>
+      </div>
+    } @else {
+      <div class="reviews-grid">
+        @for (resena of favoritos; track resena.id) {
+          <div class="review-card" (click)="verDetalle(resena)" style="cursor: pointer">
+            <div class="review-poster">
+              @if (toPosterUrl(resena.poster_contenido)) {
+                <img [src]="toPosterUrl(resena.poster_contenido)" [alt]="resena.titulo_contenido" />
+              } @else {
+                <div class="poster-placeholder">🎬</div>
+              }
+            </div>
+            <div class="review-body">
+              <h3 class="review-titulo">{{ resena.titulo_contenido }}</h3>
+              <div class="review-estrellas">{{ estrellas(resena.puntuacion) }}</div>
+              @if (resena.comentario) {
+                <p class="review-comentario">{{ resena.comentario }}</p>
+              }
+              <span class="review-fecha">
+                {{ resena.fecha_creacion | date: 'd MMM yyyy' : '' : 'es' }}
+              </span>
+            </div>
+          </div>
+        }
+      </div>
+    }
   </div>
 
   <div class="profile-section" id="resenas">
@@ -103,6 +129,125 @@
         @if (mostrarTodas) {
           <button class="btn-ver-mas" (click)="verMenos()">Ver menos</button>
         }
+      </div>
+    }
+  </div>
+
+  <div class="profile-section">
+    <div class="section-header">
+      <h2>MIS LIST<span>AS</span></h2>
+      <div class="section-header-actions">
+        <a routerLink="/lists" class="btn-secondary">Ver todas</a>
+        <button
+          class="btn-secondary"
+          type="button"
+          (click)="mostrarFormNuevaLista = !mostrarFormNuevaLista"
+        >
+          + Nueva lista
+        </button>
+      </div>
+    </div>
+
+    @if (mostrarFormNuevaLista) {
+      <div class="nueva-lista-form">
+        <input
+          type="text"
+          placeholder="Nombre de la lista"
+          [(ngModel)]="nombreNuevaLista"
+          class="input-nombre-lista"
+        />
+        @if (errorNuevaLista) {
+          <p class="error-lista">{{ errorNuevaLista }}</p>
+        }
+        <div class="nueva-lista-actions">
+          <button
+            class="btn-primary"
+            type="button"
+            (click)="crearLista()"
+            [disabled]="loadingNuevaLista"
+          >
+            {{ loadingNuevaLista ? 'Creando...' : 'Crear' }}
+          </button>
+          <button class="btn-secondary" type="button" (click)="mostrarFormNuevaLista = false">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    }
+
+    <div class="listas-grid">
+      <div class="lista-columna">
+        <h3 class="lista-col-titulo">VIENDO</h3>
+        @if (contenidosViendo.length === 0) {
+          <div class="empty-state-small">Sin contenido</div>
+        } @else {
+          @for (item of contenidosViendo; track item.id) {
+            <div class="lista-item-mini">
+              @if (toPosterUrl(item.poster)) {
+                <img [src]="toPosterUrl(item.poster)" [alt]="item.titulo" />
+              } @else {
+                <div class="poster-placeholder-mini">🎬</div>
+              }
+              <span>{{ item.titulo }}</span>
+            </div>
+          }
+        }
+      </div>
+      <div class="lista-columna">
+        <h3 class="lista-col-titulo">PENDIENTE</h3>
+        @if (contenidosPendientes.length === 0) {
+          <div class="empty-state-small">Sin contenido</div>
+        } @else {
+          @for (item of contenidosPendientes; track item.id) {
+            <div class="lista-item-mini">
+              @if (toPosterUrl(item.poster)) {
+                <img [src]="toPosterUrl(item.poster)" [alt]="item.titulo" />
+              } @else {
+                <div class="poster-placeholder-mini">🎬</div>
+              }
+              <span>{{ item.titulo }}</span>
+            </div>
+          }
+        }
+      </div>
+      <div class="lista-columna">
+        <h3 class="lista-col-titulo">COMPLETADO</h3>
+        @if (contenidosCompletadas.length === 0) {
+          <div class="empty-state-small">Sin contenido</div>
+        } @else {
+          @for (item of contenidosCompletadas; track item.id) {
+            <div class="lista-item-mini">
+              @if (toPosterUrl(item.poster)) {
+                <img [src]="toPosterUrl(item.poster)" [alt]="item.titulo" />
+              } @else {
+                <div class="poster-placeholder-mini">🎬</div>
+              }
+              <span>{{ item.titulo }}</span>
+            </div>
+          }
+        }
+      </div>
+    </div>
+
+    @if (listasPersonalizadas.length > 0) {
+      <div class="carrusel-wrapper">
+        <h3 class="carrusel-titulo">MIS LISTAS <span>PERSONALIZADAS</span></h3>
+        <div class="carrusel-container">
+          <button class="carrusel-btn" type="button" (click)="carruselAnterior()">‹</button>
+          <div class="carrusel-track">
+            @for (lista of listasPersonalizadasVisibles; track lista.id) {
+              <div
+                class="carrusel-card"
+                [routerLink]="['/lists', lista.id]"
+                style="cursor: pointer"
+              >
+                <span class="carrusel-nombre">{{ lista.nombre }}</span>
+                <span class="carrusel-ver">Ver →</span>
+              </div>
+            }
+          </div>
+          <button class="carrusel-btn" type="button" (click)="carruselSiguiente()">›</button>
+        </div>
       </div>
     }
   </div>

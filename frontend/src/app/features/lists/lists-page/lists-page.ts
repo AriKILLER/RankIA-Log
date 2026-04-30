@@ -1,6 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { LoadingComponent } from '../../../shared/loading/loading';
+import { FormsModule } from '@angular/forms';
 import { ContenidoService } from '../../../core/services/contenido';
 
 type ListTab = 'viendo' | 'pendientes' | 'completadas';
@@ -23,13 +24,13 @@ interface Lista {
 @Component({
   selector: 'app-lists-page',
   standalone: true,
-  imports: [LoadingComponent],
+  imports: [LoadingComponent, FormsModule],
   templateUrl: './lists-page.html',
   styleUrl: './lists-page.css',
 })
 export class ListsPage implements OnInit {
   private contenido = inject(ContenidoService);
-  private router = inject(Router);
+  router = inject(Router);
   private route = inject(ActivatedRoute);
 
   tabs: { key: ListTab; label: string }[] = [
@@ -41,6 +42,11 @@ export class ListsPage implements OnInit {
   activeTab: ListTab = 'viendo';
   loading = false;
   error = '';
+  listasPersonalizadas: any[] = [];
+  mostrarFormNuevaLista = false;
+  nombreNuevaLista = '';
+  errorNuevaLista = '';
+  loadingNuevaLista = false;
 
   listaIds: Record<ListTab, number | null> = {
     viendo: null,
@@ -79,6 +85,7 @@ export class ListsPage implements OnInit {
             if (nombre === 'pendiente') this.listaIds['pendientes'] = lista.id;
             if (nombre === 'completado') this.listaIds['completadas'] = lista.id;
           });
+          this.listasPersonalizadas = listas.filter((l: Lista) => l.tipo_lista === 'personalizada');
           this.cargarContenidosDeTab(this.activeTab);
         } else {
           this.error = 'Error al cargar las listas';
@@ -155,7 +162,33 @@ export class ListsPage implements OnInit {
   get currentItems(): ListItem[] {
     return this.items[this.activeTab];
   }
+  crearLista(): void {
+    if (!this.nombreNuevaLista.trim()) return;
+    this.loadingNuevaLista = true;
+    this.errorNuevaLista = '';
 
+    const fd = new FormData();
+    fd.append('action', 'crearLista');
+    fd.append('nombre', this.nombreNuevaLista.trim());
+    fd.append('tipo_lista', 'personalizada');
+
+    this.contenido.postParsed(fd).subscribe({
+      next: (res: any) => {
+        if (res?.success) {
+          this.nombreNuevaLista = '';
+          this.mostrarFormNuevaLista = false;
+          this.cargarListas();
+        } else {
+          this.errorNuevaLista = res?.message ?? 'Error al crear la lista';
+        }
+        this.loadingNuevaLista = false;
+      },
+      error: () => {
+        this.errorNuevaLista = 'Error al conectar con el servidor';
+        this.loadingNuevaLista = false;
+      },
+    });
+  }
   irADetalle(item: ListItem): void {
     this.router.navigate(['/content', item.tipo, item.externalId]);
   }

@@ -1,13 +1,14 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth';
 import { ContenidoService } from '../../../core/services/contenido';
 
 @Component({
   selector: 'app-profile-page',
   standalone: true,
-  imports: [RouterLink, DatePipe],
+imports: [RouterLink, DatePipe, FormsModule],
   templateUrl: './profile-page.html',
   styleUrl: './profile-page.css',
 })
@@ -19,6 +20,7 @@ export class ProfilePage implements OnInit {
   get user() {
     return this.auth.currentUser() ?? null;
   }
+  favoritos: any[] = [];
   resenas: any[] = [];
   todasResenas: any[] = [];
   mostrarTodas = false;
@@ -29,9 +31,63 @@ export class ProfilePage implements OnInit {
   totalPendientes = 0;
   totalCompletadas = 0;
 
+  contenidosViendo: any[] = [];
+  contenidosPendientes: any[] = [];
+  contenidosCompletadas: any[] = [];
+  listasPersonalizadas: any[] = [];
+  mostrarFormNuevaLista = false;
+  nombreNuevaLista = '';
+  errorNuevaLista = '';
+  loadingNuevaLista = false;
+  carruselIndex = 0;
+  carruselSize = 3;
+
+  get listasPersonalizadasVisibles(): any[] {
+    return this.listasPersonalizadas.slice(
+      this.carruselIndex,
+      this.carruselIndex + this.carruselSize,
+    );
+  }
+  crearLista(): void {
+    if (!this.nombreNuevaLista.trim()) return;
+    this.loadingNuevaLista = true;
+    this.errorNuevaLista = '';
+
+    const fd = new FormData();
+    fd.append('action', 'crearLista');
+    fd.append('nombre', this.nombreNuevaLista.trim());
+    fd.append('tipo_lista', 'personalizada');
+
+    this.contenido.postParsed(fd).subscribe({
+      next: (res: any) => {
+        if (res?.success) {
+          this.nombreNuevaLista = '';
+          this.mostrarFormNuevaLista = false;
+          this.cargarStatsListas();
+        } else {
+          this.errorNuevaLista = res?.message ?? 'Error al crear la lista';
+        }
+        this.loadingNuevaLista = false;
+      },
+      error: () => {
+        this.errorNuevaLista = 'Error al conectar con el servidor';
+        this.loadingNuevaLista = false;
+      },
+    });
+  }
+  carruselAnterior(): void {
+    if (this.carruselIndex > 0) this.carruselIndex--;
+  }
+
+  carruselSiguiente(): void {
+    if (this.carruselIndex + this.carruselSize < this.listasPersonalizadas.length)
+      this.carruselIndex++;
+  }
+
   ngOnInit(): void {
     this.cargarUltimasResenas();
     this.cargarStatsListas();
+    this.cargarFavoritos();
   }
 
   cargarUltimasResenas(): void {
@@ -75,6 +131,7 @@ export class ProfilePage implements OnInit {
           listas.forEach((lista: any) => {
             this.cargarConteoLista(lista.id, lista.nombre.toLowerCase());
           });
+          this.listasPersonalizadas = listas.filter((l: any) => l.tipo_lista === 'personalizada');
         }
       },
     });
@@ -87,10 +144,20 @@ export class ProfilePage implements OnInit {
 
     this.contenido.postParsed(fd).subscribe({
       next: (res: any) => {
-        const count = (res?.contenidos ?? []).length;
-        if (nombre === 'viendo') this.totalViendo = count;
-        if (nombre === 'pendiente') this.totalPendientes = count;
-        if (nombre === 'completado') this.totalCompletadas = count;
+        const contenidos = res?.contenidos ?? [];
+        const count = contenidos.length;
+        if (nombre === 'viendo') {
+          this.totalViendo = count;
+          this.contenidosViendo = contenidos.slice(0, 3);
+        }
+        if (nombre === 'pendiente') {
+          this.totalPendientes = count;
+          this.contenidosPendientes = contenidos.slice(0, 3);
+        }
+        if (nombre === 'completado') {
+          this.totalCompletadas = count;
+          this.contenidosCompletadas = contenidos.slice(0, 3);
+        }
       },
     });
   }
@@ -112,7 +179,19 @@ export class ProfilePage implements OnInit {
       },
     });
   }
+  cargarFavoritos(): void {
+    const fd = new FormData();
+    fd.append('action', 'obtenerResenaFavorita');
+    fd.append('limite', '6');
 
+    this.contenido.postParsed(fd).subscribe({
+      next: (res: any) => {
+        if (res?.success) {
+          this.favoritos = res.resena_favorita ?? [];
+        }
+      },
+    });
+  }
   verTodas(): void {
     this.mostrarTodas = true;
   }

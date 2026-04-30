@@ -1,1 +1,57 @@
-<p>list-detail works!</p>
+<div class="list-detail-container">
+  <div class="list-detail-header">
+    <div>
+      <a routerLink="/lists" class="btn-back">← Mis listas</a>
+      <h1>{{ nombreLista || 'Lista' }}</h1>
+    </div>
+    <button class="btn-danger" type="button" (click)="eliminarLista()">🗑️ Eliminar lista</button>
+  </div>
+
+  @if (loading) {
+    <div class="loading">Cargando...</div>
+  } @else if (error) {
+    <div class="empty-state">
+      <span>⚠️</span>
+      <p>{{ error }}</p>
+    </div>
+  } @else if (items.length === 0) {
+    <div class="empty-state">
+      <span>📋</span>
+      <p>Esta lista está vacía</p>
+      <small>Ve al catálogo y añade contenido desde el detalle.</small>
+      <a routerLink="/search" class="btn-primary">Ir al catálogo</a>
+    </div>
+  } @else {
+    <div class="grid">
+      @for (item of items; track item.contenidoId) {
+        <article class="content-card">
+          <div class="poster" (click)="irADetalle(item)" style="cursor: pointer">
+            @if (item.posterUrl) {
+              <img [src]="item.posterUrl" [alt]="item.titulo" />
+            } @else {
+              <div class="poster-placeholder">🎬</div>
+            }
+          </div>
+          <div class="card-body">
+            <div class="title-row">
+              <h3>{{ item.titulo }}</h3>
+              <span class="year">{{ item.fecha?.slice(0, 4) ?? '' }}</span>
+            </div>
+            <span class="tipo-badge">
+              {{ item.tipo === 'pelicula' ? '🎬 Película' : '📺 Serie' }}
+            </span>
+            <div class="card-actions">
+              <button class="btn-ghost" type="button" (click)="irADetalle(item)">Ver</button>
+              <button class="btn-ghost btn-quitar" type="button" (click)="quitarDeLista(item)">
+                🗑️ Quitar
+              </button>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  }
+  <div class="footer-nav">
+    <a routerLink="/profile" class="btn-secondary">← Volver al perfil</a>
+  </div>
+</div>
