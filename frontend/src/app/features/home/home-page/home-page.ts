@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth';
 import { ContenidoService } from '../../../core/services/contenido';
+import { DetalleResponse, PosterItem, RawDetalle } from '../../auth/models/models';
 
 @Component({
   selector: 'app-home-page',
@@ -14,7 +15,7 @@ export class HomePage implements OnInit {
   auth = inject(AuthService);
   contenido = inject(ContenidoService);
 
-  posters: { titulo: string; tipo: string; id: number; url: string | null }[] = [
+  posters: PosterItem[] = [
     { titulo: 'Breaking Bad', tipo: 'serie', id: 1396, url: null },
     { titulo: 'Oppenheimer', tipo: 'pelicula', id: 872585, url: null },
     { titulo: 'Dune', tipo: 'pelicula', id: 438631, url: null },
@@ -28,8 +29,8 @@ export class HomePage implements OnInit {
       fd.append('tipo', p.tipo);
 
       this.contenido.postParsed(fd).subscribe({
-        next: (res: any) => {
-          const d = res?.contenido ?? res?.detalle ?? res;
+        next: (res: DetalleResponse) => {
+          const d = res?.contenido ?? res?.detalle ?? (res as RawDetalle);
           const path = d?.poster ?? d?.poster_path ?? null;
           this.posters[i] = { ...this.posters[i], url: this.contenido.toPosterUrl(path) };
         },

@@ -1,7 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { ContenidoService } from '../../../core/services/contenido';
+import { RecuperacionContrasenaResponse } from '../models/models';
 
 @Component({
   selector: 'app-forgot-password',
@@ -12,7 +13,7 @@ import { HttpClient } from '@angular/common/http';
 })
 export class ForgotPassword {
   private fb = inject(FormBuilder);
-  private http = inject(HttpClient);
+  private contenido = inject(ContenidoService);
 
   form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -32,18 +33,12 @@ export class ForgotPassword {
     fd.append('action', 'solicitarRecuperacionContrasena');
     fd.append('email', this.form.getRawValue().email!);
 
-    this.http.post<any>('/api', fd, { responseType: 'text' as 'json' }).subscribe({
-      next: (raw: any) => {
-        try {
-          const clean = (raw as string).substring((raw as string).indexOf('{'));
-          const res = JSON.parse(clean);
-          if (res.success) {
-            this.success = true;
-          } else {
-            this.error = res.message || 'Error al enviar el correo';
-          }
-        } catch {
-          this.error = 'Error inesperado';
+    this.contenido.postParsed(fd).subscribe({
+      next: (res: RecuperacionContrasenaResponse) => {
+        if (res.success) {
+          this.success = true;
+        } else {
+          this.error = res.message ?? 'Error al enviar el correo';
         }
         this.loading = false;
       },

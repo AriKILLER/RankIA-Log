@@ -1,10 +1,18 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { DecimalPipe } from '@angular/common';
-import { map } from 'rxjs';
 import { LoadingComponent } from '../../shared/loading/loading';
 import { AuthService } from '../../core/services/auth';
+import { ContenidoService } from '../../core/services/contenido';
+import { ListaService } from '../../core/services/lista';
+import {
+  Lista,
+  RawDetalle,
+  ListasUsuarioResponse,
+  ContenidosListaResponse,
+  GuardarContenidoResponse,
+  DetalleResponse,
+} from '../../features/auth/models/models';
 
 type Tipo = 'pelicula' | 'serie';
 
@@ -18,10 +26,10 @@ type Tipo = 'pelicula' | 'serie';
 export class ContentDetail implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private http = inject(HttpClient);
+  private contenido = inject(ContenidoService);
+  private listas = inject(ListaService);
   auth = inject(AuthService);
 
-  private readonly API_URL = '/api';
   private readonly TMDB_IMG = 'https://image.tmdb.org/t/p/w780';
 
   loading = true;
@@ -39,15 +47,14 @@ export class ContentDetail implements OnInit {
   popularidad: number | null = null;
   contenidoId: number | null = null;
 
-  // IDs de listas predefinidas
   listaViendo: number | null = null;
   listaPendiente: number | null = null;
 
-  // Estado actual en listas
   enViendo = false;
   enPendiente = false;
   loadingLista = false;
-  listasPersonalizadas: any[] = [];
+
+  listasPersonalizadas: Lista[] = [];
   listasConContenido: number[] = [];
   mostrarDropdown = false;
 
@@ -72,21 +79,7 @@ export class ContentDetail implements OnInit {
     }
   }
 
-  private postParsed(formData: FormData) {
-    return this.http.post(this.API_URL, formData, { responseType: 'text' }).pipe(
-      map((text: string) => {
-        const cleaned = (text ?? '').replace(/^\uFEFF/, '').trim();
-        const first = cleaned.indexOf('{');
-        const last = cleaned.lastIndexOf('}');
-        if (first === -1 || last === -1 || last <= first) {
-          throw new Error('Respuesta sin JSON válido.');
-        }
-        return JSON.parse(cleaned.slice(first, last + 1));
-      }),
-    );
-  }
-
-  private toPosterUrl(posterPath: any): string | null {
+  private toPosterUrl(posterPath: string | null | undefined): string | null {
     if (!posterPath) return null;
     const s = String(posterPath);
     if (s.startsWith('http://') || s.startsWith('https://')) return s;
@@ -103,8 +96,8 @@ export class ContentDetail implements OnInit {
     fdBd.append('external_id', String(this.id));
     fdBd.append('tipo', this.tipo);
 
-    this.postParsed(fdBd).subscribe({
-      next: (res: any) => {
+    this.contenido.postParsed(fdBd).subscribe({
+      next: (res: DetalleResponse) => {
         if (res?.success && res?.detalle) {
           this.contenidoId = res.detalle.id ?? null;
           this.aplicarDetalle(res.detalle);
@@ -123,28 +116,28 @@ export class ContentDetail implements OnInit {
     fd.append('tmdbId', String(this.id));
     fd.append('tipo', this.tipo);
 
-    this.postParsed(fd).subscribe({
-      next: (res: any) => {
+    this.contenido.postParsed(fd).subscribe({
+      next: (res: DetalleResponse) => {
         if (res?.success === false) {
           this.error = res?.message ?? 'Error al cargar detalle';
           this.loading = false;
           return;
         }
-        const d = res?.contenido ?? res?.detalle ?? res;
-        this.aplicarDetalle(d);
+        const d = res?.detalle ?? res;
+        this.aplicarDetalle(d as RawDetalle);
         this.loading = false;
       },
-      error: (err: any) => {
+      error: (err: Error) => {
         this.error = err?.message ?? 'Error al cargar detalle';
         this.loading = false;
       },
     });
   }
 
-  private aplicarDetalle(d: any): void {
+  private aplicarDetalle(d: RawDetalle): void {
     this.titulo = d?.titulo ?? d?.title ?? d?.name ?? 'Sin título';
-    this.fecha = d?.fecha_lanzamiento ?? d?.release_date ?? d?.first_air_date ?? d?.fecha ?? null;
-    this.sinopsis = d?.sinopsis ?? d?.overview ?? d?.descripcion ?? '';
+    this.fecha = d?.fecha_lanzamiento ?? d?.release_date ?? d?.first_air_date ?? null;
+    this.sinopsis = d?.sinopsis ?? d?.overview ?? '';
     this.posterUrl = this.toPosterUrl(d?.poster ?? d?.poster_path ?? null);
     this.duracion = d?.duracion ?? d?.runtime ?? null;
     this.numeroTemporadas = d?.numero_temporadas ?? d?.number_of_seasons ?? null;
@@ -152,23 +145,22 @@ export class ContentDetail implements OnInit {
   }
 
   private cargarListas(): void {
-    const fd = new FormData();
-    fd.append('action', 'obtenerListasDeUsuario');
-
-    this.postParsed(fd).subscribe({
-      next: (res: any) => {
+    this.listas.obtenerListasDeUsuario().subscribe({
+      next: (res: ListasUsuarioResponse) => {
         if (res?.success) {
-          const listas = res.listas ?? [];
-          listas.forEach((lista: any) => {
+          const listasTodas: Lista[] = res.listas ?? [];
+          listasTodas.forEach((lista: Lista) => {
             const nombre = lista.nombre.toLowerCase();
             if (nombre === 'viendo') this.listaViendo = lista.id;
             if (nombre === 'pendiente') this.listaPendiente = lista.id;
           });
-          this.listasPersonalizadas = listas.filter((l: any) => l.tipo_lista === 'personalizada');
-          if (this.contenidoId) this.comprobarEnListas();
-          if (this.contenidoId) this.comprobarEnListasPersonalizadas();
-          // Comprobar si el contenido ya está en alguna lista
-          if (this.contenidoId) this.comprobarEnListas();
+          this.listasPersonalizadas = listasTodas.filter(
+            (l: Lista) => l.tipo_lista === 'personalizada',
+          );
+          if (this.contenidoId) {
+            this.comprobarEnListas();
+            this.comprobarEnListasPersonalizadas();
+          }
         }
       },
     });
@@ -176,38 +168,26 @@ export class ContentDetail implements OnInit {
 
   private comprobarEnListas(): void {
     if (this.listaViendo) {
-      const fd = new FormData();
-      fd.append('action', 'obtenerContenidosDeLista');
-      fd.append('lista_id', String(this.listaViendo));
-      this.postParsed(fd).subscribe({
-        next: (res: any) => {
-          const contenidos = res?.contenidos ?? [];
-          this.enViendo = contenidos.some((c: any) => Number(c.external_id) === this.id);
+      this.listas.obtenerContenidosDeLista(this.listaViendo).subscribe({
+        next: (res: ContenidosListaResponse) => {
+          this.enViendo = this.listas.estaContenidoEnLista(res?.contenidos ?? [], this.id);
         },
       });
     }
     if (this.listaPendiente) {
-      const fd = new FormData();
-      fd.append('action', 'obtenerContenidosDeLista');
-      fd.append('lista_id', String(this.listaPendiente));
-      this.postParsed(fd).subscribe({
-        next: (res: any) => {
-          const contenidos = res?.contenidos ?? [];
-          this.enPendiente = contenidos.some((c: any) => Number(c.external_id) === this.id);
+      this.listas.obtenerContenidosDeLista(this.listaPendiente).subscribe({
+        next: (res: ContenidosListaResponse) => {
+          this.enPendiente = this.listas.estaContenidoEnLista(res?.contenidos ?? [], this.id);
         },
       });
     }
   }
 
   private comprobarEnListasPersonalizadas(): void {
-    this.listasPersonalizadas.forEach((lista: any) => {
-      const fd = new FormData();
-      fd.append('action', 'obtenerContenidosDeLista');
-      fd.append('lista_id', String(lista.id));
-      this.postParsed(fd).subscribe({
-        next: (res: any) => {
-          const contenidos = res?.contenidos ?? [];
-          const estaEnLista = contenidos.some((c: any) => Number(c.external_id) === this.id);
+    this.listasPersonalizadas.forEach((lista: Lista) => {
+      this.listas.obtenerContenidosDeLista(lista.id).subscribe({
+        next: (res: ContenidosListaResponse) => {
+          const estaEnLista = this.listas.estaContenidoEnLista(res?.contenidos ?? [], this.id);
           if (estaEnLista && !this.listasConContenido.includes(lista.id)) {
             this.listasConContenido.push(lista.id);
           }
@@ -215,31 +195,32 @@ export class ContentDetail implements OnInit {
       });
     });
   }
+
   private guardarContenidoEnBd(): Promise<number> {
     return new Promise((resolve, reject) => {
-      const fd = new FormData();
-      fd.append('action', 'guardarDetalleEnBd');
-      fd.append('external_id', String(this.id));
-      fd.append('titulo', this.titulo);
-      fd.append('tipo', this.tipo);
-      fd.append('sinopsis', this.sinopsis);
-      fd.append('poster', this.posterUrl ?? '');
-      fd.append('fecha_lanzamiento', this.fecha ?? '');
-      fd.append('duracion', String(this.duracion ?? 0));
-      fd.append('numero_temporadas', String(this.numeroTemporadas ?? 0));
-      fd.append('popularidad', String(this.popularidad ?? 0));
-
-      this.postParsed(fd).subscribe({
-        next: (res: any) => {
-          if (res?.contenido_id) {
-            this.contenidoId = res.contenido_id;
-            resolve(res.contenido_id);
-          } else {
-            reject('No se pudo guardar el contenido');
-          }
-        },
-        error: () => reject('Error al guardar contenido'),
-      });
+      this.listas
+        .guardarContenidoEnBd(
+          this.id,
+          this.titulo,
+          this.tipo,
+          this.sinopsis,
+          this.posterUrl ?? '',
+          this.fecha ?? '',
+          this.duracion ?? 0,
+          this.numeroTemporadas ?? 0,
+          this.popularidad ?? 0,
+        )
+        .subscribe({
+          next: (res: GuardarContenidoResponse) => {
+            if (res?.contenido_id) {
+              this.contenidoId = res.contenido_id;
+              resolve(res.contenido_id);
+            } else {
+              reject('No se pudo guardar el contenido');
+            }
+          },
+          error: () => reject('Error al guardar contenido'),
+        });
     });
   }
 
@@ -248,10 +229,7 @@ export class ContentDetail implements OnInit {
       this.router.navigate(['/login']);
       return;
     }
-
     this.loadingLista = true;
-
-    // Guardar contenido en BD si no tenemos contenidoId
     if (!this.contenidoId) {
       try {
         await this.guardarContenidoEnBd();
@@ -260,23 +238,14 @@ export class ContentDetail implements OnInit {
         return;
       }
     }
-
     const listaId = tipo === 'viendo' ? this.listaViendo : this.listaPendiente;
     const enLista = tipo === 'viendo' ? this.enViendo : this.enPendiente;
-
     if (!listaId) {
       this.loadingLista = false;
       return;
     }
-
-    const action = enLista ? 'eliminarContenidoDeLista' : 'agregarContenidoALista';
-    const fd = new FormData();
-    fd.append('action', action);
-    fd.append('lista_id', String(listaId));
-    fd.append('contenido_id', String(this.contenidoId));
-
-    this.postParsed(fd).subscribe({
-      next: (res: any) => {
+    this.listas.toggleContenidoEnLista(listaId, this.contenidoId!, enLista).subscribe({
+      next: (res) => {
         if (res?.success) {
           if (tipo === 'viendo') this.enViendo = !this.enViendo;
           if (tipo === 'pendientes') this.enPendiente = !this.enPendiente;
@@ -288,7 +257,8 @@ export class ContentDetail implements OnInit {
       },
     });
   }
-  async toggleListaPersonalizada(lista: any): Promise<void> {
+
+  async toggleListaPersonalizada(lista: Lista): Promise<void> {
     if (!this.contenidoId) {
       try {
         await this.guardarContenidoEnBd();
@@ -296,17 +266,9 @@ export class ContentDetail implements OnInit {
         return;
       }
     }
-
     const estaEnLista = this.listasConContenido.includes(lista.id);
-    const action = estaEnLista ? 'eliminarContenidoDeLista' : 'agregarContenidoALista';
-
-    const fd = new FormData();
-    fd.append('action', action);
-    fd.append('lista_id', String(lista.id));
-    fd.append('contenido_id', String(this.contenidoId));
-
-    this.postParsed(fd).subscribe({
-      next: (res: any) => {
+    this.listas.toggleContenidoEnLista(lista.id, this.contenidoId!, estaEnLista).subscribe({
+      next: (res) => {
         if (res?.success) {
           if (estaEnLista) {
             this.listasConContenido = this.listasConContenido.filter((id) => id !== lista.id);
@@ -317,29 +279,29 @@ export class ContentDetail implements OnInit {
       },
     });
   }
+
   resenar(): void {
     if (!this.auth.isLoggedIn()) {
       this.router.navigate(['/login']);
       return;
     }
-
-    const fd = new FormData();
-    fd.append('action', 'guardarDetalleEnBd');
-    fd.append('external_id', String(this.id));
-    fd.append('titulo', this.titulo);
-    fd.append('tipo', this.tipo);
-    fd.append('sinopsis', this.sinopsis);
-    fd.append('poster', this.posterUrl ?? '');
-    fd.append('fecha_lanzamiento', this.fecha ?? '');
-    fd.append('duracion', String(this.duracion ?? 0));
-    fd.append('numero_temporadas', String(this.numeroTemporadas ?? 0));
-    fd.append('popularidad', String(this.popularidad ?? 0));
-
-    this.postParsed(fd).subscribe({
-      next: () =>
-        this.router.navigate(['/review/new'], { queryParams: { tipo: this.tipo, id: this.id } }),
-      error: () =>
-        this.router.navigate(['/review/new'], { queryParams: { tipo: this.tipo, id: this.id } }),
-    });
+    this.listas
+      .guardarContenidoEnBd(
+        this.id,
+        this.titulo,
+        this.tipo,
+        this.sinopsis,
+        this.posterUrl ?? '',
+        this.fecha ?? '',
+        this.duracion ?? 0,
+        this.numeroTemporadas ?? 0,
+        this.popularidad ?? 0,
+      )
+      .subscribe({
+        next: () =>
+          this.router.navigate(['/review/new'], { queryParams: { tipo: this.tipo, id: this.id } }),
+        error: () =>
+          this.router.navigate(['/review/new'], { queryParams: { tipo: this.tipo, id: this.id } }),
+      });
   }
 }

@@ -1,6 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
+import {
+  BackendResponse,
+  CatalogoResponse,
+  DetalleResponse,
+  RawCatalogoItem,
+} from '../../features/auth/models/models';
 
 export type CatalogoTipo = 'ambos' | 'pelicula' | 'serie';
 export type TipoContenido = 'pelicula' | 'serie';
@@ -11,7 +17,6 @@ export interface CatalogoItemUI {
   titulo: string;
   fecha: string | null;
   posterUrl: string | null;
-
   overview?: string;
   popularity?: number;
   voteAverage?: number;
@@ -25,8 +30,7 @@ export class ContenidoService {
 
   constructor(private http: HttpClient) {}
 
-  /** Helper para convertir poster_path -> URL completa */
-  toPosterUrl(posterPath: any): string | null {
+  toPosterUrl(posterPath: string | null | undefined): string | null {
     if (!posterPath) return null;
     const s = String(posterPath);
     if (s.startsWith('http://') || s.startsWith('https://')) return s;
@@ -34,8 +38,7 @@ export class ContenidoService {
     return `${this.TMDB_IMG}/${s}`;
   }
 
-  /** POST que devuelve texto, recorta JSON y lo parsea (por si hay warnings/BOM) */
-  postParsed(formData: FormData): Observable<any> {
+  postParsed(formData: FormData): Observable<BackendResponse> {
     return this.http.post(this.API_URL, formData, { responseType: 'text' }).pipe(
       map((text: string) => {
         const cleaned = (text ?? '').replace(/^\uFEFF/, '').trim();
@@ -45,12 +48,11 @@ export class ContenidoService {
           throw new Error('Respuesta sin JSON válido (no se encontró objeto JSON).');
         }
         const jsonStr = cleaned.slice(first, last + 1);
-        return JSON.parse(jsonStr);
+        return JSON.parse(jsonStr) as BackendResponse;
       }),
     );
   }
 
-  // ---------- CATALOGO TMDB (backend: obtenerCatalogoTmdb) ----------
   obtenerCatalogoTmdb(tipo: CatalogoTipo = 'ambos', pagina = 1): Observable<CatalogoItemUI[]> {
     const formData = new FormData();
     formData.append('action', 'obtenerCatalogoTmdb');
@@ -58,25 +60,22 @@ export class ContenidoService {
     formData.append('pagina', String(pagina));
 
     return this.postParsed(formData).pipe(
-      map((res: any) => {
+      map((res: CatalogoResponse) => {
         if (!res?.success) throw new Error(res?.message ?? 'Error del backend');
-
         const raw = res?.catalogo ?? [];
         if (!Array.isArray(raw)) return [];
-
-        return raw.map((it: any) => this.mapCatalogoToUI(it)).filter(Boolean) as CatalogoItemUI[];
+        return raw.map((it) => this.mapCatalogoToUI(it)).filter(Boolean) as CatalogoItemUI[];
       }),
     );
   }
 
-  private mapCatalogoToUI(it: any): CatalogoItemUI | null {
+  private mapCatalogoToUI(it: RawCatalogoItem): CatalogoItemUI | null {
     const externalId = Number(it?.tmdb_id ?? 0);
     if (!externalId || Number.isNaN(externalId)) return null;
 
     const tipo = (it?.tipo ?? '').toString();
     const titulo = (it?.titulo ?? 'Sin título').toString();
     const fecha = (it?.fecha ?? null) as string | null;
-
     const posterUrl = this.toPosterUrl(it?.poster_path ?? null);
 
     return {
@@ -92,27 +91,24 @@ export class ContenidoService {
     };
   }
 
-  // ---------- DETALLE BD (backend: obtenerDetalleDeBd) ----------
-  obtenerDetalleDeBd(external_id: number, tipo: TipoContenido): Observable<any> {
+  obtenerDetalleDeBd(external_id: number, tipo: TipoContenido): Observable<DetalleResponse> {
     const formData = new FormData();
     formData.append('action', 'obtenerDetalleDeBd');
     formData.append('external_id', String(external_id));
     formData.append('tipo', tipo);
 
-    return this.postParsed(formData);
+    return this.postParsed(formData) as Observable<DetalleResponse>;
   }
 
-  // ---------- DETALLE TMDB (backend: obtenerDetalleTmdb) ----------
-  obtenerDetalleTmdb(tmdbId: number, tipo: TipoContenido): Observable<any> {
+  obtenerDetalleTmdb(tmdbId: number, tipo: TipoContenido): Observable<DetalleResponse> {
     const formData = new FormData();
     formData.append('action', 'obtenerDetalleTmdb');
     formData.append('tmdbId', String(tmdbId));
     formData.append('tipo', tipo);
 
-    return this.postParsed(formData);
+    return this.postParsed(formData) as Observable<DetalleResponse>;
   }
 
-  // ---------- BUSCAR TMDB (backend: buscarContenidoTmdb) ----------
   buscarContenidoTmdb(
     texto: string,
     tipo: CatalogoTipo = 'ambos',
@@ -125,11 +121,11 @@ export class ContenidoService {
     formData.append('pagina', String(pagina));
 
     return this.postParsed(formData).pipe(
-      map((res: any) => {
+      map((res: CatalogoResponse) => {
         if (!res?.success) throw new Error(res?.message ?? 'Error del backend');
         const raw = res?.catalogo ?? [];
         if (!Array.isArray(raw)) return [];
-        return raw.map((it: any) => this.mapCatalogoToUI(it)).filter(Boolean) as CatalogoItemUI[];
+        return raw.map((it) => this.mapCatalogoToUI(it)).filter(Boolean) as CatalogoItemUI[];
       }),
     );
   }

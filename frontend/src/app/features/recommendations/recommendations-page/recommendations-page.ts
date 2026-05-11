@@ -1,8 +1,9 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { LoadingComponent } from '../../../shared/loading/loading';
-import { ContenidoService, CatalogoItemUI } from '../../../core/services/contenido';
-
+import { ContenidoService, CatalogoItemUI, CatalogoTipo } from '../../../core/services/contenido';
+import { ListaService } from '../../../core/services/lista';
+import { ResenasResponse, Resena } from '../../auth/models/models';
 @Component({
   selector: 'app-recommendations-page',
   standalone: true,
@@ -12,15 +13,15 @@ import { ContenidoService, CatalogoItemUI } from '../../../core/services/conteni
 })
 export class RecommendationsPage implements OnInit {
   private contenido = inject(ContenidoService);
+  private listaSvc = inject(ListaService);
   private router = inject(Router);
 
   catalogo: CatalogoItemUI[] = [];
   loading = false;
   error = '';
 
-  // Estadísticas para mostrar al usuario
-  tipoFavorito: string = '';
-  razonTexto: string = '';
+  tipoFavorito = '';
+  razonTexto = '';
 
   ngOnInit(): void {
     this.cargar();
@@ -31,23 +32,20 @@ export class RecommendationsPage implements OnInit {
     this.error = '';
     this.catalogo = [];
 
-    // Primero obtenemos las reseñas del usuario
     const fd = new FormData();
     fd.append('action', 'obtenerTodasResenasDeUsuario');
 
-    this.contenido.postParsed(fd).subscribe({
-      next: (res: any) => {
-        const resenas = res?.resenas ?? [];
-        this.aplicarReglas(resenas);
+    this.listaSvc['contenido'].postParsed(fd).subscribe({
+      next: (res: ResenasResponse) => {
+        this.aplicarReglas(res?.resenas ?? []);
       },
       error: () => {
-        // Si no hay sesión o falla, cargamos populares
         this.cargarPopulares('ambos');
       },
     });
   }
 
-  private aplicarReglas(resenas: any[]): void {
+  private aplicarReglas(resenas: Resena[]): void {
     if (resenas.length === 0) {
       this.razonTexto = 'Contenido popular para descubrir';
       this.tipoFavorito = 'ambos';
@@ -55,8 +53,7 @@ export class RecommendationsPage implements OnInit {
       return;
     }
 
-    // Reseñas con puntuación alta (4 o 5)
-    const altas = resenas.filter((r: any) => r.puntuacion >= 4);
+    const altas = resenas.filter((r: Resena) => r.puntuacion >= 4);
 
     if (altas.length === 0) {
       this.razonTexto = 'Contenido popular para descubrir';
@@ -65,11 +62,10 @@ export class RecommendationsPage implements OnInit {
       return;
     }
 
-    // Contamos qué tipo le gusta más
-    const peliculas = altas.filter((r: any) => r.tipo_contenido === 'pelicula').length;
-    const series = altas.filter((r: any) => r.tipo_contenido === 'serie').length;
+    const peliculas = altas.filter((r: Resena) => r.tipo_contenido === 'pelicula').length;
+    const series = altas.filter((r: Resena) => r.tipo_contenido === 'serie').length;
 
-    let tipo: 'pelicula' | 'serie' | 'ambos' = 'ambos';
+    let tipo: CatalogoTipo = 'ambos';
 
     if (peliculas > series) {
       tipo = 'pelicula';
@@ -88,11 +84,10 @@ export class RecommendationsPage implements OnInit {
     this.cargarPopulares(tipo);
   }
 
-  private cargarPopulares(tipo: 'pelicula' | 'serie' | 'ambos'): void {
+  private cargarPopulares(tipo: CatalogoTipo): void {
     this.contenido.obtenerCatalogoTmdb(tipo).subscribe({
-      next: (items) => {
-        const mezclado = items.sort(() => Math.random() - 0.5);
-        this.catalogo = mezclado.slice(0, 6);
+      next: (items: CatalogoItemUI[]) => {
+        this.catalogo = items.sort(() => Math.random() - 0.5).slice(0, 6);
         this.loading = false;
       },
       error: () => {

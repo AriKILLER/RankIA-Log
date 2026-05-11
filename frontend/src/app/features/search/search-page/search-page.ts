@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LoadingComponent } from '../../../shared/loading/loading';
@@ -11,7 +11,7 @@ import { ContenidoService, CatalogoItemUI, CatalogoTipo } from '../../../core/se
   templateUrl: './search-page.html',
   styleUrl: './search-page.css',
 })
-export class SearchPage {
+export class SearchPage implements OnInit {
   private contenido = inject(ContenidoService);
   private router = inject(Router);
 
@@ -28,6 +28,8 @@ export class SearchPage {
   loading = false;
   error = '';
 
+  private searchTimeout: ReturnType<typeof setTimeout> | null = null;
+
   ngOnInit(): void {
     this.cargarCatalogo();
   }
@@ -38,7 +40,7 @@ export class SearchPage {
     this.query = '';
 
     this.contenido.obtenerCatalogoTmdb(this.selectedFiltro).subscribe({
-      next: (items) => {
+      next: (items: CatalogoItemUI[]) => {
         this.catalogo = items;
         this.loading = false;
       },
@@ -58,23 +60,17 @@ export class SearchPage {
     }
   }
 
-  private searchTimeout: any = null;
-
   onSearch(): void {
     const q = this.query.trim();
 
-    if (this.searchTimeout) {
-      clearTimeout(this.searchTimeout);
-    }
+    if (this.searchTimeout) clearTimeout(this.searchTimeout);
 
     if (!q) {
       this.cargarCatalogo();
       return;
     }
 
-    this.searchTimeout = setTimeout(() => {
-      this.buscar();
-    }, 500);
+    this.searchTimeout = setTimeout(() => this.buscar(), 500);
   }
 
   private buscar(): void {
@@ -82,7 +78,7 @@ export class SearchPage {
     this.error = '';
 
     this.contenido.buscarContenidoTmdb(this.query.trim(), this.selectedFiltro).subscribe({
-      next: (items) => {
+      next: (items: CatalogoItemUI[]) => {
         this.catalogo = items;
         this.loading = false;
       },

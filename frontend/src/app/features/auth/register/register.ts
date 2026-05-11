@@ -40,7 +40,7 @@ export class Register {
             error: () => this.router.navigate(['/preferences']),
           });
         } else {
-          this.error = res.message;
+          this.error = res.message ?? 'Error al registrarse';
           this.loading = false;
         }
       },

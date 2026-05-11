@@ -2,8 +2,7 @@ import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap, map, catchError, of } from 'rxjs';
-import { User } from '../../features/auth/models/models';
-
+import { User, ApiResponse, RegisterResponse, LoginResponse, SesionActualResponse } from '../../features/auth/models/models';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly API_URL = '/api';
@@ -19,39 +18,38 @@ export class AuthService {
     private router: Router,
   ) {}
 
-  register(nombre: string, email: string, password: string): Observable<any> {
+  register(nombre: string, email: string, password: string): Observable<RegisterResponse> {
     const formData = new FormData();
     formData.append('action', 'registroUsuario');
     formData.append('nombre', nombre);
     formData.append('email', email);
     formData.append('password', password);
 
-    return this.http.post<any>(this.API_URL, formData);
+    return this.http.post<RegisterResponse>(this.API_URL, formData);
   }
 
-  login(email: string, password: string): Observable<any> {
+  login(email: string, password: string): Observable<LoginResponse> {
     const formData = new FormData();
     formData.append('action', 'inicioSesion');
     formData.append('email', email);
     formData.append('password', password);
 
-    return this.http.post<any>(this.API_URL, formData).pipe(
+    return this.http.post<LoginResponse>(this.API_URL, formData).pipe(
       tap((res) => {
-        if (res.success) this.persistSession(res.usuario);
+        if (res.success && res.usuario) this.persistSession(res.usuario);
       }),
     );
   }
 
-  /** NUEVO: pregunta al backend si hay sesión PHP activa */
   sesionActual(): Observable<User | null> {
     const formData = new FormData();
     formData.append('action', 'sesionActual');
 
-    return this.http.post<any>(this.API_URL, formData).pipe(
+    return this.http.post<SesionActualResponse>(this.API_URL, formData).pipe(
       map((res) => {
         if (res?.success && res?.usuario) {
-          this.persistSession(res.usuario as User);
-          return res.usuario as User;
+          this.persistSession(res.usuario);
+          return res.usuario;
         }
         this.clearSession();
         return null;
@@ -67,7 +65,7 @@ export class AuthService {
     const formData = new FormData();
     formData.append('action', 'cerrarSesion');
 
-    this.http.post<any>(this.API_URL, formData).subscribe();
+    this.http.post<ApiResponse>(this.API_URL, formData).subscribe();
     this.clearSession();
     this.router.navigate(['/']);
   }

@@ -1,8 +1,15 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { ContenidoService } from '../../../core/services/contenido';
+import { ListaService } from '../../../core/services/lista';
+import {
+  Lista,
+  Contenido,
+  ListasUsuarioResponse,
+  ContenidosListaResponse,
+  ListaAccionResponse,
+} from '../../auth/models/models';
 
-interface ListItem {
+export interface ListItem {
   contenidoId: number;
   externalId: number;
   tipo: string;
@@ -21,7 +28,7 @@ interface ListItem {
 export class ListDetail implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private contenido = inject(ContenidoService);
+  private listas = inject(ListaService);
 
   listaId = 0;
   nombreLista = '';
@@ -37,32 +44,25 @@ export class ListDetail implements OnInit {
   cargarContenidos(): void {
     this.loading = true;
 
-    const fd = new FormData();
-    fd.append('action', 'obtenerListasDeUsuario');
-
-    this.contenido.postParsed(fd).subscribe({
-      next: (res: any) => {
+    this.listas.obtenerListasDeUsuario().subscribe({
+      next: (res: ListasUsuarioResponse) => {
         if (res?.success) {
-          const lista = res.listas.find((l: any) => l.id === this.listaId);
+          const lista = (res.listas ?? []).find((l: Lista) => l.id === this.listaId);
           if (lista) this.nombreLista = lista.nombre;
         }
       },
     });
 
-    const fd2 = new FormData();
-    fd2.append('action', 'obtenerContenidosDeLista');
-    fd2.append('lista_id', String(this.listaId));
-
-    this.contenido.postParsed(fd2).subscribe({
-      next: (res: any) => {
+    this.listas.obtenerContenidosDeLista(this.listaId).subscribe({
+      next: (res: ContenidosListaResponse) => {
         if (res?.success) {
-          this.items = (res.contenidos ?? []).map((c: any) => ({
+          this.items = (res.contenidos ?? []).map((c: Contenido) => ({
             contenidoId: c.id,
             externalId: Number(c.external_id),
-            tipo: c.tipo,
-            titulo: c.titulo,
+            tipo: c.tipo ?? '',
+            titulo: c.titulo ?? '',
             fecha: c.fecha_lanzamiento ?? null,
-            posterUrl: this.contenido.toPosterUrl(c.poster ?? null),
+            posterUrl: this.listas.toPosterUrl(c.poster ?? null),
           }));
         }
         this.loading = false;
@@ -75,13 +75,8 @@ export class ListDetail implements OnInit {
   }
 
   quitarDeLista(item: ListItem): void {
-    const fd = new FormData();
-    fd.append('action', 'eliminarLista');
-    fd.append('id', String(this.listaId));
-    fd.append('contenido_id', String(item.contenidoId));
-
-    this.contenido.postParsed(fd).subscribe({
-      next: (res: any) => {
+    this.listas.toggleContenidoEnLista(this.listaId, item.contenidoId, true).subscribe({
+      next: (res: ListaAccionResponse) => {
         if (res?.success) {
           this.items = this.items.filter((i) => i.contenidoId !== item.contenidoId);
         }
@@ -92,12 +87,8 @@ export class ListDetail implements OnInit {
   eliminarLista(): void {
     if (!confirm('¿Seguro que quieres eliminar esta lista?')) return;
 
-    const fd = new FormData();
-    fd.append('action', 'eliminarLista');
-    fd.append('id', String(this.listaId));
-
-    this.contenido.postParsed(fd).subscribe({
-      next: (res: any) => {
+    this.listas.eliminarLista(this.listaId).subscribe({
+      next: (res: ListaAccionResponse) => {
         if (res?.success) {
           this.router.navigate(['/lists']);
         }
