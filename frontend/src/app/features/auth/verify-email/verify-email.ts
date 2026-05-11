@@ -1,7 +1,8 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { ContenidoService } from '../../../core/services/contenido';
+import { VerificarCorreoResponse } from '../models/models';
 
 @Component({
   selector: 'app-verify-email',
@@ -12,7 +13,7 @@ import { CommonModule } from '@angular/common';
 })
 export class VerifyEmail implements OnInit {
   private route = inject(ActivatedRoute);
-  private http = inject(HttpClient);
+  private contenido = inject(ContenidoService);
 
   loading = true;
   success = false;
@@ -31,18 +32,12 @@ export class VerifyEmail implements OnInit {
     fd.append('action', 'verificarCorreo');
     fd.append('token', token);
 
-    this.http.post<any>('/api', fd, { responseType: 'text' as 'json' }).subscribe({
-      next: (raw: any) => {
-        try {
-          const clean = (raw as string).substring((raw as string).indexOf('{'));
-          const res = JSON.parse(clean);
-          if (res.success) {
-            this.success = true;
-          } else {
-            this.error = res.message || 'No se pudo verificar la cuenta.';
-          }
-        } catch {
-          this.error = 'Error inesperado al verificar.';
+    this.contenido.postParsed(fd).subscribe({
+      next: (res: VerificarCorreoResponse) => {
+        if (res.success) {
+          this.success = true;
+        } else {
+          this.error = res.message ?? 'No se pudo verificar la cuenta.';
         }
         this.loading = false;
       },

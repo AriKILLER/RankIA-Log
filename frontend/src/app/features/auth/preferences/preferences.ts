@@ -1,7 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { ContenidoService } from '../../../core/services/contenido';
+import { PreferenciaResponse, Genero } from '../models/models';
 
 @Component({
   selector: 'app-preferences',
@@ -12,12 +13,10 @@ import { HttpClient } from '@angular/common/http';
 })
 export class Preferences {
   private fb = inject(FormBuilder);
-  private http = inject(HttpClient);
+  private contenido = inject(ContenidoService);
   private router = inject(Router);
 
-  private readonly API_URL = '/api';
-
-  generos = [
+  generos: Genero[] = [
     { id: 1, nombre: 'Acción' },
     { id: 2, nombre: 'Drama' },
     { id: 3, nombre: 'Comedia' },
@@ -62,20 +61,20 @@ export class Preferences {
     this.loading = true;
     this.error = '';
 
-    const formData = new FormData();
-    formData.append('action', 'crearPreferenciaUsuario');
-    formData.append('tipo_preferido', this.form.value.tipo_preferido!);
-    formData.append('duracion_preferida', this.form.value.duracion_preferida!);
-    formData.append('max_temporadas', this.form.value.max_temporadas!);
-    formData.append('preferencia_popularidad', this.form.value.preferencia_popularidad!);
-    formData.append('generos_ids', JSON.stringify(Array.from(this.selectedGeneros)));
+    const fd = new FormData();
+    fd.append('action', 'crearPreferenciaUsuario');
+    fd.append('tipo_preferido', this.form.value.tipo_preferido!);
+    fd.append('duracion_preferida', this.form.value.duracion_preferida!);
+    fd.append('max_temporadas', this.form.value.max_temporadas!);
+    fd.append('preferencia_popularidad', this.form.value.preferencia_popularidad!);
+    fd.append('generos_ids', JSON.stringify(Array.from(this.selectedGeneros)));
 
-    this.http.post<any>(this.API_URL, formData).subscribe({
-      next: (res) => {
+    this.contenido.postParsed(fd).subscribe({
+      next: (res: PreferenciaResponse) => {
         if (res.success) {
           this.router.navigate(['']);
         } else {
-          this.error = res.message;
+          this.error = res.message ?? 'Error al guardar preferencias';
           this.loading = false;
         }
       },

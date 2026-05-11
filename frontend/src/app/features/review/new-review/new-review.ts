@@ -1,10 +1,15 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { map } from 'rxjs';
 import { ContenidoService, CatalogoItemUI } from '../../../core/services/contenido';
+import { ListaService } from '../../../core/services/lista';
+import {
+  DetalleResponse,
+  RawDetalle,
+  GuardarContenidoResponse,
+  CrearResenaResponse,
+} from '../../auth/models/models';
 
 @Component({
   selector: 'app-new-review',
@@ -17,10 +22,8 @@ export class NewReview {
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-  private http = inject(HttpClient);
   private contenido = inject(ContenidoService);
-
-  private readonly API_URL = '/api';
+  private listaSvc = inject(ListaService);
 
   tipo: string = '';
   externalId: string = '';
@@ -29,8 +32,7 @@ export class NewReview {
   posterUrl: string | null = null;
   loadingDetalle = false;
 
-  // Búsqueda
-  busqueda = '';
+  busqueda: string = '';
   resultadosBusqueda: CatalogoItemUI[] = [];
   loadingBusqueda = false;
 
@@ -65,8 +67,8 @@ export class NewReview {
     fd.append('tipo', this.tipo);
 
     this.contenido.postParsed(fd).subscribe({
-      next: (res: any) => {
-        const d = res?.contenido ?? res?.detalle ?? res;
+      next: (res: DetalleResponse) => {
+        const d = res?.detalle ?? (res as RawDetalle);
         this.titulo = d?.titulo ?? d?.title ?? d?.name ?? '';
         this.posterUrl = this.contenido.toPosterUrl(d?.poster ?? d?.poster_path ?? null);
         this.loadingDetalle = false;
@@ -85,7 +87,7 @@ export class NewReview {
     this.resultadosBusqueda = [];
 
     this.contenido.buscarContenidoTmdb(q).subscribe({
-      next: (items) => {
+      next: (items: CatalogoItemUI[]) => {
         this.resultadosBusqueda = items.slice(0, 8);
         this.loadingBusqueda = false;
       },
@@ -114,20 +116,6 @@ export class NewReview {
     this.error = '';
   }
 
-  private postParsed(formData: FormData) {
-    return this.http.post(this.API_URL, formData, { responseType: 'text' }).pipe(
-      map((text: string) => {
-        const cleaned = (text ?? '').replace(/^\uFEFF/, '').trim();
-        const first = cleaned.indexOf('{');
-        const last = cleaned.lastIndexOf('}');
-        if (first === -1 || last === -1 || last <= first) {
-          throw new Error('Respuesta sin JSON válido.');
-        }
-        return JSON.parse(cleaned.slice(first, last + 1));
-      }),
-    );
-  }
-
   setStars(n: number): void {
     this.selectedStars = n;
     this.form.patchValue({ puntuacion: n });
@@ -154,57 +142,56 @@ export class NewReview {
     this.loading = true;
     this.error = '';
 
-    // Primero guardamos el contenido en BD para obtener el contenido_id
-    const fdGuardar = new FormData();
-    fdGuardar.append('action', 'guardarDetalleEnBd');
-    fdGuardar.append('external_id', this.externalId);
-    fdGuardar.append('titulo', this.titulo);
-    fdGuardar.append('tipo', this.tipo);
-    fdGuardar.append('sinopsis', '');
-    fdGuardar.append('poster', this.posterUrl ?? '');
-    fdGuardar.append('fecha_lanzamiento', '');
-    fdGuardar.append('duracion', '0');
-    fdGuardar.append('numero_temporadas', '0');
-    fdGuardar.append('popularidad', '0');
+    this.listaSvc
+      .guardarContenidoEnBd(
+        Number(this.externalId),
+        this.titulo,
+        this.tipo,
+        '',
+        this.posterUrl ?? '',
+        '',
+        0,
+        0,
+        0,
+      )
+      .subscribe({
+        next: (resGuardar: GuardarContenidoResponse) => {
+          const contenidoId = resGuardar?.contenido_id;
+          if (!contenidoId) {
+            this.error = 'Error al registrar el contenido';
+            this.loading = false;
+            return;
+          }
 
-    this.postParsed(fdGuardar).subscribe({
-      next: (resGuardar) => {
-        const contenidoId = resGuardar?.contenido_id;
-        if (!contenidoId) {
+          const fd = new FormData();
+          fd.append('action', 'crearResena');
+          fd.append('contenido_id', String(contenidoId));
+          fd.append('puntuacion', String(this.selectedStars));
+          fd.append('comentario', this.form.value.comentario!);
+
+          this.contenido.postParsed(fd).subscribe({
+            next: (res: CrearResenaResponse) => {
+              if (res.success) {
+                this.success = true;
+                setTimeout(() => this.router.navigate(['/profile']), 1500);
+              } else {
+                this.error = res.message ?? 'Error al publicar la reseña';
+                this.loading = false;
+              }
+            },
+            error: () => {
+              this.error = 'Error al conectar con el servidor';
+              this.loading = false;
+            },
+          });
+        },
+        error: () => {
           this.error = 'Error al registrar el contenido';
           this.loading = false;
-          return;
-        }
-
-        // Ahora creamos la reseña con el contenido_id real
-        const fd = new FormData();
-        fd.append('action', 'crearResena');
-        fd.append('contenido_id', String(contenidoId));
-        fd.append('puntuacion', String(this.selectedStars));
-        fd.append('comentario', this.form.value.comentario!);
-
-        this.postParsed(fd).subscribe({
-          next: (res) => {
-            if (res.success) {
-              this.success = true;
-              setTimeout(() => this.router.navigate(['/profile']), 1500);
-            } else {
-              this.error = res.message ?? 'Error al publicar la reseña';
-              this.loading = false;
-            }
-          },
-          error: () => {
-            this.error = 'Error al conectar con el servidor';
-            this.loading = false;
-          },
-        });
-      },
-      error: () => {
-        this.error = 'Error al registrar el contenido';
-        this.loading = false;
-      },
-    });
+        },
+      });
   }
+
   get comentario() {
     return this.form.get('comentario')!;
   }

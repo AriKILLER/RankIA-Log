@@ -11,42 +11,46 @@ import { AuthService } from '../../../core/services/auth';
   styleUrl: './login.css',
 })
 export class Login {
-  private fb     = inject(FormBuilder);
-  private auth   = inject(AuthService);
+  private fb = inject(FormBuilder);
+  private auth = inject(AuthService);
   private router = inject(Router);
 
   form = this.fb.group({
-    email:    ['', [Validators.required, Validators.email]],
+    email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required]],
   });
 
   loading = false;
-  error   = '';
+  error = '';
 
   onSubmit(): void {
     if (this.form.invalid) return;
 
     this.loading = true;
-    this.error   = '';
+    this.error = '';
 
     const { email, password } = this.form.getRawValue();
 
     this.auth.login(email!, password!).subscribe({
-      next: res => {
+      next: (res) => {
         if (res.success) {
           this.router.navigate(['']);
         } else {
-          this.error   = res.message;
+          this.error = res.message ?? 'Error al iniciar sesión';
           this.loading = false;
         }
       },
       error: () => {
-        this.error   = 'Error al conectar con el servidor';
+        this.error = 'Error al conectar con el servidor';
         this.loading = false;
-      }
+      },
     });
   }
 
-  get email()    { return this.form.get('email')!; }
-  get password() { return this.form.get('password')!; }
+  get email() {
+    return this.form.get('email')!;
+  }
+  get password() {
+    return this.form.get('password')!;
+  }
 }
