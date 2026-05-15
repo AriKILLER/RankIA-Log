@@ -70,7 +70,37 @@ class TmdbService{
             'popularity' => (float)($item['popularity'] ?? 0),
             'vote_average' => (float)($item['vote_average'] ?? 0),
             'genre_ids' => $item['genre_ids'] ?? [],
+            'duracion' => $tipo === 'pelicula'
+                ? (int)($item['runtime'] ?? 0)
+                : (int)(($item['episode_run_time'][0] ?? 0)),
+            'numero_temporadas' => $tipo === 'serie'
+                ? (int)($item['number_of_seasons'] ?? 0)
+                : 0,
         ];
+    }
+
+    private function completarDetalles(array $catalogo): array{
+        foreach ($catalogo as &$item) {
+            $tmdbId = (int)($item['tmdb_id'] ?? 0);
+            if ($tmdbId <= 0) {
+                continue;
+            }
+
+            if (($item['tipo'] ?? '') === 'pelicula' && empty($item['duracion'])) {
+                $detalle = $this->detallePelicula($tmdbId);
+                $item['duracion'] = (int)($detalle['runtime'] ?? 0);
+            }
+
+            if (($item['tipo'] ?? '') === 'serie' && empty($item['numero_temporadas'])) {
+                $detalle = $this->detalleSerie($tmdbId);
+                $item['numero_temporadas'] = (int)($detalle['number_of_seasons'] ?? 0);
+                if (empty($item['duracion'])) {
+                    $item['duracion'] = (int)($detalle['episode_run_time'][0] ?? 0);
+                }
+            }
+        }
+
+        return $catalogo;
     }
 
     public function buscarContenidoTmdb(string $texto, string $tipo = 'ambos', int $pagina = 1, int $limite = 100): array{
@@ -112,7 +142,8 @@ class TmdbService{
         }
 
         usort($catalogo, fn($a, $b) => $b['popularity'] <=> $a['popularity']);
-        return array_slice($catalogo, 0, $limite);
+        $catalogo = array_slice($catalogo, 0, $limite);
+        return $this->completarDetalles($catalogo);
     }
 
     public function obtenerCatalogoTmdb(string $tipo = 'ambos', int $pagina = 1, int $limite = 120, string $query = ''): array{
@@ -146,7 +177,8 @@ class TmdbService{
         }
         
         usort($catalogo, fn($a, $b) => $b['popularity'] <=> $a['popularity']);
-        return array_slice($catalogo, 0, $limite);
+        $catalogo = array_slice($catalogo, 0, $limite);
+        return $this->completarDetalles($catalogo);
     }
 }
 ?>

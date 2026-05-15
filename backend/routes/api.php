@@ -7,6 +7,7 @@ require_once __DIR__ . '/../app/middleware/Autenticacion.php';
 require_once __DIR__ . '/../app/controllers/ResenaController.php';
 require_once __DIR__ . '/../app/models/Usuario.php';
 require_once __DIR__ . '/../app/controllers/ListaController.php';
+require_once __DIR__ . '/../app/controllers/RecomendacionController.php';
 
 if(session_status() === PHP_SESSION_NONE){
     session_start();
@@ -19,6 +20,7 @@ $contenidoController = new ContenidoController();
 $resenaController = new ResenaController();
 $usuarioModel = new Usuario();
 $listaController = new ListaController();
+$recomendacionController = new RecomendacionController();
 header('Content-Type: application/json; charset=UTF-8');
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -562,6 +564,26 @@ if($method === 'POST' && $action === 'obtenerContenidosDeLista'){
         }
         $contenidos = $listaController->obtenerContenidosDeLista($lista_id);
         echo json_encode(['success' => true, 'contenidos' => $contenidos]);
+    }catch (Exception $e){
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+if($method === 'POST' && $action === 'obtenerRecomendaciones'){
+    try{
+        $autenticacion->verificarSesion();
+
+        $usuario_id = (int)$_SESSION['usuario_id'];
+        $tipo = $_POST['tipo'] ?? 'ambos';
+        $limite = (int)($_POST['limite'] ?? 6);
+
+        if($limite < 1 || $limite > 50){
+            throw new Exception("El limite debe estar entre 1 y 50.");
+        }
+
+        $recomendaciones = $recomendacionController->obtenerRecomendaciones($usuario_id, $tipo, $limite);
+
+        echo json_encode(['success' => true, 'recomendaciones' => $recomendaciones]);
     }catch (Exception $e){
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
