@@ -3,7 +3,8 @@ import { Router } from '@angular/router';
 import { LoadingComponent } from '../../../shared/loading/loading';
 import { ContenidoService, CatalogoItemUI, CatalogoTipo } from '../../../core/services/contenido';
 import { ListaService } from '../../../core/services/lista';
-import { ResenasResponse, Resena } from '../../auth/models/models';
+import { RecomendacionesResponse, RecomendacionItem } from '../../auth/models/models';
+
 @Component({
   selector: 'app-recommendations-page',
   standalone: true,
@@ -19,8 +20,6 @@ export class RecommendationsPage implements OnInit {
   catalogo: CatalogoItemUI[] = [];
   loading = false;
   error = '';
-
-  tipoFavorito = '';
   razonTexto = '';
 
   ngOnInit(): void {
@@ -33,55 +32,35 @@ export class RecommendationsPage implements OnInit {
     this.catalogo = [];
 
     const fd = new FormData();
-    fd.append('action', 'obtenerTodasResenasDeUsuario');
+    fd.append('action', 'obtenerRecomendaciones');
+    fd.append('limite', '6');
 
     this.listaSvc['contenido'].postParsed(fd).subscribe({
-      next: (res: ResenasResponse) => {
-        this.aplicarReglas(res?.resenas ?? []);
+      next: (res: RecomendacionesResponse) => {
+        if (res?.success && res.recomendaciones && res.recomendaciones.length > 0) {
+          this.razonTexto = 'Recomendaciones personalizadas basadas en tus preferencias y reseñas';
+          this.catalogo = res.recomendaciones.map((r: RecomendacionItem) => ({
+            externalId: r.contenido.tmdb_id,
+            tipo: r.contenido.tipo,
+            titulo: r.contenido.titulo,
+            fecha: r.contenido.fecha ?? null,
+            posterUrl: this.contenido.toPosterUrl(r.contenido.poster_path ?? null),
+            overview: r.contenido.overview,
+            popularity: r.contenido.popularity,
+            voteAverage: r.contenido.vote_average,
+          }));
+        } else {
+          this.razonTexto = 'Contenido popular para descubrir';
+          this.cargarPopulares('ambos');
+          return;
+        }
+        this.loading = false;
       },
       error: () => {
+        this.razonTexto = 'Contenido popular para descubrir';
         this.cargarPopulares('ambos');
       },
     });
-  }
-
-  private aplicarReglas(resenas: Resena[]): void {
-    if (resenas.length === 0) {
-      this.razonTexto = 'Contenido popular para descubrir';
-      this.tipoFavorito = 'ambos';
-      this.cargarPopulares('ambos');
-      return;
-    }
-
-    const altas = resenas.filter((r: Resena) => r.puntuacion >= 4);
-
-    if (altas.length === 0) {
-      this.razonTexto = 'Contenido popular para descubrir';
-      this.tipoFavorito = 'ambos';
-      this.cargarPopulares('ambos');
-      return;
-    }
-
-    const peliculas = altas.filter((r: Resena) => r.tipo_contenido === 'pelicula').length;
-    const series = altas.filter((r: Resena) => r.tipo_contenido === 'serie').length;
-
-    let tipo: CatalogoTipo = 'ambos';
-
-    if (peliculas > series) {
-      tipo = 'pelicula';
-      this.tipoFavorito = 'películas';
-      this.razonTexto = `Basado en tus ${peliculas} reseñas de películas con puntuación alta`;
-    } else if (series > peliculas) {
-      tipo = 'serie';
-      this.tipoFavorito = 'series';
-      this.razonTexto = `Basado en tus ${series} reseñas de series con puntuación alta`;
-    } else {
-      tipo = 'ambos';
-      this.tipoFavorito = 'películas y series';
-      this.razonTexto = `Basado en tus ${altas.length} reseñas con puntuación alta`;
-    }
-
-    this.cargarPopulares(tipo);
   }
 
   private cargarPopulares(tipo: CatalogoTipo): void {

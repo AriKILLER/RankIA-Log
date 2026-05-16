@@ -162,3 +162,27 @@ export interface GuardarContenidoResponse extends BackendResponse {
 }
 
 export interface CrearResenaResponse extends BackendResponse {}
+
+export interface RecomendacionContenido {
+  tmdb_id: number;
+  tipo: string;
+  titulo: string;
+  fecha?: string;
+  poster_path?: string;
+  overview?: string;
+  popularity?: number;
+  vote_average?: number;
+  duracion?: number;
+  numero_temporadas?: number;
+  genre_ids?: number[];
+}
+
+export interface RecomendacionItem {
+  contenido: RecomendacionContenido;
+  puntuacion: number;
+  motivo: string[];
+}
+
+export interface RecomendacionesResponse extends BackendResponse {
+  recomendaciones?: RecomendacionItem[];
+}
