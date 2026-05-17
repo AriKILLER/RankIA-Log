@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable, map, of } from 'rxjs';
 import {
   BackendResponse,
   CatalogoResponse,
   DetalleResponse,
+  RecomendacionesResponse,
   RawCatalogoItem,
 } from '../../features/auth/models/models';
 
@@ -27,6 +28,17 @@ export interface CatalogoItemUI {
 export class ContenidoService {
   private readonly API_URL = '/api';
   private readonly TMDB_IMG = 'https://image.tmdb.org/t/p/w500';
+
+  private readonly cacheCatalogo = new Map<string, CatalogoItemUI[]>();
+  private readonly cacheBusqueda = new Map<string, CatalogoItemUI[]>();
+  private readonly cacheRecomendaciones = new Map<string, RecomendacionesResponse>();
+
+  estadoBusqueda: {
+    catalogo: CatalogoItemUI[];
+    query: string;
+    filtro: CatalogoTipo;
+    scrollY: number;
+  } = { catalogo: [], query: '', filtro: 'ambos', scrollY: 0 };
 
   constructor(private http: HttpClient) {}
 
@@ -53,7 +65,16 @@ export class ContenidoService {
     );
   }
 
-  obtenerCatalogoTmdb(tipo: CatalogoTipo = 'ambos', pagina = 1): Observable<CatalogoItemUI[]> {
+  obtenerCatalogoTmdb(
+    tipo: CatalogoTipo = 'ambos',
+    pagina = 1,
+    useCache = true,
+  ): Observable<CatalogoItemUI[]> {
+    const cacheKey = `catalogo:${tipo}:${pagina}`;
+    if (useCache && this.cacheCatalogo.has(cacheKey)) {
+      return of(this.cacheCatalogo.get(cacheKey) ?? []);
+    }
+
     const formData = new FormData();
     formData.append('action', 'obtenerCatalogoTmdb');
     formData.append('tipo', tipo);
@@ -64,7 +85,11 @@ export class ContenidoService {
         if (!res?.success) throw new Error(res?.message ?? 'Error del backend');
         const raw = res?.catalogo ?? [];
         if (!Array.isArray(raw)) return [];
-        return raw.map((it) => this.mapCatalogoToUI(it)).filter(Boolean) as CatalogoItemUI[];
+        const mapped = raw
+          .map((it) => this.mapCatalogoToUI(it))
+          .filter(Boolean) as CatalogoItemUI[];
+        this.cacheCatalogo.set(cacheKey, mapped);
+        return mapped;
       }),
     );
   }
@@ -113,7 +138,13 @@ export class ContenidoService {
     texto: string,
     tipo: CatalogoTipo = 'ambos',
     pagina = 1,
+    useCache = true,
   ): Observable<CatalogoItemUI[]> {
+    const cacheKey = `buscar:${tipo}:${pagina}:${texto.trim().toLowerCase()}`;
+    if (useCache && this.cacheBusqueda.has(cacheKey)) {
+      return of(this.cacheBusqueda.get(cacheKey) ?? []);
+    }
+
     const formData = new FormData();
     formData.append('action', 'buscarContenidoTmdb');
     formData.append('texto', texto);
@@ -125,8 +156,44 @@ export class ContenidoService {
         if (!res?.success) throw new Error(res?.message ?? 'Error del backend');
         const raw = res?.catalogo ?? [];
         if (!Array.isArray(raw)) return [];
-        return raw.map((it) => this.mapCatalogoToUI(it)).filter(Boolean) as CatalogoItemUI[];
+        const mapped = raw
+          .map((it) => this.mapCatalogoToUI(it))
+          .filter(Boolean) as CatalogoItemUI[];
+        this.cacheBusqueda.set(cacheKey, mapped);
+        return mapped;
       }),
     );
+  }
+
+  obtenerRecomendaciones(
+    limite = 6,
+    tipo: CatalogoTipo = 'ambos',
+    useCache = true,
+  ): Observable<RecomendacionesResponse> {
+    const cacheKey = `recomendaciones:${tipo}:${limite}`;
+    if (useCache && this.cacheRecomendaciones.has(cacheKey)) {
+      return of(this.cacheRecomendaciones.get(cacheKey) as RecomendacionesResponse);
+    }
+
+    const formData = new FormData();
+    formData.append('action', 'obtenerRecomendaciones');
+    formData.append('limite', String(limite));
+    if (tipo !== 'ambos') {
+      formData.append('tipo', tipo);
+    }
+
+    return this.postParsed(formData).pipe(
+      map((res: RecomendacionesResponse) => {
+        if (res?.success) {
+          this.cacheRecomendaciones.set(cacheKey, res);
+        }
+        return res;
+      }),
+    ) as Observable<RecomendacionesResponse>;
+  }
+  limpiarCache(): void {
+    this.cacheCatalogo.clear();
+    this.cacheBusqueda.clear();
+    this.cacheRecomendaciones.clear();
   }
 }

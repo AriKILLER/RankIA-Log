@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LoadingComponent } from '../../../shared/loading/loading';
@@ -11,11 +11,15 @@ import { ContenidoService, CatalogoItemUI, CatalogoTipo } from '../../../core/se
   templateUrl: './search-page.html',
   styleUrl: './search-page.css',
 })
-export class SearchPage implements OnInit {
+export class SearchPage implements OnInit, OnDestroy {
   private contenido = inject(ContenidoService);
   private router = inject(Router);
 
   query = '';
+  selectedFiltro: CatalogoTipo = 'ambos';
+  catalogo: CatalogoItemUI[] = [];
+  loading = false;
+  error = '';
 
   filtros: { key: CatalogoTipo; label: string }[] = [
     { key: 'ambos', label: '🎭 Ambos' },
@@ -23,15 +27,27 @@ export class SearchPage implements OnInit {
     { key: 'serie', label: '📺 Series' },
   ];
 
-  selectedFiltro: CatalogoTipo = 'ambos';
-  catalogo: CatalogoItemUI[] = [];
-  loading = false;
-  error = '';
-
   private searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
   ngOnInit(): void {
-    this.cargarCatalogo();
+    const estado = this.contenido.estadoBusqueda;
+    if (estado.catalogo.length > 0) {
+      this.catalogo = estado.catalogo;
+      this.query = estado.query;
+      this.selectedFiltro = estado.filtro;
+      setTimeout(() => window.scrollTo(0, estado.scrollY), 0);
+    } else {
+      this.cargarCatalogo();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.contenido.estadoBusqueda = {
+      catalogo: this.catalogo,
+      query: this.query,
+      filtro: this.selectedFiltro,
+      scrollY: window.scrollY,
+    };
   }
 
   cargarCatalogo(): void {
@@ -62,14 +78,11 @@ export class SearchPage implements OnInit {
 
   onSearch(): void {
     const q = this.query.trim();
-
     if (this.searchTimeout) clearTimeout(this.searchTimeout);
-
     if (!q) {
       this.cargarCatalogo();
       return;
     }
-
     this.searchTimeout = setTimeout(() => this.buscar(), 500);
   }
 

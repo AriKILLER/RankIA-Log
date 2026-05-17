@@ -23,18 +23,29 @@ export class Register {
 
   loading = false;
   error = '';
+  mostrarPassword = false;
+  correoPendiente = false;
+  emailEnviado = '';
+
+  togglePassword(): void {
+    this.mostrarPassword = !this.mostrarPassword;
+  }
 
   onSubmit(): void {
     if (this.form.invalid) return;
 
     this.loading = true;
     this.error = '';
+    this.correoPendiente = false;
 
     const { nombre, email, password } = this.form.getRawValue();
 
     this.auth.register(nombre!, email!, password!).subscribe({
       next: (res) => {
         if (res.success) {
+          this.correoPendiente = true;
+          this.emailEnviado = email!;
+          this.loading = false;
           this.auth.sesionActual().subscribe({
             next: () => this.router.navigate(['/preferences']),
             error: () => this.router.navigate(['/preferences']),

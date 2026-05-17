@@ -139,3 +139,29 @@ form {
 .forgot-link a:hover {
   color: var(--accent);
 }
+.input-password {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-password input {
+  width: 100%;
+  padding-right: 2.8rem;
+}
+
+.btn-ojo {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 0;
+  line-height: 1;
+  color: var(--text-muted);
+}
+
+.btn-ojo:hover {
+  color: var(--text);
+}

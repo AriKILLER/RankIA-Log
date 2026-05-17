@@ -2,7 +2,6 @@ import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { LoadingComponent } from '../../../shared/loading/loading';
 import { ContenidoService, CatalogoItemUI, CatalogoTipo } from '../../../core/services/contenido';
-import { ListaService } from '../../../core/services/lista';
 import { RecomendacionesResponse, RecomendacionItem } from '../../auth/models/models';
 
 @Component({
@@ -14,7 +13,6 @@ import { RecomendacionesResponse, RecomendacionItem } from '../../auth/models/mo
 })
 export class RecommendationsPage implements OnInit {
   private contenido = inject(ContenidoService);
-  private listaSvc = inject(ListaService);
   private router = inject(Router);
 
   catalogo: CatalogoItemUI[] = [];
@@ -26,16 +24,15 @@ export class RecommendationsPage implements OnInit {
     this.cargar();
   }
 
-  cargar(): void {
+  cargar(useCache = true): void {
     this.loading = true;
     this.error = '';
     this.catalogo = [];
+    if (!useCache) {
+      this.contenido.limpiarCache();
+    }
 
-    const fd = new FormData();
-    fd.append('action', 'obtenerRecomendaciones');
-    fd.append('limite', '6');
-
-    this.listaSvc['contenido'].postParsed(fd).subscribe({
+    this.contenido.obtenerRecomendaciones(6, 'ambos', useCache).subscribe({
       next: (res: RecomendacionesResponse) => {
         if (res?.success && res.recomendaciones && res.recomendaciones.length > 0) {
           this.razonTexto = 'Recomendaciones personalizadas basadas en tus preferencias y reseñas';
@@ -49,12 +46,11 @@ export class RecommendationsPage implements OnInit {
             popularity: r.contenido.popularity,
             voteAverage: r.contenido.vote_average,
           }));
+          this.loading = false;
         } else {
           this.razonTexto = 'Contenido popular para descubrir';
           this.cargarPopulares('ambos');
-          return;
         }
-        this.loading = false;
       },
       error: () => {
         this.razonTexto = 'Contenido popular para descubrir';

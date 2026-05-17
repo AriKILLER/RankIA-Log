@@ -22,6 +22,11 @@ export class Login {
 
   loading = false;
   error = '';
+  mostrarPassword = false;
+
+  togglePassword(): void {
+    this.mostrarPassword = !this.mostrarPassword;
+  }
 
   onSubmit(): void {
     if (this.form.invalid) return;
