@@ -38,7 +38,7 @@ class RecomendacionController{
             $tipoFinal = 'ambos';
         }
 
-        $catalogo = $this->contenidoModel->obtenerCatalogoTmdb($tipoFinal, 1, 120, '');
+        $catalogo = $this->contenidoModel->obtenerCatalogoTmdb($tipoFinal, 1, 30, '', true);
 
         $perfilResenas = $this->construirPerfilResenas($usuario_id, 30);
 

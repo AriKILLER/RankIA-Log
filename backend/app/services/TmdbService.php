@@ -103,7 +103,7 @@ class TmdbService{
         return $catalogo;
     }
 
-    public function buscarContenidoTmdb(string $texto, string $tipo = 'ambos', int $pagina = 1, int $limite = 100): array{
+    public function buscarContenidoTmdb(string $texto, string $tipo = 'ambos', int $pagina = 1, int $limite = 60, bool $completarDetalles = false): array{
         $texto = trim($texto);
         if ($texto === '') {
             return [];
@@ -143,13 +143,13 @@ class TmdbService{
 
         usort($catalogo, fn($a, $b) => $b['popularity'] <=> $a['popularity']);
         $catalogo = array_slice($catalogo, 0, $limite);
-        return $this->completarDetalles($catalogo);
+        return $completarDetalles ? $this->completarDetalles($catalogo) : $catalogo;
     }
 
-    public function obtenerCatalogoTmdb(string $tipo = 'ambos', int $pagina = 1, int $limite = 120, string $query = ''): array{
+    public function obtenerCatalogoTmdb(string $tipo = 'ambos', int $pagina = 1, int $limite = 60, string $query = '', bool $completarDetalles = false): array{
         $query = trim($query);
         if ($query !== '') {
-            return $this->buscarContenidoTmdb($query, $tipo, $pagina, $limite);
+            return $this->buscarContenidoTmdb($query, $tipo, $pagina, $limite, $completarDetalles);
         }
 
         $pagina = max(1, $pagina);
@@ -178,7 +178,7 @@ class TmdbService{
         
         usort($catalogo, fn($a, $b) => $b['popularity'] <=> $a['popularity']);
         $catalogo = array_slice($catalogo, 0, $limite);
-        return $this->completarDetalles($catalogo);
+        return $completarDetalles ? $this->completarDetalles($catalogo) : $catalogo;
     }
 }
 ?>
