@@ -15,6 +15,7 @@ import {
 interface Resena {
   id: number;
   contenido_id: number;
+  external_id?: number | string;
   puntuacion: number;
   comentario?: string;
   fecha_creacion: string;
@@ -32,10 +33,6 @@ interface FavoritosResponse extends BackendResponse {
 }
 
 interface EliminarResenaResponse extends BackendResponse {}
-
-interface DetalleResponse extends BackendResponse {
-  detalle?: { external_id: string | number };
-}
 
 @Component({
   selector: 'app-profile-page',
@@ -212,18 +209,8 @@ export class ProfilePage implements OnInit {
   }
 
   verDetalle(resena: Resena): void {
-    const fd = new FormData();
-    fd.append('action', 'obtenerDetalleDeBd');
-    fd.append('external_id', String(resena.contenido_id));
-    fd.append('tipo', resena.tipo_contenido);
-
-    this.listaSvc['contenido'].postParsed(fd).subscribe({
-      next: (res: DetalleResponse) => {
-        if (res?.success && res.detalle?.external_id) {
-          this.router.navigate(['/content', resena.tipo_contenido, res.detalle.external_id]);
-        }
-      },
-    });
+    const id = resena.external_id ?? resena.contenido_id;
+    this.router.navigate(['/content', resena.tipo_contenido, id]);
   }
 
   verTodas(): void {

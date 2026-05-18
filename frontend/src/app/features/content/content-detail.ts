@@ -1,5 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Location } from '@angular/common';
 import { DecimalPipe } from '@angular/common';
 import { LoadingComponent } from '../../shared/loading/loading';
 import { AuthService } from '../../core/services/auth';
@@ -19,13 +20,14 @@ type Tipo = 'pelicula' | 'serie';
 @Component({
   selector: 'app-content-detail',
   standalone: true,
-  imports: [RouterLink, DecimalPipe, LoadingComponent],
+  imports: [DecimalPipe, LoadingComponent],
   templateUrl: './content-detail.html',
   styleUrl: './content-detail.css',
 })
 export class ContentDetail implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private location = inject(Location);
   private contenido = inject(ContenidoService);
   private listas = inject(ListaService);
   auth = inject(AuthService);
@@ -303,5 +305,8 @@ export class ContentDetail implements OnInit {
         error: () =>
           this.router.navigate(['/review/new'], { queryParams: { tipo: this.tipo, id: this.id } }),
       });
+  }
+  volver(): void {
+    this.location.back();
   }
 }

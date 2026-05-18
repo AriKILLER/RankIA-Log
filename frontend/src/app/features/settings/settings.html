@@ -26,15 +26,65 @@
           <span class="settings-item-title">Nombre de usuario</span>
           <span class="settings-item-value">{{ user?.nombre }}</span>
         </div>
-        <button class="btn-ghost" disabled>Próximamente</button>
+        <button class="btn-ghost" type="button" (click)="abrirEditarNombre()">Editar</button>
       </div>
+      @if (editandoNombre) {
+        <div class="settings-edit-form">
+          <input type="text" [formControl]="nombre" placeholder="Nuevo nombre" />
+          @if (nombre.invalid && nombre.touched) {
+            <span class="error">Mínimo 3 caracteres</span>
+          }
+          @if (errorNombre) {
+            <span class="error">{{ errorNombre }}</span>
+          }
+          <div class="edit-actions">
+            <button
+              class="btn-primary"
+              type="button"
+              (click)="guardarNombre()"
+              [disabled]="loadingNombre || nombre.invalid"
+            >
+              {{ loadingNombre ? 'Guardando...' : 'Guardar' }}
+            </button>
+            <button class="btn-secondary" type="button" (click)="editandoNombre = false">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      }
+
       <div class="settings-item">
         <div class="settings-item-info">
           <span class="settings-item-title">Email</span>
           <span class="settings-item-value">{{ user?.email }}</span>
         </div>
-        <button class="btn-ghost" disabled>Próximamente</button>
+        <button class="btn-ghost" type="button" (click)="abrirEditarEmail()">Editar</button>
       </div>
+      @if (editandoEmail) {
+        <div class="settings-edit-form">
+          <input type="email" [formControl]="email" placeholder="Nuevo email" />
+          @if (email.invalid && email.touched) {
+            <span class="error">Email inválido</span>
+          }
+          @if (errorEmail) {
+            <span class="error">{{ errorEmail }}</span>
+          }
+          <div class="edit-actions">
+            <button
+              class="btn-primary"
+              type="button"
+              (click)="guardarEmail()"
+              [disabled]="loadingEmail || email.invalid"
+            >
+              {{ loadingEmail ? 'Guardando...' : 'Guardar' }}
+            </button>
+            <button class="btn-secondary" type="button" (click)="editandoEmail = false">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      }
+
       <div class="settings-item">
         <div class="settings-item-info">
           <span class="settings-item-title">Contraseña</span>
@@ -42,13 +92,37 @@
         </div>
         <a routerLink="/forgot-password" class="btn-ghost">Cambiar</a>
       </div>
+
       <div class="settings-item">
         <div class="settings-item-info">
           <span class="settings-item-title">Foto de perfil</span>
           <span class="settings-item-value">Avatar con inicial</span>
         </div>
-        <button class="btn-ghost" disabled>Próximamente</button>
+        <button class="btn-ghost" type="button" (click)="editandoFoto = !editandoFoto">
+          Editar
+        </button>
       </div>
+      @if (editandoFoto) {
+        <div class="settings-edit-form">
+          <input type="file" accept="image/*" (change)="onFotoSeleccionada($event)" />
+          @if (errorFoto) {
+            <span class="error">{{ errorFoto }}</span>
+          }
+          <div class="edit-actions">
+            <button
+              class="btn-primary"
+              type="button"
+              (click)="guardarFoto()"
+              [disabled]="loadingFoto || !fotoSeleccionada"
+            >
+              {{ loadingFoto ? 'Subiendo...' : 'Subir foto' }}
+            </button>
+            <button class="btn-secondary" type="button" (click)="editandoFoto = false">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      }
     </div>
   </div>
 
