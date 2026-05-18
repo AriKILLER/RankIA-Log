@@ -35,7 +35,6 @@ export class SearchPage implements OnInit, OnDestroy {
       this.catalogo = estado.catalogo;
       this.query = estado.query;
       this.selectedFiltro = estado.filtro;
-      setTimeout(() => window.scrollTo(0, estado.scrollY), 0);
     } else {
       this.cargarCatalogo();
     }
@@ -46,7 +45,7 @@ export class SearchPage implements OnInit, OnDestroy {
       catalogo: this.catalogo,
       query: this.query,
       filtro: this.selectedFiltro,
-      scrollY: window.scrollY,
+      scrollY: 0,
     };
   }
 

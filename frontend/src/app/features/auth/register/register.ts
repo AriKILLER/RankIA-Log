@@ -47,8 +47,8 @@ export class Register {
           this.emailEnviado = email!;
           this.loading = false;
           this.auth.sesionActual().subscribe({
-            next: () => this.router.navigate(['/preferences']),
-            error: () => this.router.navigate(['/preferences']),
+            next: () => setTimeout(() => this.router.navigate(['/preferences']), 6000),
+            error: () => setTimeout(() => this.router.navigate(['/preferences']), 6000),
           });
         } else {
           this.error = res.message ?? 'Error al registrarse';

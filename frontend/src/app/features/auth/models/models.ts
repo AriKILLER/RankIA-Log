@@ -141,6 +141,7 @@ export interface PosterItem {
 export interface Resena {
   id: number;
   contenido_id: number;
+  external_id?: number | string;
   puntuacion: number;
   comentario?: string;
   fecha_creacion: string;
