@@ -4,12 +4,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ContenidoService, CatalogoItemUI } from '../../../core/services/contenido';
 import { ListaService } from '../../../core/services/lista';
-import {
-  DetalleResponse,
-  RawDetalle,
-  GuardarContenidoResponse,
-  CrearResenaResponse,
-} from '../../auth/models/models';
+import { DetalleResponse, RawDetalle, CrearResenaResponse } from '../../auth/models/models';
 
 @Component({
   selector: 'app-new-review',
@@ -23,7 +18,6 @@ export class NewReview {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private contenido = inject(ContenidoService);
-  private listaSvc = inject(ListaService);
 
   tipo: string = '';
   externalId: string = '';
@@ -142,54 +136,28 @@ export class NewReview {
     this.loading = true;
     this.error = '';
 
-    this.listaSvc
-      .guardarContenidoEnBd(
-        Number(this.externalId),
-        this.titulo,
-        this.tipo,
-        '',
-        this.posterUrl ?? '',
-        '',
-        0,
-        0,
-        0,
-      )
-      .subscribe({
-        next: (resGuardar: GuardarContenidoResponse) => {
-          const contenidoId = resGuardar?.contenido_id;
-          if (!contenidoId) {
-            this.error = 'Error al registrar el contenido';
-            this.loading = false;
-            return;
-          }
+    const fd = new FormData();
+    fd.append('action', 'crearResena');
+    fd.append('external_id', String(this.externalId));
+    fd.append('tipo', this.tipo);
+    fd.append('puntuacion', String(this.selectedStars));
+    fd.append('comentario', this.form.value.comentario!);
 
-          const fd = new FormData();
-          fd.append('action', 'crearResena');
-          fd.append('contenido_id', String(contenidoId));
-          fd.append('puntuacion', String(this.selectedStars));
-          fd.append('comentario', this.form.value.comentario!);
-
-          this.contenido.postParsed(fd).subscribe({
-            next: (res: CrearResenaResponse) => {
-              if (res.success) {
-                this.success = true;
-                setTimeout(() => this.router.navigate(['/profile']), 1500);
-              } else {
-                this.error = res.message ?? 'Error al publicar la reseña';
-                this.loading = false;
-              }
-            },
-            error: () => {
-              this.error = 'Error al conectar con el servidor';
-              this.loading = false;
-            },
-          });
-        },
-        error: () => {
-          this.error = 'Error al registrar el contenido';
+    this.contenido.postParsed(fd).subscribe({
+      next: (res: CrearResenaResponse) => {
+        if (res.success) {
+          this.success = true;
+          setTimeout(() => this.router.navigate(['/profile']), 1500);
+        } else {
+          this.error = res.message ?? 'Error al publicar la reseña';
           this.loading = false;
-        },
-      });
+        }
+      },
+      error: () => {
+        this.error = 'Error al conectar con el servidor';
+        this.loading = false;
+      },
+    });
   }
 
   get comentario() {

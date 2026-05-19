@@ -158,10 +158,6 @@ export interface FavoritosResponse extends BackendResponse {
   resena_favorita?: Resena[];
 }
 
-export interface GuardarContenidoResponse extends BackendResponse {
-  contenido_id?: number;
-}
-
 export interface CrearResenaResponse extends BackendResponse {}
 
 export interface RecomendacionContenido {
