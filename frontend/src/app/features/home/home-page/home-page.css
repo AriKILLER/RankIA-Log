@@ -337,3 +337,90 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+@media (max-width: 900px) {
+  .hero {
+    flex-direction: column;
+    padding: 3rem 2rem;
+    gap: 2.5rem;
+    min-height: unset;
+    text-align: center;
+  }
+
+  .hero-content {
+    max-width: 100%;
+  }
+
+  .hero-content h1 {
+    font-size: 3.5rem;
+  }
+
+  .hero-desc {
+    max-width: 100%;
+  }
+
+  .hero-actions {
+    justify-content: center;
+  }
+
+  .hero-cards {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .card {
+    width: 110px;
+  }
+
+  .card-featured {
+    width: 130px;
+  }
+
+  .card-poster {
+    height: 160px;
+  }
+
+  .features {
+    padding: 2.5rem 2rem;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero {
+    padding: 2rem 1.25rem;
+  }
+
+  .hero-content h1 {
+    font-size: 2.8rem;
+  }
+
+  .hero-cards {
+    gap: 0.6rem;
+  }
+
+  .card {
+    width: 90px;
+  }
+
+  .card-featured {
+    width: 110px;
+  }
+
+  .card-poster {
+    height: 130px;
+  }
+
+  .card-info {
+    padding: 0.5rem;
+  }
+
+  .card-title {
+    font-size: 0.7rem;
+  }
+
+  .features {
+    flex-direction: column;
+    padding: 2rem 1.25rem;
+  }
+}

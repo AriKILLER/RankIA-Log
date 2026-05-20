@@ -368,3 +368,59 @@ form {
   background: #c1121f;
   transform: translateY(-1px);
 }
+
+@media (max-width: 640px) {
+  .review-container {
+    padding: 1.25rem;
+    align-items: flex-start;
+  }
+
+  .review-box {
+    padding: 2rem 1.25rem;
+    gap: 1.5rem;
+  }
+
+  .review-header h1 {
+    font-size: 2rem;
+  }
+
+  .review-content-info {
+    gap: 1rem;
+  }
+
+  .review-poster {
+    width: 55px;
+    height: 82px;
+  }
+
+  .review-content-titulo {
+    font-size: 1.4rem;
+  }
+
+  .stars-container {
+    gap: 0.35rem;
+  }
+
+  .star {
+    font-size: 1.75rem;
+  }
+
+  .search-bar {
+    flex-direction: column;
+  }
+
+  .btn-buscar {
+    width: 100%;
+    padding: 0.75rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions .btn-primary,
+  .form-actions .btn-secondary {
+    width: 100%;
+    text-align: center;
+  }
+}

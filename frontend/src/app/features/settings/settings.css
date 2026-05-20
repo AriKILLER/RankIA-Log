@@ -332,3 +332,46 @@
   gap: 0.5rem;
   margin-top: 0.25rem;
 }
+
+@media (max-width: 640px) {
+  .settings-header h1 {
+    font-size: 2rem;
+  }
+
+  .settings-card {
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  .settings-card .btn-secondary {
+    width: 100%;
+    text-align: center;
+  }
+
+  .settings-item {
+    gap: 0.75rem;
+  }
+
+  .settings-item .btn-ghost,
+  .settings-item .btn-primary,
+  .settings-item a.btn-ghost {
+    width: 100%;
+    text-align: center;
+  }
+
+  .edit-actions {
+    flex-direction: column;
+  }
+
+  .edit-actions .btn-primary,
+  .edit-actions .btn-secondary {
+    width: 100%;
+    text-align: center;
+  }
+
+  .ticket-success {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
