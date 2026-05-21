@@ -107,5 +107,121 @@ class EmailService{
             return false;
         }
     }
+
+  public function enviarCorreoRecuperacion(string $destinatario, string $token){
+    $frontendUrl = $this->emailConfig['frontend_url'];
+    $enlace = $frontendUrl . '/reset-password?token=' . urlencode($token);
+    $this->phpmailer->clearAddresses();
+    $asunto = "Recuperación de contraseña en RankIA-Log";
+    $cuerpo = "<body style=\"margin:0;padding:0;background-color:#0d0d0d;font-family:'Segoe UI',Arial,sans-serif;\">
+  <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#0d0d0d;padding:40px 20px;\">
+    <tr>
+      <td align=\"center\">
+        <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"max-width:520px;background-color:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;overflow:hidden;\">
+
+          <!-- Header -->
+          <tr>
+            <td style=\"background-color:#e63946;padding:6px 0;\"></td>
+          </tr>
+          <tr>
+            <td align=\"center\" style=\"padding:40px 40px 24px 40px;\">
+              <h1 style=\"margin:0;font-size:2rem;letter-spacing:4px;color:#ffffff;font-family:'Arial Black',Arial,sans-serif;\">
+                RANK<span style=\"color:#e63946;\">IA</span> LOG
+              </h1>
+              <p style=\"margin:8px 0 0 0;font-size:0.8rem;color:#888888;letter-spacing:0.1em;text-transform:uppercase;\">
+                Tu diario de contenido audiovisual
+              </p>
+            </td>
+          </tr>
+
+          <!-- Icon -->
+          <tr>
+            <td align=\"center\" style=\"padding:0 40px 16px 40px;\">
+              <div style=\"font-size:3rem;\">🔐</div>
+            </td>
+          </tr>
+
+          <!-- Title -->
+          <tr>
+            <td align=\"center\" style=\"padding:0 40px 16px 40px;\">
+              <h2 style=\"margin:0;font-size:1.5rem;letter-spacing:2px;color:#ffffff;font-family:'Arial Black',Arial,sans-serif;\">
+                RECUPERA TU <span style=\"color:#e63946;\">CONTRASEÑA</span>
+              </h2>
+            </td>
+          </tr>
+<!-- Body -->
+          <tr>
+            <td style=\"padding:0 40px 32px 40px;\">
+              <p style=\"margin:0 0 16px 0;font-size:0.95rem;color:#cccccc;line-height:1.7;text-align:center;\">
+                Hemos recibido una solicitud para restablecer la contraseña de tu cuenta. Haz clic en el botón de abajo para crear una nueva contraseña.
+              </p>
+              <p style=\"margin:0 0 32px 0;font-size:0.85rem;color:#888888;line-height:1.6;text-align:center;\">
+                Si no has solicitado este cambio, puedes ignorar este correo. Tu contraseña no será modificada.
+              </p>
+              <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">
+                <tr>
+                  <td align=\"center\">
+                    <a href=\"{{RESET_URL}}\"
+                       style=\"display:inline-block;background-color:#e63946;color:#ffffff;text-decoration:none;padding:14px 40px;border-radius:6px;font-family:'Arial Black',Arial,sans-serif;font-size:1rem;letter-spacing:2px;text-transform:uppercase;\">
+                      RESTABLECER CONTRASEÑA
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Token info -->
+          <tr>
+            <td style=\"padding:0 40px 32px 40px;\">
+              <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background-color:#111111;border:1px solid #2a2a2a;border-radius:6px;\">
+                <tr>
+                  <td style=\"padding:16px 20px;\">
+                    <p style=\"margin:0 0 4px 0;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:#888888;\">
+                      ⏱ Este enlace expira en
+                    </p>
+                    <p style=\"margin:0;font-size:0.95rem;color:#ffffff;font-weight:600;\">
+                      3 días
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+<!-- Footer -->
+          <tr>
+            <td style=\"background-color:#111111;border-top:1px solid #2a2a2a;padding:20px 40px;text-align:center;\">
+              <p style=\"margin:0;font-size:0.78rem;color:#666666;line-height:1.6;\">
+                Si el botón no funciona, copia y pega este enlace en tu navegador:<br/>
+                <span style=\"color:#e63946;word-break:break-all;\">{{RESET_URL}}</span>
+              </p>
+              <p style=\"margin:12px 0 0 0;font-size:0.75rem;color:#444444;\">
+                © RankIA Log · Proyecto Fin de Ciclo DAW
+              </p>
+            </td>
+          </tr>
+
+          <!-- Bottom bar -->
+          <tr>
+            <td style=\"background-color:#e63946;padding:4px 0;\"></td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>";
+$cuerpo = str_replace('{{RESET_URL}}', $enlace, $cuerpo);
+      try{
+          $this->phpmailer->addAddress($destinatario);
+            $this->phpmailer->Subject = $asunto;
+            $this->phpmailer->Body = $cuerpo;
+            if($this->phpmailer->send()){
+              return true;
+            }
+          }catch (Exception $e){
+            return false;
+          }
+    }
     
 }

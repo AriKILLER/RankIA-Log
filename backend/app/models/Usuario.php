@@ -48,5 +48,34 @@ class Usuario extends Model{
         return $stmt->rowCount() > 0; // Devuelve true si se actualizó el usuario, lo que indica que se verificó el correo, de lo contrario false
     }
 
+    public function actualizarNombre(int $usuario_id, string $nuevo_nombre){
+        $sql = "UPDATE usuarios SET nombre = :nuevo_nombre WHERE id = :usuario_id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            ':nuevo_nombre' => $nuevo_nombre,
+            ':usuario_id' => $usuario_id
+        ]);
+        return $stmt->rowCount() > 0;
+    }
+
+    public function actualizarContra(int $usuario_id, string $nueva_contra_hash){
+        $sql = "UPDATE usuarios SET password_hash = :nueva_contra_hash WHERE id = :usuario_id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            ':nueva_contra_hash' => $nueva_contra_hash,
+            ':usuario_id' => $usuario_id
+        ]);
+        return $stmt->rowCount() > 0;
+    }
+
+    public function actualizarEmail(int $usuario_id, string $nuevo_email){
+        $sql = "UPDATE usuarios SET email = :nuevo_email, email_verificado = FALSE WHERE id = :usuario_id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            ':nuevo_email' => $nuevo_email,
+            ':usuario_id' => $usuario_id
+        ]);
+        return $stmt->rowCount() > 0;
+    }
 
 }
