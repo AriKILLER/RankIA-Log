@@ -22,7 +22,7 @@ class Resena extends Model{
     }
 
     public function obtenerTodasResenasDeUsuario(int $usuario_id){
-        $sql = "SELECT r.*, u.nombre AS nombre_usuario, c.titulo AS titulo_contenido, c.poster AS poster_contenido, c.tipo AS tipo_contenido FROM resenas r JOIN usuarios u ON r.usuario_id = u.id JOIN contenidos c ON r.contenido_id = c.id WHERE r.usuario_id = :usuario_id ORDER BY r.fecha_creacion DESC";
+        $sql = "SELECT r.*, u.nombre AS nombre_usuario, c.external_id AS external_id, c.titulo AS titulo_contenido, c.poster AS poster_contenido, c.tipo AS tipo_contenido FROM resenas r JOIN usuarios u ON r.usuario_id = u.id JOIN contenidos c ON r.contenido_id = c.id WHERE r.usuario_id = :usuario_id ORDER BY r.fecha_creacion DESC";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([':usuario_id' => $usuario_id]);
         $resenas = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -30,7 +30,7 @@ class Resena extends Model{
     }
 
     public function obtenerResenasPorPuntuacion(int $usuario_id, int $puntuacion){
-        $sql = "SELECT r.*, u.nombre AS nombre_usuario, c.titulo AS titulo_contenido, c.poster AS poster_contenido, c.tipo AS tipo_contenido FROM resenas r JOIN usuarios u ON r.usuario_id = u.id JOIN contenidos c ON r.contenido_id = c.id WHERE r.usuario_id = :usuario_id AND r.puntuacion = :puntuacion ORDER BY r.fecha_creacion DESC";
+        $sql = "SELECT r.*, u.nombre AS nombre_usuario, c.external_id AS external_id, c.titulo AS titulo_contenido, c.poster AS poster_contenido, c.tipo AS tipo_contenido FROM resenas r JOIN usuarios u ON r.usuario_id = u.id JOIN contenidos c ON r.contenido_id = c.id WHERE r.usuario_id = :usuario_id AND r.puntuacion = :puntuacion ORDER BY r.fecha_creacion DESC";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
             ':usuario_id' => $usuario_id,
@@ -41,7 +41,7 @@ class Resena extends Model{
     }
 
     public function obtenerResenaPorId(int $id){
-        $sql = "SELECT r.*, u.nombre AS nombre_usuario, c.titulo AS titulo_contenido, c.poster AS poster_contenido, c.tipo AS tipo_contenido FROM resenas r JOIN usuarios u ON r.usuario_id = u.id JOIN contenidos c ON r.contenido_id = c.id WHERE r.id = :id";
+        $sql = "SELECT r.*, u.nombre AS nombre_usuario, c.external_id AS external_id, c.titulo AS titulo_contenido, c.poster AS poster_contenido, c.tipo AS tipo_contenido FROM resenas r JOIN usuarios u ON r.usuario_id = u.id JOIN contenidos c ON r.contenido_id = c.id WHERE r.id = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([':id' => $id]);
         $resena = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -49,7 +49,7 @@ class Resena extends Model{
     }
 
     public function obtenerResenaPorIdDeUsuario(int $id, int $usuario_id){
-        $sql = "SELECT r.*, u.nombre AS nombre_usuario, c.titulo AS titulo_contenido, c.poster AS poster_contenido, c.tipo AS tipo_contenido FROM resenas r JOIN usuarios u ON r.usuario_id = u.id JOIN contenidos c ON r.contenido_id = c.id WHERE r.id = :id AND r.usuario_id = :usuario_id";
+        $sql = "SELECT r.*, u.nombre AS nombre_usuario, c.external_id AS external_id, c.titulo AS titulo_contenido, c.poster AS poster_contenido, c.tipo AS tipo_contenido FROM resenas r JOIN usuarios u ON r.usuario_id = u.id JOIN contenidos c ON r.contenido_id = c.id WHERE r.id = :id AND r.usuario_id = :usuario_id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
             ':id' => $id,
@@ -103,7 +103,7 @@ class Resena extends Model{
     }
 
     public function ultimasResenasDeUsuario(int $usuario_id, int $limite = 5){
-        $sql = "SELECT r.*, u.nombre AS nombre_usuario, c.titulo AS titulo_contenido, c.poster AS poster_contenido, c.tipo AS tipo_contenido FROM resenas r JOIN usuarios u ON r.usuario_id = u.id JOIN contenidos c ON r.contenido_id = c.id WHERE r.usuario_id = :usuario_id ORDER BY r.fecha_creacion DESC LIMIT :limite";
+        $sql = "SELECT r.*, u.nombre AS nombre_usuario, c.external_id AS external_id, c.titulo AS titulo_contenido, c.poster AS poster_contenido, c.tipo AS tipo_contenido FROM resenas r JOIN usuarios u ON r.usuario_id = u.id JOIN contenidos c ON r.contenido_id = c.id WHERE r.usuario_id = :usuario_id ORDER BY r.fecha_creacion DESC LIMIT :limite";
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':usuario_id', $usuario_id, PDO::PARAM_INT);
         $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
@@ -123,7 +123,7 @@ class Resena extends Model{
     }
 
     public function obtenerResenaFavorita(int $usuario_id, int $limite = 5){
-        $sql = "SELECT r.*, u.nombre AS nombre_usuario, c.titulo AS titulo_contenido, c.poster AS poster_contenido, c.tipo AS tipo_contenido FROM resenas r JOIN usuarios u ON r.usuario_id = u.id JOIN contenidos c ON r.contenido_id = c.id WHERE r.usuario_id = :usuario_id AND r.puntuacion = 5 ORDER BY r.fecha_creacion DESC LIMIT :limite";
+        $sql = "SELECT r.*, u.nombre AS nombre_usuario, c.external_id AS external_id, c.titulo AS titulo_contenido, c.poster AS poster_contenido, c.tipo AS tipo_contenido FROM resenas r JOIN usuarios u ON r.usuario_id = u.id JOIN contenidos c ON r.contenido_id = c.id WHERE r.usuario_id = :usuario_id AND r.puntuacion = 5 ORDER BY r.fecha_creacion DESC LIMIT :limite";
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':usuario_id', $usuario_id, PDO::PARAM_INT);
         $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);

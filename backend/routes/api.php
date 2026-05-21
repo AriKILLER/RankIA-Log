@@ -590,4 +590,88 @@ if($method === 'POST' && $action === 'obtenerRecomendaciones'){
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
 }
+
+if($method === 'POST' && $action === 'actualizarNombre'){
+    try{
+        $autenticacion->verificarSesion();
+
+        $usuario_id = (int)$_SESSION['usuario_id'];
+        $nuevo_nombre = trim($_POST['nuevo_nombre'] ?? '');
+
+        if(empty($nuevo_nombre)){
+            throw new Exception("El nuevo nombre no puede estar vacío.");
+        }
+
+        $actualizado = $usuarioModel->actualizarNombre($usuario_id, $nuevo_nombre);
+
+        if(!$actualizado){
+            throw new Exception("No se pudo actualizar el nombre. Asegúrate de que el usuario exista.");
+        }
+
+        echo json_encode(['success' => true, 'message' => 'Nombre actualizado exitosamente']);
+    }catch (Exception $e){
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+if($method === 'POST' && $action === 'actualizarEmail'){
+    try{
+        $autenticacion->verificarSesion();
+
+        $usuario_id = (int)$_SESSION['usuario_id'];
+        $nuevo_email = mb_strtolower(trim($_POST['nuevo_email'] ?? ''));
+        if(empty($nuevo_email)){
+            throw new Exception("El nuevo correo electrónico no puede estar vacío.");
+        }
+        if(!filter_var($nuevo_email, FILTER_VALIDATE_EMAIL)){
+            throw new Exception("El nuevo correo electrónico proporcionado no es válido. Por favor, ingrese un correo electrónico válido.");
+        }
+        if($usuarioModel->buscarPorEmail($nuevo_email)){
+            throw new Exception("El correo electrónico ya está registrado. Por favor, intente con otro correo electrónico para actualizar su perfil.");
+        }
+        $actualizado = $usuarioModel->actualizarEmail($usuario_id, $nuevo_email);
+        if(!$actualizado){
+            throw new Exception("No se pudo actualizar el correo electrónico. Por favor, intente de nuevo.");
+        }
+        echo json_encode(['success' => true, 'message' => 'Correo electrónico actualizado exitosamente']);
+    }catch (Exception $e){
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+if($method === 'POST' && $action === 'solicitarResetContra'){
+    try{
+        $email = mb_strtolower(trim($_POST['email'] ?? ''));
+        if($email === ''){
+            throw new Exception("El correo es obligatorio.");
+        }
+        $autenticacionController->solicitarResetContra($email);
+        echo json_encode(['success' => true, 'message' => 'Correo de recuperación enviado']);
+    }catch (Exception $e){
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+if($method === 'POST' && $action === 'restablecerContrasena'){
+    try{
+        $token = trim($_POST['token'] ?? '');
+        $password_nueva = $_POST['password_nueva'] ?? '';
+        $confirmar = $_POST['confirmar'] ?? '';
+
+        if($token === ''){
+            throw new Exception("Token requerido.");
+        }
+
+        $autenticacionController->actualizarContra($token, $password_nueva, $confirmar);
+
+        // Cerrar sesion si estaba logueado
+        if(isset($_SESSION['usuario_id'])){
+            $autenticacion->verificarCierreSesion();
+        }
+
+        echo json_encode(['success' => true, 'message' => 'Contraseña actualizada']);
+    }catch (Exception $e){
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
 ?>
