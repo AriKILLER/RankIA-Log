@@ -639,7 +639,7 @@ if($method === 'POST' && $action === 'actualizarEmail'){
     }
 }
 
-if($method === 'POST' && $action === 'solicitarResetContra'){
+if($method === 'POST' && $action === 'solicitarRecuperacionContrasena'){
     try{
         $email = mb_strtolower(trim($_POST['email'] ?? ''));
         if($email === ''){
