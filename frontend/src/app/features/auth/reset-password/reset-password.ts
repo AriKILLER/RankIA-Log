@@ -20,7 +20,7 @@ export class ResetPassword implements OnInit {
   token = '';
 
   form = this.fb.group({
-    password: ['', [Validators.required, Validators.minLength(6)]],
+    password: ['', [Validators.required, Validators.minLength(8)]],
     confirmPassword: ['', [Validators.required]],
   });
 
@@ -51,7 +51,8 @@ export class ResetPassword implements OnInit {
     const fd = new FormData();
     fd.append('action', 'restablecerContrasena');
     fd.append('token', this.token);
-    fd.append('nueva_contrasena', password!);
+    fd.append('password_nueva', password!);
+    fd.append('confirmar', confirmPassword!);
 
     this.contenido.postParsed(fd).subscribe({
       next: (res: RestablecerContrasenaResponse) => {

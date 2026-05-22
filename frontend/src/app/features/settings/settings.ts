@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../core/services/auth';
+import { ContenidoService } from '../../core/services/contenido';
 import { User, BackendResponse } from '../auth/models/models';
 
 @Component({
@@ -14,6 +15,7 @@ import { User, BackendResponse } from '../auth/models/models';
 export class Settings {
   auth = inject(AuthService);
   private fb = inject(FormBuilder);
+  private contenido = inject(ContenidoService);
 
   get user(): User | null {
     return this.auth.currentUser() ?? null;
@@ -71,8 +73,26 @@ export class Settings {
     if (this.nombreForm.invalid) return;
     this.loadingNombre = true;
     this.errorNombre = '';
-    this.loadingNombre = false;
-    this.editandoNombre = false;
+
+    const fd = new FormData();
+    fd.append('action', 'actualizarNombre');
+    fd.append('nuevo_nombre', this.nombreForm.controls['nombre'].value!);
+
+    this.contenido.postParsed(fd).subscribe({
+      next: (res: BackendResponse) => {
+        if (res.success) {
+          this.editandoNombre = false;
+          this.auth.sesionActual().subscribe();
+        } else {
+          this.errorNombre = res.message ?? 'Error al actualizar el nombre';
+        }
+        this.loadingNombre = false;
+      },
+      error: () => {
+        this.errorNombre = 'Error al conectar con el servidor';
+        this.loadingNombre = false;
+      },
+    });
   }
 
   abrirEditarEmail(): void {
@@ -85,10 +105,27 @@ export class Settings {
     if (this.emailForm.invalid) return;
     this.loadingEmail = true;
     this.errorEmail = '';
-    this.loadingEmail = false;
-    this.editandoEmail = false;
-  }
 
+    const fd = new FormData();
+    fd.append('action', 'actualizarEmail');
+    fd.append('nuevo_email', this.emailForm.controls['email'].value!);
+
+    this.contenido.postParsed(fd).subscribe({
+      next: (res: BackendResponse) => {
+        if (res.success) {
+          this.editandoEmail = false;
+          this.auth.sesionActual().subscribe();
+        } else {
+          this.errorEmail = res.message ?? 'Error al actualizar el email';
+        }
+        this.loadingEmail = false;
+      },
+      error: () => {
+        this.errorEmail = 'Error al conectar con el servidor';
+        this.loadingEmail = false;
+      },
+    });
+  }
   onFotoSeleccionada(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
