@@ -140,7 +140,8 @@ class AutenticacionController{
         if(empty($nuevo_email)){
             throw new Exception("El nuevo correo electrónico no puede estar vacío. Por favor, ingrese un nuevo correo electrónico para actualizar su perfil.");
         }
-        if($this->usuarioModel->buscarPorEmail($nuevo_email)){
+        $existente = $this->usuarioModel->buscarPorEmail($nuevo_email);
+        if($existente && (int)$existente['id'] !== $usuario_id){
             throw new Exception("El correo electrónico ya está registrado. Por favor, intente con otro correo electrónico para actualizar su perfil.");
         }
         $actualizado = $this->usuarioModel->actualizarEmail($usuario_id, $nuevo_email);

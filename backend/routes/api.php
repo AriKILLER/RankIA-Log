@@ -626,13 +626,11 @@ if($method === 'POST' && $action === 'actualizarEmail'){
         if(!filter_var($nuevo_email, FILTER_VALIDATE_EMAIL)){
             throw new Exception("El nuevo correo electrónico proporcionado no es válido. Por favor, ingrese un correo electrónico válido.");
         }
-        if($usuarioModel->buscarPorEmail($nuevo_email)){
+        $existente = $usuarioModel->buscarPorEmail($nuevo_email);
+        if($existente && (int)$existente['id'] !== $usuario_id){
             throw new Exception("El correo electrónico ya está registrado. Por favor, intente con otro correo electrónico para actualizar su perfil.");
         }
-        $actualizado = $usuarioModel->actualizarEmail($usuario_id, $nuevo_email);
-        if(!$actualizado){
-            throw new Exception("No se pudo actualizar el correo electrónico. Por favor, intente de nuevo.");
-        }
+        $autenticacionController->actualizarEmail($usuario_id, $nuevo_email);
         echo json_encode(['success' => true, 'message' => 'Correo electrónico actualizado exitosamente']);
     }catch (Exception $e){
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
@@ -670,6 +668,21 @@ if($method === 'POST' && $action === 'restablecerContrasena'){
         }
 
         echo json_encode(['success' => true, 'message' => 'Contraseña actualizada']);
+    }catch (Exception $e){
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    }
+}
+
+if($method === 'POST' && $action === 'obtenerPreferenciasUsuario'){
+    try{
+        $autenticacion->verificarSesion();
+
+        $usuario_id = (int)$_SESSION['usuario_id'];
+        if(empty($usuario_id)){
+            throw new Exception("No se ha seleccionado usuario para obtener sus preferencias");
+        }
+        $preferencias = $preferenciaController->obtenerPreferenciasPorUsuarioId($usuario_id);
+        echo json_encode(['success' => true, 'preferencias' => $preferencias]);
     }catch (Exception $e){
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
