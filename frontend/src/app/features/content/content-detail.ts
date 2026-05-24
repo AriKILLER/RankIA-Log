@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, HostListener } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { DecimalPipe } from '@angular/common';
@@ -6,6 +6,7 @@ import { LoadingComponent } from '../../shared/loading/loading';
 import { AuthService } from '../../core/services/auth';
 import { ContenidoService } from '../../core/services/contenido';
 import { ListaService } from '../../core/services/lista';
+import { FormsModule } from '@angular/forms';
 import {
   Lista,
   RawDetalle,
@@ -20,7 +21,7 @@ type Tipo = 'pelicula' | 'serie';
 @Component({
   selector: 'app-content-detail',
   standalone: true,
-  imports: [DecimalPipe, LoadingComponent],
+  imports: [DecimalPipe, LoadingComponent, FormsModule],
   templateUrl: './content-detail.html',
   styleUrl: './content-detail.css',
 })
@@ -51,14 +52,21 @@ export class ContentDetail implements OnInit {
 
   listaViendo: number | null = null;
   listaPendiente: number | null = null;
+  listaCompletado: number | null = null;
 
   enViendo = false;
   enPendiente = false;
+  enCompletado = false;
   loadingLista = false;
 
   listasPersonalizadas: Lista[] = [];
   listasConContenido: number[] = [];
   mostrarDropdown = false;
+
+  mostrarFormNuevaLista = false;
+  nombreNuevaListaDetalle = '';
+  errorNuevaListaDetalle = '';
+  loadingNuevaListaDetalle = false;
 
   constructor() {
     const tipoParam = (this.route.snapshot.paramMap.get('tipo') ?? 'pelicula') as Tipo;
@@ -78,6 +86,15 @@ export class ContentDetail implements OnInit {
     this.cargarDetalle();
     if (this.auth.isLoggedIn()) {
       this.cargarListas();
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.dropdown-wrapper')) {
+      this.mostrarDropdown = false;
+      this.mostrarFormNuevaLista = false;
     }
   }
 
@@ -155,6 +172,7 @@ export class ContentDetail implements OnInit {
             const nombre = lista.nombre.toLowerCase();
             if (nombre === 'viendo') this.listaViendo = lista.id;
             if (nombre === 'pendiente') this.listaPendiente = lista.id;
+            if (nombre === 'completado') this.listaCompletado = lista.id;
           });
           this.listasPersonalizadas = listasTodas.filter(
             (l: Lista) => l.tipo_lista === 'personalizada',
@@ -180,6 +198,13 @@ export class ContentDetail implements OnInit {
       this.listas.obtenerContenidosDeLista(this.listaPendiente).subscribe({
         next: (res: ContenidosListaResponse) => {
           this.enPendiente = this.listas.estaContenidoEnLista(res?.contenidos ?? [], this.id);
+        },
+      });
+    }
+    if (this.listaCompletado) {
+      this.listas.obtenerContenidosDeLista(this.listaCompletado).subscribe({
+        next: (res: ContenidosListaResponse) => {
+          this.enCompletado = this.listas.estaContenidoEnLista(res?.contenidos ?? [], this.id);
         },
       });
     }
@@ -226,7 +251,7 @@ export class ContentDetail implements OnInit {
     });
   }
 
-  async toggleLista(tipo: 'viendo' | 'pendientes'): Promise<void> {
+  async toggleLista(tipo: 'viendo' | 'pendientes' | 'completado'): Promise<void> {
     if (!this.auth.isLoggedIn()) {
       this.router.navigate(['/login']);
       return;
@@ -240,8 +265,18 @@ export class ContentDetail implements OnInit {
         return;
       }
     }
-    const listaId = tipo === 'viendo' ? this.listaViendo : this.listaPendiente;
-    const enLista = tipo === 'viendo' ? this.enViendo : this.enPendiente;
+    const listaId =
+      tipo === 'viendo'
+        ? this.listaViendo
+        : tipo === 'pendientes'
+          ? this.listaPendiente
+          : this.listaCompletado;
+    const enLista =
+      tipo === 'viendo'
+        ? this.enViendo
+        : tipo === 'pendientes'
+          ? this.enPendiente
+          : this.enCompletado;
     if (!listaId) {
       this.loadingLista = false;
       return;
@@ -251,6 +286,7 @@ export class ContentDetail implements OnInit {
         if (res?.success) {
           if (tipo === 'viendo') this.enViendo = !this.enViendo;
           if (tipo === 'pendientes') this.enPendiente = !this.enPendiente;
+          if (tipo === 'completado') this.enCompletado = !this.enCompletado;
         }
         this.loadingLista = false;
       },
@@ -306,6 +342,30 @@ export class ContentDetail implements OnInit {
           this.router.navigate(['/review/new'], { queryParams: { tipo: this.tipo, id: this.id } }),
       });
   }
+
+  crearListaDesdeDetalle(): void {
+    if (!this.nombreNuevaListaDetalle.trim()) return;
+    this.loadingNuevaListaDetalle = true;
+    this.errorNuevaListaDetalle = '';
+
+    this.listas.crearLista(this.nombreNuevaListaDetalle.trim()).subscribe({
+      next: (res) => {
+        if (res?.success) {
+          this.nombreNuevaListaDetalle = '';
+          this.mostrarFormNuevaLista = false;
+          this.cargarListas();
+        } else {
+          this.errorNuevaListaDetalle = res?.message ?? 'Error al crear la lista';
+        }
+        this.loadingNuevaListaDetalle = false;
+      },
+      error: () => {
+        this.errorNuevaListaDetalle = 'Error al conectar con el servidor';
+        this.loadingNuevaListaDetalle = false;
+      },
+    });
+  }
+
   volver(): void {
     this.location.back();
   }

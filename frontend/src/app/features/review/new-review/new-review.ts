@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ContenidoService, CatalogoItemUI } from '../../../core/services/contenido';
 import {
@@ -22,6 +23,7 @@ export class NewReview {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private contenido = inject(ContenidoService);
+  private location = inject(Location);
 
   tipo: string = '';
   externalId: string = '';
@@ -203,7 +205,9 @@ export class NewReview {
       });
     }
   }
-
+  volver(): void {
+    this.location.back();
+  }
   get comentario() {
     return this.form.get('comentario')!;
   }

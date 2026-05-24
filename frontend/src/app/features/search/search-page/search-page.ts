@@ -19,7 +19,10 @@ export class SearchPage implements OnInit, OnDestroy {
   selectedFiltro: CatalogoTipo = 'ambos';
   catalogo: CatalogoItemUI[] = [];
   loading = false;
+  loadingMas = false;
   error = '';
+  paginaActual = 1;
+  hayMas = true;
 
   filtros: { key: CatalogoTipo; label: string }[] = [
     { key: 'ambos', label: '🎭 Ambos' },
@@ -53,10 +56,13 @@ export class SearchPage implements OnInit, OnDestroy {
     this.loading = true;
     this.error = '';
     this.query = '';
+    this.paginaActual = 1;
+    this.hayMas = true;
 
-    this.contenido.obtenerCatalogoTmdb(this.selectedFiltro).subscribe({
+    this.contenido.obtenerCatalogoTmdb(this.selectedFiltro, 1).subscribe({
       next: (items: CatalogoItemUI[]) => {
-        this.catalogo = items;
+        this.catalogo = this.eliminarDuplicados(items);
+        this.hayMas = items.length >= 60;
         this.loading = false;
       },
       error: () => {
@@ -66,6 +72,23 @@ export class SearchPage implements OnInit, OnDestroy {
     });
   }
 
+  cargarMas(): void {
+    if (this.loadingMas || !this.hayMas) return;
+    this.loadingMas = true;
+    this.paginaActual++;
+
+    this.contenido.obtenerCatalogoTmdb(this.selectedFiltro, this.paginaActual).subscribe({
+      next: (items: CatalogoItemUI[]) => {
+        const nuevos = this.eliminarDuplicados([...this.catalogo, ...items]);
+        this.hayMas = items.length >= 60;
+        this.catalogo = nuevos;
+        this.loadingMas = false;
+      },
+      error: () => {
+        this.loadingMas = false;
+      },
+    });
+  }
   selectFiltro(filtro: CatalogoTipo): void {
     this.selectedFiltro = filtro;
     if (this.query.trim()) {
@@ -91,7 +114,7 @@ export class SearchPage implements OnInit, OnDestroy {
 
     this.contenido.buscarContenidoTmdb(this.query.trim(), this.selectedFiltro).subscribe({
       next: (items: CatalogoItemUI[]) => {
-        this.catalogo = items;
+        this.catalogo = this.eliminarDuplicados(items);
         this.loading = false;
       },
       error: () => {
@@ -99,6 +122,20 @@ export class SearchPage implements OnInit, OnDestroy {
         this.loading = false;
       },
     });
+  }
+
+  private eliminarDuplicados(items: CatalogoItemUI[]): CatalogoItemUI[] {
+    const vistos = new Set<string>();
+    return items.filter((item) => {
+      const clave = `${item.externalId}-${item.tipo}`;
+      if (vistos.has(clave)) return false;
+      vistos.add(clave);
+      return true;
+    });
+  }
+  limpiarBusqueda(): void {
+    this.query = '';
+    this.cargarCatalogo();
   }
 
   irADetalle(item: CatalogoItemUI): void {
