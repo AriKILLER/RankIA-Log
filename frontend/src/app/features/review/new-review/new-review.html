@@ -1,6 +1,6 @@
 <div class="review-container">
   <div class="review-box">
-    @if (!externalId) {
+    @if (!externalId && !modoEdicion) {
       <div class="review-search">
         <h2>BUSCA EL <span>CONTENIDO</span></h2>
         <p>Busca la película o serie que quieres reseñar</p>
@@ -59,8 +59,14 @@
       }
 
       <div class="review-header">
-        <h1>NUEVA <span>RESEÑA</span></h1>
-        <p>Comparte tu opinión sobre esta {{ tipo === 'pelicula' ? 'película' : 'serie' }}</p>
+        <h1>{{ modoEdicion ? 'EDITAR' : 'NUEVA' }} <span>RESEÑA</span></h1>
+        <p>
+          {{
+            modoEdicion
+              ? 'Modifica tu opinión sobre este contenido'
+              : 'Comparte tu opinión sobre esta ' + (tipo === 'pelicula' ? 'película' : 'serie')
+          }}
+        </p>
       </div>
 
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
@@ -111,15 +117,29 @@
         }
 
         @if (success) {
-          <p class="success-global">¡Reseña publicada correctamente!</p>
+          <p class="success-global">
+            {{
+              modoEdicion ? '¡Reseña editada correctamente!' : '¡Reseña publicada correctamente!'
+            }}
+          </p>
         }
 
         <div class="form-actions">
-          <button class="btn-secondary" type="button" (click)="limpiarSeleccion()">
-            ← Cambiar contenido
-          </button>
+          @if (!modoEdicion) {
+            <button class="btn-secondary" type="button" (click)="limpiarSeleccion()">
+              ← Cambiar contenido
+            </button>
+          }
           <button class="btn-primary" type="submit" [disabled]="loading">
-            {{ loading ? 'Publicando...' : 'Publicar reseña' }}
+            {{
+              loading
+                ? modoEdicion
+                  ? 'Guardando...'
+                  : 'Publicando...'
+                : modoEdicion
+                  ? 'Guardar cambios'
+                  : 'Publicar reseña'
+            }}
           </button>
         </div>
       </form>

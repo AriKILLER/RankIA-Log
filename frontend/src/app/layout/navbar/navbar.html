@@ -1,15 +1,17 @@
 <nav class="navbar">
   <a class="navbar-logo" routerLink="/">RANK<span>IA</span></a>
 
-  <div class="navbar-links">
-    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
-      >Inicio</a
-    >
-    <a routerLink="/search" routerLinkActive="active">Catálogo</a>
-    <a routerLink="/recommendations" routerLinkActive="active">Sugerencias</a>
-  </div>
+  @if (!enPreferences) {
+    <div class="navbar-links">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
+        >Inicio</a
+      >
+      <a routerLink="/search" routerLinkActive="active">Catálogo</a>
+      <a routerLink="/recommendations" routerLinkActive="active">Sugerencias</a>
+    </div>
+  }
 
-  @if (auth.isLoggedIn()) {
+  @if (auth.isLoggedIn() && !enPreferences) {
     <div class="navbar-user" (click)="toggleMenu()">
       <div class="navbar-avatar" [style.background]="getAvatarColor(user?.nombre ?? '')">
         {{ user?.nombre?.charAt(0)?.toUpperCase() ?? '?' }}
@@ -44,7 +46,7 @@
       <a routerLink="/" (click)="closeMobile()">Inicio</a>
       <a routerLink="/search" (click)="closeMobile()">Catálogo</a>
       <a routerLink="/recommendations" (click)="closeMobile()">Sugerencias</a>
-      @if (auth.isLoggedIn()) {
+      @if (auth.isLoggedIn() && !enPreferences) {
         <a routerLink="/profile" (click)="closeMobile()">Mi perfil</a>
         <a routerLink="/review/new" (click)="closeMobile()">Nueva reseña</a>
         <a routerLink="/lists" (click)="closeMobile()">Mis listas</a>

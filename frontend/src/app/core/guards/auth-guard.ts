@@ -11,7 +11,7 @@ export const authGuard: CanActivateFn = () => {
   if (auth.isLoggedIn()) return true;
 
   // Si no, intenta recuperar sesión PHP desde backend
-  return auth.sesionActual().pipe(
+  return auth.sesionActual(true).pipe(
     map((user) => {
       if (user) return true;
       router.navigate(['/login']);

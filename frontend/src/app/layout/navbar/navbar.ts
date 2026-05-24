@@ -1,5 +1,5 @@
 import { Component, inject, HostListener } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth';
 
 @Component({
@@ -11,8 +11,14 @@ import { AuthService } from '../../core/services/auth';
 })
 export class Navbar {
   auth = inject(AuthService);
+  private router = inject(Router);
+
   get user() {
     return this.auth.currentUser();
+  }
+
+  get enPreferences(): boolean {
+    return this.router.url === '/preferences';
   }
   menuOpen = false;
   mobileOpen = false;

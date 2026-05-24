@@ -66,6 +66,11 @@
               <span class="review-fecha">
                 {{ resena.fecha_creacion | date: 'd MMM yyyy' : '' : 'es' }}
               </span>
+              <div class="review-actions">
+                <button class="btn-ghost-small" (click)="editarResena(resena, $event)">
+                  ✏️ Editar
+                </button>
+              </div>
             </div>
           </div>
         }
@@ -109,6 +114,9 @@
                 {{ resena.fecha_creacion | date: 'd MMM yyyy' : '' : 'es' }}
               </span>
               <div class="review-actions">
+                <button class="btn-ghost-small" (click)="editarResena(resena, $event)">
+                  ✏️ Editar
+                </button>
                 <button
                   class="btn-ghost-small"
                   (click)="$event.stopPropagation(); eliminarResena(resena.id)"

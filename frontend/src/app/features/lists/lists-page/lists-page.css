@@ -435,3 +435,8 @@
     gap: 0.25rem;
   }
 }
+.lista-pers-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}

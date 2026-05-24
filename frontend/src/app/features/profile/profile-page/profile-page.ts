@@ -213,6 +213,20 @@ export class ProfilePage implements OnInit {
     this.router.navigate(['/content', resena.tipo_contenido, id]);
   }
 
+  editarResena(resena: Resena, event: Event): void {
+    event.stopPropagation();
+    this.router.navigate(['/review/new'], {
+      queryParams: {
+        resenaId: resena.id,
+        contenidoId: resena.contenido_id,
+        puntuacion: resena.puntuacion,
+        comentario: resena.comentario ?? '',
+        titulo: resena.titulo_contenido,
+        posterUrl: resena.poster_contenido ?? '',
+      },
+    });
+  }
+
   verTodas(): void {
     this.mostrarTodas = true;
   }
