@@ -8,12 +8,17 @@ class RecomandacionService{
         $motivos = [];
 
         $reglas = [
-            function() use ($preferencias, $candidatos, &$motivos){
+            function() use ($preferencias, $candidatos, $perfilResenas, &$motivos){
                 // 1) Tipo de contenido coincide con las preferencias del usuario (30 puntos)
                 $tipoPreferido = $preferencias['tipo_preferido'] ?? 'ambos';
-                if($tipoPreferido === 'ambos' || $tipoPreferido === $candidatos['tipo'] ?? ''){
+                $tipoCandidato = $candidatos['tipo'] ?? '';
+                if($tipoPreferido === 'ambos' || $tipoPreferido === $tipoCandidato){
                     $motivos[] = "El tipo de contenido coincide";
                     return 30;
+                }
+                if(isset($perfilResenas['tipo'][$tipoCandidato]['avg']) && $perfilResenas['tipo'][$tipoCandidato]['avg'] >= 3){
+                    $motivos[] = "Tus reseñas muestran interes por este tipo";
+                    return 15;
                 }
                 return 0;
             },
@@ -90,20 +95,29 @@ class RecomandacionService{
 
     public function obtenerRecomendaciones(array $preferencias, array $catalogo, array $generosFavoritos, int $limite = 6, array $perfilResenas = []): array{
         $recomendaciones = [];
+        $puntuadas = [];
         foreach($catalogo as $contenido){
             $puntuacion = $this->puntuarContenido($preferencias, $contenido, $generosFavoritos, $perfilResenas);
+            $item = [
+                'contenido' => $contenido,
+                'puntuacion' => $puntuacion['score'],
+                'motivo' => $puntuacion['motivo']
+            ];
+            $puntuadas[] = $item;
             if($puntuacion['recomendable']){
-                $recomendaciones[] = [
-                    'contenido' => $contenido,
-                    'puntuacion' => $puntuacion['score'],
-                    'motivo' => $puntuacion['motivo']
-                ];
+                $recomendaciones[] = $item;
             }
         }
         usort($recomendaciones, function($a, $b){
             return $b['puntuacion'] <=> $a['puntuacion'];
         });
-        return array_slice($recomendaciones, 0, $limite);
+        if(!empty($recomendaciones)){
+            return array_slice($recomendaciones, 0, $limite);
+        }
+        usort($puntuadas, function($a, $b){
+            return $b['puntuacion'] <=> $a['puntuacion'];
+        });
+        return array_slice($puntuadas, 0, $limite);
     }
 
     private function ajustePorResenas(array $candidato, array $perfilResenas, array &$motivos): int{

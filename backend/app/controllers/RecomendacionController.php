@@ -32,19 +32,45 @@ class RecomendacionController{
         $generosFavoritos = array_map('intval', array_column($generos, 'id'));
 
         $tipoPreferido = $preferencias['tipo_preferido'] ?? 'ambos';
-        $tipoFinal = $tipo === 'ambos' ? $tipoPreferido : $tipo;
+        $tipoFinal = $tipo === 'ambos' ? 'ambos' : $tipo;
 
         if(!in_array($tipoFinal, ['pelicula', 'serie', 'ambos'], true)){
             $tipoFinal = 'ambos';
         }
 
         $catalogo = $this->contenidoModel->obtenerCatalogoTmdb($tipoFinal, 1, 30, '', true);
+        $resenados = $this->resenaModel->obtenerIdsResenados($usuario_id);
+        $resenadosSet = array_fill_keys($resenados, true);
+
+        $catalogoFiltrado = [];
+        $vistos = [];
+        foreach($catalogo as $item){
+            $tmdbId = (string)($item['tmdb_id'] ?? '');
+            if($tmdbId === ''){
+                continue;
+            }
+            if(isset($resenadosSet[$tmdbId])){
+                continue;
+            }
+            if(isset($vistos[$tmdbId])){
+                continue;
+            }
+            $vistos[$tmdbId] = true;
+            $catalogoFiltrado[] = $item;
+        }
 
         $perfilResenas = $this->construirPerfilResenas($usuario_id, 30);
 
+        if($tipoFinal === 'ambos' && $tipoPreferido !== 'ambos'){
+            $tipoSecundario = $tipoPreferido === 'pelicula' ? 'serie' : 'pelicula';
+            if(isset($perfilResenas['tipo'][$tipoSecundario]['avg']) && $perfilResenas['tipo'][$tipoSecundario]['avg'] >= 3){
+                $preferencias['tipo_preferido'] = 'ambos';
+            }
+        }
+
         return $this->recomendacionService->obtenerRecomendaciones(
             $preferencias,
-            $catalogo,
+            $catalogoFiltrado,
             $generosFavoritos,
             $limite,
             $perfilResenas
@@ -70,8 +96,9 @@ class RecomendacionController{
             $puntuacion = (int)($resena['puntuacion'] ?? 0);
             $tipo = $resena['tipo_contenido'] ?? '';
             $externalId = (int)($resena['external_id'] ?? 0);
-
-            if($puntuacion <= 0 || $externalId <= 0 || !in_array($tipo, ['pelicula', 'serie'], true)){
+            
+            // si el contenido reseñado tiene una puntuacion de 3 o mas se tendra en cuenta para construir el perfil de sugerencias, ya que se entiende que le ha gustado y se intentara mostrar contenidos similares.
+            if($puntuacion < 3 || $externalId <= 0 || !in_array($tipo, ['pelicula', 'serie'], true)){
                 continue;
             }
 
