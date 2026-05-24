@@ -160,6 +160,10 @@ export interface FavoritosResponse extends BackendResponse {
 
 export interface CrearResenaResponse extends BackendResponse {}
 
+export interface EditarResenaResponse extends BackendResponse {
+  resena?: Resena;
+}
+
 export interface RecomendacionContenido {
   tmdb_id: number;
   tipo: string;

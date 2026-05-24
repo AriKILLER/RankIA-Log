@@ -62,6 +62,9 @@
       </div>
       @if (editandoEmail) {
         <div class="settings-edit-form">
+          <p class="settings-edit-desc">
+            Se enviará un correo de verificación a la nueva dirección de email.
+          </p>
           <input type="email" [formControl]="email" placeholder="Nuevo email" />
           @if (email.invalid && email.touched) {
             <span class="error">Email inválido</span>

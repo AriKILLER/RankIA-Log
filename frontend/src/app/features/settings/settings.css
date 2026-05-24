@@ -375,3 +375,9 @@
     gap: 0.5rem;
   }
 }
+.settings-edit-desc {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.5;
+}

@@ -3,8 +3,12 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ContenidoService, CatalogoItemUI } from '../../../core/services/contenido';
-import { ListaService } from '../../../core/services/lista';
-import { DetalleResponse, RawDetalle, CrearResenaResponse } from '../../auth/models/models';
+import {
+  DetalleResponse,
+  RawDetalle,
+  CrearResenaResponse,
+  EditarResenaResponse,
+} from '../../auth/models/models';
 
 @Component({
   selector: 'app-new-review',
@@ -21,6 +25,9 @@ export class NewReview {
 
   tipo: string = '';
   externalId: string = '';
+  resenaId: string = '';
+  contenidoId: string = '';
+  modoEdicion = false;
 
   titulo: string = '';
   posterUrl: string | null = null;
@@ -46,8 +53,18 @@ export class NewReview {
   constructor() {
     this.tipo = this.route.snapshot.queryParamMap.get('tipo') ?? '';
     this.externalId = this.route.snapshot.queryParamMap.get('id') ?? '';
+    this.resenaId = this.route.snapshot.queryParamMap.get('resenaId') ?? '';
+    this.contenidoId = this.route.snapshot.queryParamMap.get('contenidoId') ?? '';
 
-    if (this.externalId && this.tipo) {
+    if (this.resenaId) {
+      this.modoEdicion = true;
+      const puntuacion = Number(this.route.snapshot.queryParamMap.get('puntuacion') ?? 0);
+      const comentario = this.route.snapshot.queryParamMap.get('comentario') ?? '';
+      this.titulo = this.route.snapshot.queryParamMap.get('titulo') ?? '';
+      this.posterUrl = this.route.snapshot.queryParamMap.get('posterUrl') ?? null;
+      this.selectedStars = puntuacion;
+      this.form.patchValue({ puntuacion, comentario });
+    } else if (this.externalId && this.tipo) {
       this.cargarDetalle();
     }
   }
@@ -118,6 +135,7 @@ export class NewReview {
   hoverStars(n: number): void {
     this.hoveredStars = n;
   }
+
   resetHover(): void {
     this.hoveredStars = 0;
   }
@@ -128,36 +146,62 @@ export class NewReview {
       return;
     }
 
-    if (!this.externalId || !this.tipo) {
-      this.error = 'No se ha especificado el contenido a reseñar';
-      return;
-    }
-
     this.loading = true;
     this.error = '';
 
-    const fd = new FormData();
-    fd.append('action', 'crearResena');
-    fd.append('external_id', String(this.externalId));
-    fd.append('tipo', this.tipo);
-    fd.append('puntuacion', String(this.selectedStars));
-    fd.append('comentario', this.form.value.comentario!);
+    if (this.modoEdicion) {
+      const fd = new FormData();
+      fd.append('action', 'editarResena');
+      fd.append('id', this.resenaId);
+      fd.append('contenido_id', this.contenidoId);
+      fd.append('puntuacion', String(this.selectedStars));
+      fd.append('comentario', this.form.value.comentario!);
 
-    this.contenido.postParsed(fd).subscribe({
-      next: (res: CrearResenaResponse) => {
-        if (res.success) {
-          this.success = true;
-          setTimeout(() => this.router.navigate(['/profile']), 1500);
-        } else {
-          this.error = res.message ?? 'Error al publicar la reseña';
+      this.contenido.postParsed(fd).subscribe({
+        next: (res: EditarResenaResponse) => {
+          if (res.success) {
+            this.success = true;
+            setTimeout(() => this.router.navigate(['/profile']), 1500);
+          } else {
+            this.error = res.message ?? 'Error al editar la reseña';
+            this.loading = false;
+          }
+        },
+        error: () => {
+          this.error = 'Error al conectar con el servidor';
           this.loading = false;
-        }
-      },
-      error: () => {
-        this.error = 'Error al conectar con el servidor';
+        },
+      });
+    } else {
+      if (!this.externalId || !this.tipo) {
+        this.error = 'No se ha especificado el contenido a reseñar';
         this.loading = false;
-      },
-    });
+        return;
+      }
+
+      const fd = new FormData();
+      fd.append('action', 'crearResena');
+      fd.append('external_id', String(this.externalId));
+      fd.append('tipo', this.tipo);
+      fd.append('puntuacion', String(this.selectedStars));
+      fd.append('comentario', this.form.value.comentario!);
+
+      this.contenido.postParsed(fd).subscribe({
+        next: (res: CrearResenaResponse) => {
+          if (res.success) {
+            this.success = true;
+            setTimeout(() => this.router.navigate(['/profile']), 1500);
+          } else {
+            this.error = res.message ?? 'Error al publicar la reseña';
+            this.loading = false;
+          }
+        },
+        error: () => {
+          this.error = 'Error al conectar con el servidor';
+          this.loading = false;
+        },
+      });
+    }
   }
 
   get comentario() {

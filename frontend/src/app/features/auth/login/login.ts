@@ -39,7 +39,7 @@ export class Login {
     this.auth.login(email!, password!).subscribe({
       next: (res) => {
         if (res.success) {
-          this.router.navigate(['']);
+          this.auth.comprobarPreferenciasYRedirigir();
         } else {
           this.error = res.message ?? 'Error al iniciar sesión';
           this.loading = false;

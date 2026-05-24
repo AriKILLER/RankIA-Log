@@ -4,96 +4,111 @@
       <h1>CREA TU <span>CUENTA</span></h1>
       <p>Únete a RankIA Log y empieza a registrar contenido</p>
     </div>
-
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
-      <div class="field">
-        <label for="nombre">Nombre</label>
-        <input id="nombre" type="text" formControlName="nombre" placeholder="Tu nombre" />
-        @if (nombre.invalid && nombre.touched) {
-          <span class="error">Mínimo 3 caracteres</span>
-        }
+    @if (correoPendiente) {
+      <div class="verificacion-loading">
+        <div class="spinner"></div>
+        <p>
+          📧 Hemos enviado un correo de verificación a <strong>{{ emailEnviado }}</strong
+          >.
+        </p>
+        <p class="verificacion-sub">
+          Revisa tu bandeja de entrada. Redirigiendo al cuestionario...
+        </p>
       </div>
+    }
 
-      <div class="field">
-        <label for="email">Email</label>
-        <input id="email" type="email" formControlName="email" placeholder="tu@email.com" />
-        @if (email.invalid && email.touched) {
-          <span class="error">Email inválido</span>
-        }
-      </div>
-
-      <div class="field">
-        <label for="password">Contraseña</label>
-        <div class="input-password">
-          <input
-            id="password"
-            [type]="mostrarPassword ? 'text' : 'password'"
-            formControlName="password"
-            placeholder="••••••••"
-          />
-          <button
-            type="button"
-            class="btn-ojo"
-            (click)="togglePassword()"
-            [attr.aria-label]="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-          >
-            @if (mostrarPassword) {
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path
-                  d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"
-                />
-                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
-                <line x1="1" y1="1" x2="23" y2="23" />
-              </svg>
-            } @else {
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                <circle cx="12" cy="12" r="3" />
-              </svg>
-            }
-          </button>
+    @if (!correoPendiente) {
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="field">
+          <label for="nombre">Nombre</label>
+          <input id="nombre" type="text" formControlName="nombre" placeholder="Tu nombre" />
+          @if (nombre.invalid && nombre.touched) {
+            <span class="error">Mínimo 3 caracteres</span>
+          }
         </div>
-        @if (password.invalid && password.touched) {
-          <span class="error">Mínimo 8 caracteres</span>
-        }
-      </div>
 
-      @if (error) {
-        <p class="error-global">{{ error }}</p>
-      }
-
-      @if (correoPendiente) {
-        <div class="info-verificacion">
-          📧 Te hemos enviado un correo de verificación a <strong>{{ emailEnviado }}</strong
-          >. Revisa tu bandeja de entrada antes de continuar.
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" formControlName="email" placeholder="tu@email.com" />
+          @if (email.invalid && email.touched) {
+            <span class="error">Email inválido</span>
+          }
         </div>
-      }
 
-      <button class="btn-primary" type="submit" [disabled]="form.invalid || loading">
-        {{ loading ? 'Creando cuenta...' : 'Registrarse' }}
-      </button>
-    </form>
+        <div class="field">
+          <label for="password">Contraseña</label>
+          <div class="input-password">
+            <input
+              id="password"
+              [type]="mostrarPassword ? 'text' : 'password'"
+              formControlName="password"
+              placeholder="••••••••"
+            />
+            <button
+              type="button"
+              class="btn-ojo"
+              (click)="togglePassword()"
+              [attr.aria-label]="mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+            >
+              @if (mostrarPassword) {
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"
+                  />
+                  <path
+                    d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"
+                  />
+                  <line x1="1" y1="1" x2="23" y2="23" />
+                </svg>
+              } @else {
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              }
+            </button>
+          </div>
+          @if (password.invalid && password.touched) {
+            <span class="error">Mínimo 8 caracteres</span>
+          }
+        </div>
 
+        @if (error) {
+          <p class="error-global">{{ error }}</p>
+        }
+
+        @if (correoPendiente) {
+          <div class="info-verificacion">
+            📧 Te hemos enviado un correo de verificación a <strong>{{ emailEnviado }}</strong
+            >. Revisa tu bandeja de entrada.
+          </div>
+        }
+
+        <button class="btn-primary" type="submit" [disabled]="form.invalid || loading">
+          {{ loading ? 'Creando cuenta...' : 'Registrarse' }}
+        </button>
+      </form>
+    }
     <div class="auth-footer">¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></div>
   </div>
 </div>

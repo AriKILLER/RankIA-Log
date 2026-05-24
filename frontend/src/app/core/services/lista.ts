@@ -81,6 +81,14 @@ export class ListaService {
     return this.contenido.postParsed(fd) as Observable<ListaAccionResponse>;
   }
 
+  editarLista(listaId: number, nuevoNombre: string): Observable<BackendResponse> {
+    const fd = new FormData();
+    fd.append('action', 'editarLista');
+    fd.append('id', String(listaId));
+    fd.append('nuevo_nombre', nuevoNombre);
+    return this.contenido.postParsed(fd) as Observable<BackendResponse>;
+  }
+
   estaContenidoEnLista(contenidos: Contenido[], externalId: number): boolean {
     return contenidos.some((c: Contenido) => Number(c.external_id) === externalId);
   }

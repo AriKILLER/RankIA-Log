@@ -40,6 +40,8 @@ export class Preferences {
 
   loading = false;
   error = '';
+  preferenciasGuardadas = false;
+  mostrarAviso = false;
 
   toggleGenero(id: number): void {
     if (this.selectedGeneros.has(id)) this.selectedGeneros.delete(id);
@@ -72,6 +74,7 @@ export class Preferences {
     this.contenido.postParsed(fd).subscribe({
       next: (res: PreferenciaResponse) => {
         if (res.success) {
+          this.preferenciasGuardadas = true;
           this.router.navigate(['']);
         } else {
           this.error = res.message ?? 'Error al guardar preferencias';

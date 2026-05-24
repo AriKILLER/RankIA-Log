@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth-guard';
+import { preferencesGuard } from './core/guards/preferences-guard';
+import { preferencesDeactivateGuard } from './core/guards/preferences-deactivate-guard';
 import { HomePage } from './features/home/home-page/home-page';
 import { SearchPage } from './features/search/search-page/search-page';
 import { ProfilePage } from './features/profile/profile-page/profile-page';
@@ -19,6 +21,8 @@ export const routes: Routes = [
   },
   {
     path: 'preferences',
+    canActivate: [preferencesGuard],
+    canDeactivate: [preferencesDeactivateGuard],
     loadComponent: () =>
       import('./features/auth/preferences/preferences').then((m) => m.Preferences),
   },

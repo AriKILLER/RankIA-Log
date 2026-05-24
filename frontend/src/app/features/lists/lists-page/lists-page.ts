@@ -50,6 +50,10 @@ export class ListsPage implements OnInit {
   nombreNuevaLista = '';
   errorNuevaLista = '';
   loadingNuevaLista = false;
+  editandoListaId: number | null = null;
+  nombreEditarLista = '';
+  errorEditarLista = '';
+  loadingEditarLista = false;
 
   listaIds: Record<ListTab, number | null> = {
     viendo: null,
@@ -175,6 +179,34 @@ export class ListsPage implements OnInit {
     });
   }
 
+  abrirEditarLista(lista: Lista, event: Event): void {
+    event.stopPropagation();
+    this.editandoListaId = lista.id;
+    this.nombreEditarLista = lista.nombre;
+    this.errorEditarLista = '';
+  }
+
+  guardarEditarLista(): void {
+    if (!this.nombreEditarLista.trim() || !this.editandoListaId) return;
+    this.loadingEditarLista = true;
+    this.errorEditarLista = '';
+
+    this.listas.editarLista(this.editandoListaId, this.nombreEditarLista.trim()).subscribe({
+      next: (res: BackendResponse) => {
+        if (res?.success) {
+          this.editandoListaId = null;
+          this.cargarListas();
+        } else {
+          this.errorEditarLista = res?.message ?? 'Error al editar la lista';
+        }
+        this.loadingEditarLista = false;
+      },
+      error: () => {
+        this.errorEditarLista = 'Error al conectar con el servidor';
+        this.loadingEditarLista = false;
+      },
+    });
+  }
   get currentItems(): ListItem[] {
     return this.items[this.activeTab];
   }
