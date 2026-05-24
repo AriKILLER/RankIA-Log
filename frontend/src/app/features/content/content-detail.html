@@ -61,18 +61,60 @@
             {{ enPendiente ? '✅ Pendiente' : '⏳ Pendiente' }}
           </button>
 
-          @if (auth.isLoggedIn() && listasPersonalizadas.length > 0) {
+          <button
+            class="btn-list"
+            type="button"
+            [class.active]="enCompletado"
+            [disabled]="loadingLista"
+            (click)="toggleLista('completado')"
+          >
+            {{ enCompletado ? '✅ Completado' : '🏁 Completado' }}
+          </button>
+
+          @if (auth.isLoggedIn()) {
             <div class="dropdown-wrapper">
               <button class="btn-list" type="button" (click)="mostrarDropdown = !mostrarDropdown">
                 📋 Mis listas
               </button>
               @if (mostrarDropdown) {
                 <div class="dropdown-menu">
+                  <div
+                    class="dropdown-item dropdown-nueva"
+                    (click)="mostrarFormNuevaLista = !mostrarFormNuevaLista"
+                  >
+                    <span>➕</span>
+                    <span>Nueva lista</span>
+                  </div>
+                  @if (mostrarFormNuevaLista) {
+                    <div class="dropdown-form">
+                      <input
+                        type="text"
+                        [(ngModel)]="nombreNuevaListaDetalle"
+                        placeholder="Nombre de la lista"
+                        class="dropdown-input"
+                        (click)="$event.stopPropagation()"
+                      />
+                      @if (errorNuevaListaDetalle) {
+                        <span class="dropdown-error">{{ errorNuevaListaDetalle }}</span>
+                      }
+                      <button
+                        class="dropdown-crear-btn"
+                        type="button"
+                        (click)="$event.stopPropagation(); crearListaDesdeDetalle()"
+                        [disabled]="loadingNuevaListaDetalle"
+                      >
+                        {{ loadingNuevaListaDetalle ? 'Creando...' : 'Crear' }}
+                      </button>
+                    </div>
+                  }
                   @for (lista of listasPersonalizadas; track lista.id) {
                     <div class="dropdown-item" (click)="toggleListaPersonalizada(lista)">
                       <span>{{ listasConContenido.includes(lista.id) ? '✅' : '➕' }}</span>
                       <span>{{ lista.nombre }}</span>
                     </div>
+                  }
+                  @if (listasPersonalizadas.length === 0 && !mostrarFormNuevaLista) {
+                    <div class="dropdown-empty">No tienes listas personalizadas</div>
                   }
                 </div>
               }

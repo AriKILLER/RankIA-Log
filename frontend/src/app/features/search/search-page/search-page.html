@@ -15,6 +15,9 @@
         placeholder="Buscar por título..."
         (keyup)="onSearch()"
       />
+      @if (query) {
+        <button class="btn-limpiar" type="button" (click)="limpiarBusqueda()">✕</button>
+      }
     </div>
   </section>
 
@@ -72,6 +75,18 @@
           </article>
         }
       </div>
+      @if (hayMas && !query) {
+        <div class="cargar-mas-container">
+          <button
+            class="btn-cargar-mas"
+            type="button"
+            (click)="cargarMas()"
+            [disabled]="loadingMas"
+          >
+            {{ loadingMas ? 'Cargando...' : 'Cargar más' }}
+          </button>
+        </div>
+      }
     }
   </section>
 </div>

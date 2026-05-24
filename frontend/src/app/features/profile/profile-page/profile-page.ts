@@ -54,6 +54,7 @@ export class ProfilePage implements OnInit {
   resenas: Resena[] = [];
   todasResenas: Resena[] = [];
   mostrarTodas = false;
+  filtroEstrellas: number = 0;
   loadingResenas = false;
   totalResenas = 0;
 
@@ -81,7 +82,9 @@ export class ProfilePage implements OnInit {
   }
 
   get resenasVisibles(): Resena[] {
-    return this.mostrarTodas ? this.todasResenas : this.resenas;
+    const base = this.mostrarTodas ? this.todasResenas : this.resenas;
+    if (this.filtroEstrellas === 0) return base;
+    return base.filter((r) => r.puntuacion === this.filtroEstrellas);
   }
 
   ngOnInit(): void {
