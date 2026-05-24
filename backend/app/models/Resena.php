@@ -122,6 +122,14 @@ class Resena extends Model{
         return $resenas ?: [];
     }
 
+    public function obtenerIdsResenados(int $usuario_id): array{
+        $sql = "SELECT DISTINCT c.external_id FROM resenas r JOIN contenidos c ON r.contenido_id = c.id WHERE r.usuario_id = :usuario_id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':usuario_id' => $usuario_id]);
+        $ids = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        return $ids ? array_values(array_filter($ids)) : [];
+    }
+
     public function obtenerResenaFavorita(int $usuario_id, int $limite = 5){
         $sql = "SELECT r.*, u.nombre AS nombre_usuario, c.external_id AS external_id, c.titulo AS titulo_contenido, c.poster AS poster_contenido, c.tipo AS tipo_contenido FROM resenas r JOIN usuarios u ON r.usuario_id = u.id JOIN contenidos c ON r.contenido_id = c.id WHERE r.usuario_id = :usuario_id AND r.puntuacion = 5 ORDER BY r.fecha_creacion DESC LIMIT :limite";
         $stmt = $this->db->prepare($sql);
