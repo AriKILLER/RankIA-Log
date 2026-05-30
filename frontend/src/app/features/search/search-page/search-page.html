@@ -1,0 +1,92 @@
+<div class="search-container">
+  <header class="search-header">
+    <div>
+      <h1>CATÁL<span>OGO</span></h1>
+      <p>Encuentra películas y series para registrarlos en tu diario.</p>
+    </div>
+  </header>
+
+  <section class="search-bar">
+    <div class="search-input">
+      <span class="icon">🔍</span>
+      <input
+        [(ngModel)]="query"
+        type="text"
+        placeholder="Buscar por título..."
+        (keyup)="onSearch()"
+      />
+      @if (query) {
+        <button class="btn-limpiar" type="button" (click)="limpiarBusqueda()">✕</button>
+      }
+    </div>
+  </section>
+
+  <section class="filters">
+    <p class="filters-label">Tipo de contenido</p>
+    <div class="pills">
+      @for (f of filtros; track f.key) {
+        <button
+          type="button"
+          class="pill"
+          [class.active]="selectedFiltro === f.key"
+          (click)="selectFiltro(f.key)"
+        >
+          {{ f.label }}
+        </button>
+      }
+    </div>
+  </section>
+
+  <section class="results">
+    <div class="results-head">
+      <h2>RESULTAD<span>OS</span></h2>
+      <span class="results-meta">{{ catalogo.length }} encontrados</span>
+    </div>
+
+    @if (loading) {
+      <app-loading mensaje="Cargando catálogo..."></app-loading>
+    } @else if (error) {
+      <div class="error-state">{{ error }}</div>
+    } @else if (catalogo.length === 0) {
+      <div class="empty-state">
+        <span>🎬</span>
+        <p>No se encontraron resultados.</p>
+      </div>
+    } @else {
+      <div class="grid">
+        @for (item of catalogo; track item.externalId) {
+          <article class="content-card" (click)="irADetalle(item)">
+            <div class="poster">
+              @if (item.posterUrl) {
+                <img [src]="item.posterUrl" [alt]="item.titulo" />
+              } @else {
+                <div class="poster-placeholder"></div>
+              }
+            </div>
+            <div class="card-body">
+              <div class="title-row">
+                <h3>{{ item.titulo }}</h3>
+                <span class="year">{{ item.fecha?.slice(0, 4) ?? '' }}</span>
+              </div>
+              <span class="tipo-badge">
+                {{ item.tipo === 'pelicula' ? '🎬 Película' : '📺 Serie' }}
+              </span>
+            </div>
+          </article>
+        }
+      </div>
+      @if (hayMas && !query) {
+        <div class="cargar-mas-container">
+          <button
+            class="btn-cargar-mas"
+            type="button"
+            (click)="cargarMas()"
+            [disabled]="loadingMas"
+          >
+            {{ loadingMas ? 'Cargando...' : 'Cargar más' }}
+          </button>
+        </div>
+      }
+    }
+  </section>
+</div>

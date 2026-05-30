@@ -1,0 +1,12 @@
+{
+  "/api": {
+    "target": "http://localhost",
+    "secure": false,
+    "changeOrigin": false,
+    "pathRewrite": {
+      "^/api": "/RankIA-Log/backend/public/index.php"
+    },
+    "followRedirects": true,
+    "cookieDomainRewrite": "localhost"
+  }
+}

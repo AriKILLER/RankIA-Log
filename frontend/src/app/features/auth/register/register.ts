@@ -1,11 +1,74 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../../core/services/auth';
 
 @Component({
   selector: 'app-register',
-  imports: [],
+  standalone: true,
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './register.html',
   styleUrl: './register.css',
 })
 export class Register {
+  private fb = inject(FormBuilder);
+  private auth = inject(AuthService);
+  private router = inject(Router);
 
+  form = this.fb.group({
+    nombre: ['', [Validators.required, Validators.minLength(3)]],
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(8)]],
+  });
+
+  loading = false;
+  error = '';
+  mostrarPassword = false;
+  correoPendiente = false;
+  emailEnviado = '';
+
+  togglePassword(): void {
+    this.mostrarPassword = !this.mostrarPassword;
+  }
+
+  onSubmit(): void {
+    if (this.form.invalid) return;
+
+    this.loading = true;
+    this.error = '';
+    this.correoPendiente = false;
+
+    const { nombre, email, password } = this.form.getRawValue();
+
+    this.auth.register(nombre!, email!, password!).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.correoPendiente = true;
+          this.emailEnviado = email!;
+          this.loading = false;
+          this.auth.sesionActual().subscribe({
+            next: () => setTimeout(() => this.router.navigate(['/preferences']), 6000),
+            error: () => setTimeout(() => this.router.navigate(['/preferences']), 6000),
+          });
+        } else {
+          this.error = res.message ?? 'Error al registrarse';
+          this.loading = false;
+        }
+      },
+      error: () => {
+        this.error = 'Error al conectar con el servidor';
+        this.loading = false;
+      },
+    });
+  }
+
+  get nombre() {
+    return this.form.get('nombre')!;
+  }
+  get email() {
+    return this.form.get('email')!;
+  }
+  get password() {
+    return this.form.get('password')!;
+  }
 }

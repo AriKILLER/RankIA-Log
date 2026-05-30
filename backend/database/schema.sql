@@ -9,7 +9,8 @@ CREATE TABLE usuarios (
     nombre VARCHAR(100) NOT NULL,
     email VARCHAR(150) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP
+    fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP,
+    email_verificado BOOLEAN DEFAULT FALSE
 );
 
 -- =========================
@@ -32,6 +33,17 @@ CREATE TABLE generos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL UNIQUE
 );
+INSERT INTO generos (id, nombre) VALUES
+    (1,'Acción'),
+    (2,'Drama'),
+    (3,'Comedia'),
+    (4,'Terror'),
+    (5,'Thriller'),
+    (6,'Ciencia ficción'),
+    (7,'Fantasía'),
+    (8,'Romance'),
+    (9,'Animación'),
+    (10,'Documental');
 
 -- =========================
 -- GENEROS FAVORITOS DEL USUARIO
@@ -80,7 +92,8 @@ CREATE TABLE listas (
     usuario_id INT NOT NULL,
     nombre VARCHAR(100) NOT NULL,
     tipo_lista ENUM('predefinida','personalizada') NOT NULL,
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    UNIQUE KEY uq_lista_usuario_nombre (usuario_id, nombre)
 );
 
 -- =========================
@@ -110,4 +123,17 @@ CREATE TABLE resenas (
     UNIQUE (usuario_id, contenido_id),
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
     FOREIGN KEY (contenido_id) REFERENCES contenidos(id) ON DELETE CASCADE
+);
+
+-- =========================
+-- TABLA TOKEN DE VERIFICACIÓN DE EMAIL
+-- =========================
+CREATE TABLE tokens_verificacion (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    token VARCHAR(255) NOT NULL UNIQUE,
+    utilizado BOOLEAN DEFAULT FALSE,
+    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    fecha_expiracion DATETIME NOT NULL,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );

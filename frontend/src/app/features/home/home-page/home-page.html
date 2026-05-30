@@ -1,0 +1,59 @@
+<div class="hero">
+  <div class="hero-content">
+    <p class="hero-tag">Tu diario de contenido</p>
+    <h1>REGISTRA LO QUE <span>SIENTES</span></h1>
+    <p class="hero-desc">
+      Películas y series. Todo en un solo lugar. Valora, reseña y descubre nuevo contenido basado en
+      tus gustos.
+    </p>
+    <div class="hero-actions">
+      @if (auth.isLoggedIn()) {
+        <a routerLink="/profile" class="btn-primary">Ver perfil</a>
+        <a routerLink="/search" class="btn-secondary">Explorar catálogo</a>
+      } @else {
+        <a routerLink="/register" class="btn-primary">Empezar gratis</a>
+        <a routerLink="/search" class="btn-secondary">Ver catálogo</a>
+      }
+    </div>
+  </div>
+  <div class="hero-cards">
+    @for (p of posters; track p.id) {
+      <div
+        class="card"
+        [class.card-featured]="p.titulo === 'Oppenheimer'"
+        [routerLink]="['/content', p.tipo, p.id]"
+        style="cursor: pointer"
+      >
+        <div class="card-poster">
+          @if (p.url) {
+            <img [src]="p.url" [alt]="p.titulo" />
+          } @else {
+            <div class="card-placeholder"></div>
+          }
+        </div>
+        <div class="card-info">
+          <span class="card-title">{{ p.titulo }}</span>
+          <div class="card-stars">★★★★★</div>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<div class="features">
+  <div class="feature" routerLink="/search" style="cursor: pointer">
+    <span class="feature-icon">🔍</span>
+    <h3>BUSCA</h3>
+    <p>Encuentra películas y series entre miles de títulos y añádelas a tu lista.</p>
+  </div>
+  <div class="feature" routerLink="/review/new" style="cursor: pointer">
+    <span class="feature-icon">✍️</span>
+    <h3>RESEÑA</h3>
+    <p>Comparte tu opinión con la comunidad y lee las reseñas de otros usuarios.</p>
+  </div>
+  <div class="feature" routerLink="/recommendations" style="cursor: pointer">
+    <span class="feature-icon">🎯</span>
+    <h3>DESCUBRE</h3>
+    <p>Recibe recomendaciones personalizadas basadas en tus preferencias.</p>
+  </div>
+</div>

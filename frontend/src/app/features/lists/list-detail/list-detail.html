@@ -1,0 +1,122 @@
+<div class="list-detail-container">
+  <div class="list-detail-header">
+    <div>
+      <a routerLink="/lists" class="btn-back">← Mis listas</a>
+      <h1>{{ nombreLista || 'Lista' }}</h1>
+    </div>
+    <div class="header-actions">
+      <button class="btn-secondary" type="button" (click)="abrirModal()">✏️ Editar lista</button>
+      <button class="btn-danger" type="button" (click)="eliminarLista()">🗑️ Eliminar lista</button>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="loading">Cargando...</div>
+  } @else if (error) {
+    <div class="empty-state">
+      <span>⚠️</span>
+      <p>{{ error }}</p>
+    </div>
+  } @else if (items.length === 0) {
+    <div class="empty-state">
+      <span>📋</span>
+      <p>Esta lista está vacía</p>
+      <small>Ve al catálogo y añade contenido desde el detalle.</small>
+      <a routerLink="/search" class="btn-primary">Ir al catálogo</a>
+    </div>
+  } @else {
+    <div class="grid">
+      @for (item of items; track item.contenidoId) {
+        <article class="content-card">
+          <div class="poster" (click)="irADetalle(item)" style="cursor: pointer">
+            @if (item.posterUrl) {
+              <img [src]="item.posterUrl" [alt]="item.titulo" />
+            } @else {
+              <div class="poster-placeholder">🎬</div>
+            }
+          </div>
+          <div class="card-body">
+            <div class="title-row">
+              <h3>{{ item.titulo }}</h3>
+              <span class="year">{{ item.fecha?.slice(0, 4) ?? '' }}</span>
+            </div>
+            <span class="tipo-badge">
+              {{ item.tipo === 'pelicula' ? '🎬 Película' : '📺 Serie' }}
+            </span>
+            <div class="card-actions">
+              <button class="btn-ghost" type="button" (click)="irADetalle(item)">Ver</button>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  }
+
+  <div class="footer-nav">
+    <a routerLink="/profile" class="btn-secondary">← Volver al perfil</a>
+  </div>
+</div>
+
+@if (mostrarModal) {
+  <div class="modal-overlay" (click)="cerrarModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>EDITAR <span>LISTA</span></h2>
+        <button class="modal-close" type="button" (click)="cerrarModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="field">
+          <label>Nombre de la lista</label>
+          <input
+            type="text"
+            [(ngModel)]="nuevoNombre"
+            class="input-nombre-lista"
+            placeholder="Nombre de la lista"
+          />
+        </div>
+
+        @if (itemsModal.length > 0) {
+          <div class="modal-items-label">Contenido de la lista</div>
+          <div class="modal-items">
+            @for (item of itemsModal; track item.contenidoId) {
+              <div class="modal-item">
+                @if (item.posterUrl) {
+                  <img [src]="item.posterUrl" [alt]="item.titulo" class="modal-item-poster" />
+                } @else {
+                  <div class="modal-item-placeholder">🎬</div>
+                }
+                <span class="modal-item-titulo">{{ item.titulo }}</span>
+                <button
+                  class="btn-ghost modal-item-quitar"
+                  type="button"
+                  (click)="quitarDelModal(item)"
+                >
+                  ✕
+                </button>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="modal-empty">La lista quedará vacía</p>
+        }
+
+        @if (errorEditar) {
+          <p class="error-lista">{{ errorEditar }}</p>
+        }
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" type="button" (click)="cerrarModal()">Cancelar</button>
+        <button
+          class="btn-primary"
+          type="button"
+          (click)="guardarCambios()"
+          [disabled]="loadingEditar || !nuevoNombre.trim()"
+        >
+          {{ loadingEditar ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

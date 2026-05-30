@@ -1,0 +1,89 @@
+.notfound-container {
+  min-height: calc(100vh - 64px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.notfound-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.notfound-code {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 10rem;
+  line-height: 1;
+  color: var(--accent);
+  opacity: 0.8;
+}
+
+.notfound-content h1 {
+  font-size: 3rem;
+  color: var(--text);
+  line-height: 1;
+}
+
+.notfound-content h1 span {
+  color: var(--accent);
+}
+
+.notfound-content p {
+  color: var(--text-muted);
+  font-size: 1rem;
+  max-width: 400px;
+}
+
+.notfound-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.85rem 2rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transition:
+    background 0.2s ease,
+    transform 0.1s ease;
+  display: inline-block;
+}
+
+.btn-primary:hover {
+  background: #c1121f;
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.85rem 2rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transition:
+    border-color 0.2s ease,
+    transform 0.1s ease;
+  display: inline-block;
+}
+
+.btn-secondary:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}

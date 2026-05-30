@@ -1,0 +1,60 @@
+<div class="rec-container">
+  <header class="rec-header">
+    <div>
+      <h1>SUGEREN<span>CIAS</span></h1>
+      <p>Recomendaciones personalizadas basadas en tus preferencias y tu actividad.</p>
+    </div>
+    <button class="btn-primary" type="button" (click)="cargar(false)">Actualizar</button>
+  </header>
+
+  <section class="recs">
+    <div class="recs-head">
+      <div>
+        <h2>PARA <span>TI</span></h2>
+        @if (razonTexto) {
+          <p class="razon-texto">{{ razonTexto }}</p>
+        }
+      </div>
+      <span class="recs-meta">{{ catalogo.length }} sugerencias</span>
+    </div>
+
+    @if (loading) {
+      <app-loading mensaje="Analizando tus gustos..."></app-loading>
+    } @else if (error) {
+      <div class="error-state">{{ error }}</div>
+    } @else if (catalogo.length === 0) {
+      <div class="empty-state">
+        <span>🧠</span>
+        <p>Aún no hay recomendaciones.</p>
+        <small>Completa preferencias o añade contenido a tus listas.</small>
+      </div>
+    } @else {
+      <div class="grid">
+        @for (item of catalogo; track item.externalId) {
+          <article class="content-card">
+            <div class="poster" (click)="irADetalle(item)" style="cursor: pointer">
+              @if (item.posterUrl) {
+                <img [src]="item.posterUrl" [alt]="item.titulo" />
+              } @else {
+                <div class="poster-placeholder"></div>
+              }
+            </div>
+            <div class="card-body">
+              <div class="title-row">
+                <h3>{{ item.titulo }}</h3>
+                <span class="year">{{ item.fecha?.slice(0, 4) ?? '' }}</span>
+              </div>
+              <span class="tipo-badge">
+                {{ item.tipo === 'pelicula' ? '🎬 Película' : '📺 Serie' }}
+              </span>
+              <div class="card-actions">
+                <button class="btn-ghost" type="button" (click)="irADetalle(item)">Ver</button>
+                <button class="btn-ghost" type="button" (click)="resenar(item)">Reseñar</button>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </section>
+</div>

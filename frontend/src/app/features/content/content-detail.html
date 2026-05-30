@@ -1,0 +1,128 @@
+<div class="detail-container">
+  @if (loading) {
+    <app-loading mensaje="Cargando detalle..."></app-loading>
+  } @else if (error) {
+    <div class="state error">{{ error }}</div>
+  } @else {
+    <div class="detail">
+      <div class="poster">
+        @if (posterUrl) {
+          <img [src]="posterUrl" [alt]="titulo" />
+        } @else {
+          <div class="poster-placeholder"></div>
+        }
+      </div>
+
+      <div class="info">
+        <p class="meta-tipo">
+          {{ tipo === 'pelicula' ? '🎬 Película' : '📺 Serie' }}
+          @if (fecha) {
+            · {{ fecha.slice(0, 4) }}
+          }
+          @if (duracion) {
+            · {{ duracion }} min
+          }
+          @if (numeroTemporadas) {
+            · {{ numeroTemporadas }} temporadas
+          }
+        </p>
+
+        <h1>{{ titulo }}</h1>
+
+        @if (popularidad) {
+          <div class="popularidad">
+            <span class="pop-label">Valoración</span>
+            <span class="pop-value">{{ popularidad | number: '1.1-1' }} / 10</span>
+          </div>
+        }
+
+        <p class="synopsis">{{ sinopsis || 'Sin sinopsis disponible.' }}</p>
+
+        <div class="actions">
+          <button class="btn-primary" type="button" (click)="resenar()">✏️ Reseñar</button>
+
+          <button
+            class="btn-list"
+            type="button"
+            [class.active]="enViendo"
+            [disabled]="loadingLista"
+            (click)="toggleLista('viendo')"
+          >
+            {{ enViendo ? '✅ Viendo' : '👀 Viendo' }}
+          </button>
+
+          <button
+            class="btn-list"
+            type="button"
+            [class.active]="enPendiente"
+            [disabled]="loadingLista"
+            (click)="toggleLista('pendientes')"
+          >
+            {{ enPendiente ? '✅ Pendiente' : '⏳ Pendiente' }}
+          </button>
+
+          <button
+            class="btn-list"
+            type="button"
+            [class.active]="enCompletado"
+            [disabled]="loadingLista"
+            (click)="toggleLista('completado')"
+          >
+            {{ enCompletado ? '✅ Completado' : '🏁 Completado' }}
+          </button>
+
+          @if (auth.isLoggedIn()) {
+            <div class="dropdown-wrapper">
+              <button class="btn-list" type="button" (click)="mostrarDropdown = !mostrarDropdown">
+                📋 Mis listas
+              </button>
+              @if (mostrarDropdown) {
+                <div class="dropdown-menu">
+                  <div
+                    class="dropdown-item dropdown-nueva"
+                    (click)="mostrarFormNuevaLista = !mostrarFormNuevaLista"
+                  >
+                    <span>➕</span>
+                    <span>Nueva lista</span>
+                  </div>
+                  @if (mostrarFormNuevaLista) {
+                    <div class="dropdown-form">
+                      <input
+                        type="text"
+                        [(ngModel)]="nombreNuevaListaDetalle"
+                        placeholder="Nombre de la lista"
+                        class="dropdown-input"
+                        (click)="$event.stopPropagation()"
+                      />
+                      @if (errorNuevaListaDetalle) {
+                        <span class="dropdown-error">{{ errorNuevaListaDetalle }}</span>
+                      }
+                      <button
+                        class="dropdown-crear-btn"
+                        type="button"
+                        (click)="$event.stopPropagation(); crearListaDesdeDetalle()"
+                        [disabled]="loadingNuevaListaDetalle"
+                      >
+                        {{ loadingNuevaListaDetalle ? 'Creando...' : 'Crear' }}
+                      </button>
+                    </div>
+                  }
+                  @for (lista of listasPersonalizadas; track lista.id) {
+                    <div class="dropdown-item" (click)="toggleListaPersonalizada(lista)">
+                      <span>{{ listasConContenido.includes(lista.id) ? '✅' : '➕' }}</span>
+                      <span>{{ lista.nombre }}</span>
+                    </div>
+                  }
+                  @if (listasPersonalizadas.length === 0 && !mostrarFormNuevaLista) {
+                    <div class="dropdown-empty">No tienes listas personalizadas</div>
+                  }
+                </div>
+              }
+            </div>
+          }
+          <button class="btn-secondary" type="button" (click)="volver()">← Volver</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

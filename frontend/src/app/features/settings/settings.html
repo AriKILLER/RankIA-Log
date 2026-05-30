@@ -1,0 +1,192 @@
+<div class="settings-container">
+  <div class="settings-header">
+    <h1>AJUST<span>ES</span></h1>
+    <p>Gestiona tu cuenta y preferencias</p>
+  </div>
+
+  <div class="settings-section">
+    <h2>PERFIL</h2>
+    <div class="settings-card">
+      <div class="settings-avatar" [style.background]="getAvatarColor(user?.nombre ?? '')">
+        {{ user?.nombre?.charAt(0)?.toUpperCase() ?? '?' }}
+      </div>
+      <div class="settings-info">
+        <span class="settings-nombre">{{ user?.nombre }}</span>
+        <span class="settings-email">{{ user?.email }}</span>
+      </div>
+      <a routerLink="/profile" class="btn-secondary">Ver perfil</a>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <h2>CUENTA</h2>
+    <div class="settings-list">
+      <div class="settings-item">
+        <div class="settings-item-info">
+          <span class="settings-item-title">Nombre de usuario</span>
+          <span class="settings-item-value">{{ user?.nombre }}</span>
+        </div>
+        <button class="btn-ghost" type="button" (click)="abrirEditarNombre()">Editar</button>
+      </div>
+      @if (editandoNombre) {
+        <div class="settings-edit-form">
+          <input type="text" [formControl]="nombre" placeholder="Nuevo nombre" />
+          @if (nombre.invalid && nombre.touched) {
+            <span class="error">Mínimo 3 caracteres</span>
+          }
+          @if (errorNombre) {
+            <span class="error">{{ errorNombre }}</span>
+          }
+          <div class="edit-actions">
+            <button
+              class="btn-primary"
+              type="button"
+              (click)="guardarNombre()"
+              [disabled]="loadingNombre || nombre.invalid"
+            >
+              {{ loadingNombre ? 'Guardando...' : 'Guardar' }}
+            </button>
+            <button class="btn-secondary" type="button" (click)="editandoNombre = false">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      }
+
+      <div class="settings-item">
+        <div class="settings-item-info">
+          <span class="settings-item-title">Email</span>
+          <span class="settings-item-value">{{ user?.email }}</span>
+        </div>
+        <button class="btn-ghost" type="button" (click)="abrirEditarEmail()">Editar</button>
+      </div>
+      @if (editandoEmail) {
+        <div class="settings-edit-form">
+          <p class="settings-edit-desc">
+            Se enviará un correo de verificación a la nueva dirección de email.
+          </p>
+          <input type="email" [formControl]="email" placeholder="Nuevo email" />
+          @if (email.invalid && email.touched) {
+            <span class="error">Email inválido</span>
+          }
+          @if (errorEmail) {
+            <span class="error">{{ errorEmail }}</span>
+          }
+          <div class="edit-actions">
+            <button
+              class="btn-primary"
+              type="button"
+              (click)="guardarEmail()"
+              [disabled]="loadingEmail || email.invalid"
+            >
+              {{ loadingEmail ? 'Guardando...' : 'Guardar' }}
+            </button>
+            <button class="btn-secondary" type="button" (click)="editandoEmail = false">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      }
+
+      <div class="settings-item">
+        <div class="settings-item-info">
+          <span class="settings-item-title">Contraseña</span>
+          <span class="settings-item-value">••••••••</span>
+        </div>
+        <a routerLink="/forgot-password" class="btn-ghost">Cambiar</a>
+      </div>
+
+      <div class="settings-item">
+        <div class="settings-item-info">
+          <span class="settings-item-title">Foto de perfil</span>
+          <span class="settings-item-value">Avatar con inicial</span>
+        </div>
+        <button class="btn-ghost" type="button" (click)="editandoFoto = !editandoFoto">
+          Editar
+        </button>
+      </div>
+      @if (editandoFoto) {
+        <div class="settings-edit-form">
+          <input type="file" accept="image/*" (change)="onFotoSeleccionada($event)" />
+          @if (errorFoto) {
+            <span class="error">{{ errorFoto }}</span>
+          }
+          <div class="edit-actions">
+            <button
+              class="btn-primary"
+              type="button"
+              (click)="guardarFoto()"
+              [disabled]="loadingFoto || !fotoSeleccionada"
+            >
+              {{ loadingFoto ? 'Subiendo...' : 'Subir foto' }}
+            </button>
+            <button class="btn-secondary" type="button" (click)="editandoFoto = false">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <h2>SOPORT<span>E</span></h2>
+    <p class="settings-section-desc">
+      ¿Tienes algún problema o sugerencia? Envíanos un ticket y te responderemos lo antes posible.
+    </p>
+
+    @if (ticketEnviado) {
+      <div class="ticket-success">
+        <span>✅</span>
+        <div>
+          <strong>¡Ticket enviado correctamente!</strong>
+          <p>Nos pondremos en contacto contigo pronto.</p>
+        </div>
+      </div>
+    } @else {
+      <form [formGroup]="ticketForm" (ngSubmit)="enviarTicket()" class="ticket-form">
+        <div class="field">
+          <label>Asunto</label>
+          <input
+            type="text"
+            formControlName="asunto"
+            placeholder="Describe brevemente el problema"
+          />
+          @if (asunto.invalid && asunto.touched) {
+            <span class="error">El asunto es obligatorio</span>
+          }
+        </div>
+        <div class="field">
+          <label>Descripción</label>
+          <textarea
+            formControlName="descripcion"
+            rows="4"
+            placeholder="Explica el problema con detalle..."
+          ></textarea>
+          @if (descripcion.invalid && descripcion.touched) {
+            <span class="error">La descripción debe tener al menos 20 caracteres</span>
+          }
+        </div>
+        @if (ticketError) {
+          <p class="error-global">{{ ticketError }}</p>
+        }
+        <button class="btn-primary" type="submit" [disabled]="ticketForm.invalid || loadingTicket">
+          {{ loadingTicket ? 'Enviando...' : 'Enviar ticket' }}
+        </button>
+      </form>
+    }
+  </div>
+
+  <div class="settings-section danger-section">
+    <h2>ZONA DE PELIGRO</h2>
+    <div class="settings-list">
+      <div class="settings-item">
+        <div class="settings-item-info">
+          <span class="settings-item-title">Cerrar sesión</span>
+          <span class="settings-item-value">Salir de tu cuenta actual</span>
+        </div>
+        <button class="btn-danger" (click)="auth.logout()">Cerrar sesión</button>
+      </div>
+    </div>
+  </div>
+</div>

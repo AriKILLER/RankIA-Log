@@ -1,0 +1,280 @@
+<div class="profile-container">
+  <div class="profile-header">
+    <div class="profile-avatar" [style.background]="getAvatarColor(user?.nombre ?? '')">
+      {{ user?.nombre?.charAt(0)?.toUpperCase() ?? '?' }}
+    </div>
+    <div class="profile-info">
+      <h1>{{ user?.nombre }}</h1>
+      <p class="profile-email">{{ user?.email }}</p>
+      <p class="profile-since">
+        Miembro desde
+        {{
+          user?.fecha_registro
+            ? (user?.fecha_registro | date: 'MMMM yyyy' : '' : 'es')
+            : 'RankIA Log'
+        }}
+      </p>
+    </div>
+    <a routerLink="/review/new" class="btn-primary">✍️ Nueva reseña</a>
+    <a routerLink="/settings" class="btn-secondary">⚙️ Ajustes</a>
+  </div>
+
+  <div class="profile-stats">
+    <a class="stat" (click)="scrollToResenas()" style="cursor: pointer">
+      <span class="stat-number">{{ totalResenas }}</span>
+      <span class="stat-label">Reseñas</span>
+    </a>
+    <a routerLink="/lists" [queryParams]="{ tab: 'completadas' }" class="stat">
+      <span class="stat-number">{{ totalCompletadas }}</span>
+      <span class="stat-label">Completados</span>
+    </a>
+    <a routerLink="/lists" [queryParams]="{ tab: 'pendientes' }" class="stat">
+      <span class="stat-number">{{ totalPendientes }}</span>
+      <span class="stat-label">Pendientes</span>
+    </a>
+    <a routerLink="/lists" [queryParams]="{ tab: 'viendo' }" class="stat">
+      <span class="stat-number">{{ totalViendo }}</span>
+      <span class="stat-label">Viendo</span>
+    </a>
+  </div>
+
+  <div class="profile-section">
+    <h2>FAVORIT<span>OS</span></h2>
+    @if (favoritos.length === 0) {
+      <div class="empty-state">
+        <span>⭐</span>
+        <p>Aún no tienes favoritos</p>
+        <small>Las reseñas con 5 estrellas aparecerán aquí</small>
+      </div>
+    } @else {
+      <div class="reviews-grid">
+        @for (resena of favoritos; track resena.id) {
+          <div class="review-card" (click)="verDetalle(resena)" style="cursor: pointer">
+            <div class="review-poster">
+              @if (toPosterUrl(resena.poster_contenido)) {
+                <img [src]="toPosterUrl(resena.poster_contenido)" [alt]="resena.titulo_contenido" />
+              } @else {
+                <div class="poster-placeholder">🎬</div>
+              }
+            </div>
+            <div class="review-body">
+              <h3 class="review-titulo">{{ resena.titulo_contenido }}</h3>
+              <div class="review-estrellas">{{ estrellas(resena.puntuacion) }}</div>
+              @if (resena.comentario) {
+                <p class="review-comentario">{{ resena.comentario }}</p>
+              }
+              <span class="review-fecha">
+                {{ resena.fecha_creacion | date: 'd MMM yyyy' : '' : 'es' }}
+              </span>
+              <div class="review-actions">
+                <button class="btn-ghost-small" (click)="editarResena(resena, $event)">
+                  ✏️ Editar
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="profile-section">
+    <h2>MIS RESEÑ<span>AS</span></h2>
+    <div class="section-header-actions">
+      <div class="filtro-estrellas">
+        <button
+          class="filtro-star"
+          [class.active]="filtroEstrellas === 0"
+          (click)="filtroEstrellas = 0"
+        >
+          Todas
+        </button>
+        @for (n of [1, 2, 3, 4, 5]; track n) {
+          <button
+            class="filtro-star"
+            [class.active]="filtroEstrellas === n"
+            (click)="filtroEstrellas = n"
+          >
+            {{ '★'.repeat(n) }}
+          </button>
+        }
+      </div>
+      <a routerLink="/review/new" class="btn-secondary">+ Nueva reseña</a>
+    </div>
+  </div>
+
+  @if (loadingResenas) {
+    <div class="loading-resenas">Cargando reseñas...</div>
+  } @else if (resenasVisibles.length === 0) {
+    <div class="empty-state">
+      <span>✍️</span>
+      <p>Aún no has escrito ninguna reseña</p>
+      <small>Ve al catálogo, elige una película o serie y reséñala</small>
+      <a routerLink="/search" class="btn-primary">Ir al catálogo</a>
+    </div>
+  } @else {
+    <div class="reviews-grid">
+      @for (resena of resenasVisibles; track resena.id) {
+        <div class="review-card" (click)="verDetalle(resena)" style="cursor: pointer">
+          <div class="review-poster">
+            @if (toPosterUrl(resena.poster_contenido)) {
+              <img [src]="toPosterUrl(resena.poster_contenido)" [alt]="resena.titulo_contenido" />
+            } @else {
+              <div class="poster-placeholder">🎬</div>
+            }
+          </div>
+          <div class="review-body">
+            <h3 class="review-titulo">{{ resena.titulo_contenido }}</h3>
+            <div class="review-estrellas">{{ estrellas(resena.puntuacion) }}</div>
+            @if (resena.comentario) {
+              <p class="review-comentario">{{ resena.comentario }}</p>
+            }
+            <span class="review-fecha">
+              {{ resena.fecha_creacion | date: 'd MMM yyyy' : '' : 'es' }}
+            </span>
+            <div class="review-actions">
+              <button class="btn-ghost-small" (click)="editarResena(resena, $event)">
+                ✏️ Editar
+              </button>
+              <button
+                class="btn-ghost-small"
+                (click)="$event.stopPropagation(); eliminarResena(resena.id)"
+              >
+                🗑️ Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+    <div class="ver-mas-container">
+      @if (!mostrarTodas && totalResenas > 5) {
+        <button class="btn-ver-mas" (click)="verTodas()">
+          Ver todas las reseñas ({{ totalResenas }})
+        </button>
+      }
+      @if (mostrarTodas) {
+        <button class="btn-ver-mas" (click)="verMenos()">Ver menos</button>
+      }
+    </div>
+  }
+
+  <div class="profile-section">
+    <div class="section-header">
+      <h2>MIS LIST<span>AS</span></h2>
+      <div class="section-header-actions">
+        <a routerLink="/lists" class="btn-secondary">Ver todas</a>
+        <button
+          class="btn-secondary"
+          type="button"
+          (click)="mostrarFormNuevaLista = !mostrarFormNuevaLista"
+        >
+          + Nueva lista
+        </button>
+      </div>
+    </div>
+
+    @if (mostrarFormNuevaLista) {
+      <div class="nueva-lista-form">
+        <input
+          type="text"
+          placeholder="Nombre de la lista"
+          [(ngModel)]="nombreNuevaLista"
+          class="input-nombre-lista"
+        />
+        @if (errorNuevaLista) {
+          <p class="error-lista">{{ errorNuevaLista }}</p>
+        }
+        <div class="nueva-lista-actions">
+          <button
+            class="btn-primary"
+            type="button"
+            (click)="crearLista()"
+            [disabled]="loadingNuevaLista"
+          >
+            {{ loadingNuevaLista ? 'Creando...' : 'Crear' }}
+          </button>
+          <button class="btn-secondary" type="button" (click)="mostrarFormNuevaLista = false">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    }
+
+    <div class="listas-grid">
+      <div class="lista-columna">
+        <h3 class="lista-col-titulo">VIENDO</h3>
+        @if (contenidosViendo.length === 0) {
+          <div class="empty-state-small">Sin contenido</div>
+        } @else {
+          @for (item of contenidosViendo; track item.id) {
+            <div class="lista-item-mini">
+              @if (toPosterUrl(item.poster)) {
+                <img [src]="toPosterUrl(item.poster)" [alt]="item.titulo" />
+              } @else {
+                <div class="poster-placeholder-mini">🎬</div>
+              }
+              <span>{{ item.titulo }}</span>
+            </div>
+          }
+        }
+      </div>
+      <div class="lista-columna">
+        <h3 class="lista-col-titulo">PENDIENTE</h3>
+        @if (contenidosPendientes.length === 0) {
+          <div class="empty-state-small">Sin contenido</div>
+        } @else {
+          @for (item of contenidosPendientes; track item.id) {
+            <div class="lista-item-mini">
+              @if (toPosterUrl(item.poster)) {
+                <img [src]="toPosterUrl(item.poster)" [alt]="item.titulo" />
+              } @else {
+                <div class="poster-placeholder-mini">🎬</div>
+              }
+              <span>{{ item.titulo }}</span>
+            </div>
+          }
+        }
+      </div>
+      <div class="lista-columna">
+        <h3 class="lista-col-titulo">COMPLETADO</h3>
+        @if (contenidosCompletadas.length === 0) {
+          <div class="empty-state-small">Sin contenido</div>
+        } @else {
+          @for (item of contenidosCompletadas; track item.id) {
+            <div class="lista-item-mini">
+              @if (toPosterUrl(item.poster)) {
+                <img [src]="toPosterUrl(item.poster)" [alt]="item.titulo" />
+              } @else {
+                <div class="poster-placeholder-mini">🎬</div>
+              }
+              <span>{{ item.titulo }}</span>
+            </div>
+          }
+        }
+      </div>
+    </div>
+
+    @if (listasPersonalizadas.length > 0) {
+      <div class="carrusel-wrapper">
+        <h2 class="carrusel-titulo">MIS LISTAS <span>PERSONALIZADAS</span></h2>
+        <div class="carrusel-container">
+          <button class="carrusel-btn" type="button" (click)="carruselAnterior()">‹</button>
+          <div class="carrusel-track">
+            @for (lista of listasPersonalizadasVisibles; track lista.id) {
+              <div
+                class="carrusel-card"
+                [routerLink]="['/lists', lista.id]"
+                style="cursor: pointer"
+              >
+                <span class="carrusel-nombre">{{ lista.nombre }}</span>
+                <span class="carrusel-ver">Ver →</span>
+              </div>
+            }
+          </div>
+          <button class="carrusel-btn" type="button" (click)="carruselSiguiente()">›</button>
+        </div>
+      </div>
+    }
+  </div>
+</div>
